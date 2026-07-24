@@ -98,6 +98,9 @@ Fuyutsui.ClassBlocks = {
         [63] = { type = "spell", spellId = 202137, name = "沉默咒符" },
     },
     [3] = {
+        ["countBars"] = {
+            { valueType = "castCount", name = "灵魂残片", minValue = 0, maxValue = 50, spellId = 1217605 },
+        },
         [9] = { type = "block", name = "战斗时间" },
         [10] = { type = "block", name = "移动" },
         [11] = { type = "block", name = "施法" },

@@ -1995,6 +1995,9 @@ function Fuyutsui:updatePlayerAuraInfo(unit, info)
             elseif v.isHarmful then
                 auras.debuffs[v.auraInstanceID] = v
             end
+            if not isSec(v.spellId) then
+                -- print("|cnGREEN_FONT_COLOR:新增非秘密值光环: |r", v.spellId, C_Spell.GetSpellLink(v.spellId))
+            end
         end
     end
     if info.updatedAuraInstanceIDs then

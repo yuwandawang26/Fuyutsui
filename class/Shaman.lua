@@ -151,7 +151,7 @@ Fuyutsui.ClassBlocks = {
         [53] = { type = "spell", spellId = 98008, name = "灵魂链接图腾" },
         [54] = { type = "spell", spellId = 114052, name = "升腾" },
         [55] = { type = "spell", spellId = 108280, name = "治疗之潮图腾" },
-        [70] = {
+        [256] = {
             type = "group",
             num = 6,
             healthPercent = 1,

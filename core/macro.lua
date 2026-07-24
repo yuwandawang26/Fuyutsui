@@ -1,6 +1,5 @@
 local addon, ns = ...
 local format = string.format
-
 local macroList = {}
 local macroKind = {}
 local modifiers = {
