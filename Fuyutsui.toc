@@ -32,7 +32,6 @@ core/config.lua
 core/block.lua
 core/macro.lua
 core/keybinds.lua
-core/auras.lua
 
 class/Warrior.lua
 class/Paladin.lua

@@ -11,7 +11,6 @@
 - `core/block.lua` 管理顶部像素条和计数条。`Fuyutsui:CreatTexture(index, b)` 是主要输出 API。
 - `core/macro.lua` 创建 SecureActionButton 宏并绑定预设按键。
 - `core/keybinds.lua` 扫描动作条按键，把 spellId 映射到 key/keycode/icon/name。
-- `core/auras.lua` 定义职业光环元数据，并根据冷却、施法成功、图标、覆盖法术、屏幕提示等事件维护光环状态。
 - `core/quickbutton.lua` 创建游戏内快速切换按钮，操作爆发、AOE、输出模式、药水开关。
 - `class/*.lua` 按职业声明 `Fuyutsui.ClassBlocks` 和 `Fuyutsui.MacrosList`。每个文件开头会用 `UnitClassBase("player")` 过滤非当前职业。
 - `main.lua` 是运行时主逻辑：加载职业配置、更新状态、处理 WoW 事件、按帧刷新色块。
@@ -23,7 +22,7 @@
 
 1. `embeds.xml` 和库。
 2. `core/core.lua` 先创建 `Fuyutsui`、默认配置、基础表。
-3. `core/quickbutton.lua`、`core/config.lua`、`core/block.lua`、`core/macro.lua`、`core/keybinds.lua`、`core/auras.lua` 继续给 `Fuyutsui` 挂方法和数据。
+3. `core/quickbutton.lua`、`core/config.lua`、`core/block.lua`、`core/macro.lua`、`core/keybinds.lua` 继续给 `Fuyutsui` 挂方法和数据。
 4. 所有 `class/*.lua` 依次加载，但只有当前玩家职业文件真正生效。
 5. `main.lua` 消费前面的表并注册运行时逻辑。
 
@@ -52,7 +51,7 @@ Fuyutsui.ClassBlocks = {
     [specIndex] = {
         powerType = "MANA", -- 可选
         [1] = { type = "block", name = "锚点" },
-        [25] = { type = "aura", name = "圣光灌注", auraName = "圣光灌注", showKey = "remaining" },
+        [25] = { type = "aura", name = "圣光灌注", spellId = 54149 },
         [38] = { type = "spell", spellId = 20473, name = "神圣震击" },
         [39] = { type = "spell", spellId = 20473, name = "神圣震击", charge = true },
         [70] = { type = "group", num = 6, healthPercent = 1, role = 2, dispel = 3 },
@@ -63,7 +62,7 @@ Fuyutsui.ClassBlocks = {
 `main.lua:Fuyutsui:loadPlayerBlocks(specIndex)` 会解析：
 
 - `type = "block"`：写入 `blocks.state[name] = index`。
-- `type = "aura"`：写入 `blocks.auras[index] = entry`，由 `core/auras.lua` 刷新。
+- `type = "aura"`：需带 `spellId` 或 `spellIds`，写入 `blocks.auras[index]`，由 `core/block.lua` 的 AuraContainer 刷新像素。
 - `type = "spell"`：写入 `blocks.spells[spellId].index` 或 `.charge`，由冷却逻辑刷新。
 - `type = "group"`：写入 `blocks.groups`，用于队伍成员状态块。
 - 非 `type` 字段会被跳过，例如 `powerType`。
@@ -72,19 +71,17 @@ Fuyutsui.ClassBlocks = {
 
 ## 光环约定
 
-`core/auras.lua` 顶部的 `auras[classId]` 是光环元数据来源。职业表里的 `auraName` 必须和这里的键名一致。
+玩家光环由 `core/block.lua` 的 CustomAuraContainer 驱动，不再使用事件推导的逻辑光环状态机。
 
-常见输出：
+常见字段：
 
-- `showKey = "remaining"`：剩余时间。
-- `showKey = "count"`：层数。
-- `showKey = "isIcon"`：图标/触发状态。
+- `spellId` / `spellIds`：匹配的光环法术 ID（任一命中即显示）。
+- `maxApps`：可选，层数条最大显示层数。
 
 如果新增一个职业光环，通常要同时：
 
-1. 在 `core/auras.lua` 对应职业下定义光环。
-2. 在对应 `class/*.lua` 专精中加入 `type = "aura"` 色块。
-3. 确认光环由玩家真实 aura、冷却事件、施法成功、图标事件或 overlay 事件中的哪一种驱动。
+1. 在对应 `class/*.lua` 专精中加入 `type = "aura"` 且带 `spellId`/`spellIds` 的色块。
+2. 确认 `core/block.lua` 的 AuraContainer 会按该索引创建 duration slot（及可选层数条）。
 
 ## 宏和按键
 
@@ -119,9 +116,10 @@ Fuyutsui.ClassBlocks = {
 
 `main.lua:Fuyutsui:OnUpdate(elapsed)` 分两层刷新：
 
-- 每帧：玩家施法/引导/蓄力、目标/焦点施法、队伍血量范围、光环、目标光环数量。
-- 每 0.2 秒：防御光环、法术冷却、单位光环块、玩家辅助、符文、目标距离、敌人数、物品冷却。
+- 每帧：玩家施法/引导/蓄力、目标/焦点施法、队伍血量范围。
+- 每 0.2 秒：法术冷却、玩家辅助、符文、目标距离、敌人数、物品冷却。
 - 每 1 秒：战斗时间。
+- 玩家/队伍光环像素由 AuraContainer 事件驱动，不在 OnUpdate 里轮询。
 
 事件处理函数通常只更新受影响状态，然后调用对应写色块函数。新增高频逻辑前先确认是否真的需要每帧，避免在战斗中制造额外开销。
 

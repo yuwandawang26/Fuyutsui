@@ -623,16 +623,6 @@ Fuyutsui.spellsList = {
     [441776]  = { index = 60, },               -- 致命一击
 }
 
-Fuyutsui.e = {
-    ["法术冷却"] = "SPELL_UPDATE_COOLDOWN", -- 冷却事件
-    ["施法成功"] = "UNIT_SPELLCAST_SUCCEEDED", -- 成功事件
-    ["图标改变"] = "SPELL_UPDATE_ICON", -- ICON事件
-    ["法术覆盖"] = "COOLDOWN_VIEWER_SPELL_OVERRIDE_UPDATED", -- 法术临时覆盖事件
-    ["图标发光显示"] = "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", -- 图标发光显示
-    ["图标发光隐藏"] = "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", -- 图标发光隐藏
-    ["屏幕提示显示"] = "SPELL_ACTIVATION_OVERLAY_SHOW", -- 屏幕提示显示
-    ["屏幕提示隐藏"] = "SPELL_ACTIVATION_OVERLAY_HIDE", -- 屏幕提示隐藏
-}
 -- 英雄天赋
 Fuyutsui.heroTalents = {
     -- 战士

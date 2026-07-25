@@ -322,11 +322,8 @@ function Fuyutsui:loadPlayerBlocks(specIndex)
             if v.spellId or v.spellIds then
                 -- AuraContainer：spellId / spellIds（任一命中即显示）在像素位 index
                 blocks.auras[k] = v
-            elseif v.auraName and v.showKey then
-                -- 旧逻辑光环：由 core/auras.lua + CreatTexture 写入
-                blocks.auras[k] = v
             else
-                print(("loadPlayerBlocks: 索引 %s 的 aura 缺少 spellId/spellIds 或 auraName/showKey，已跳过"):format(tostring(k)))
+                -- 旧 auraName/showKey 逻辑光环已移除，忽略
             end
         elseif v.type == "spell" then
             if not v.spellId then
@@ -400,7 +397,6 @@ function Fuyutsui:GetCharacterSpecInfo()
     self:updatePlayerMounted()
     self:updateGroup()
     self:loadPlayerMacros() -- 载入玩家宏
-    self:updateAuraIconByEnteringWorld()
     self:GetItemCount()     -- 获取物品数量
     self:CreatTexture(blocks.state["职业"], self.state.classId / 255)
     self:CreatTexture(blocks.state["专精"], self.state.specIndex / 255)
@@ -1533,7 +1529,6 @@ function Fuyutsui:UNIT_SPELLCAST_SUCCEEDED(_, unitTarget, castGUID, spellID, cas
     -- printSuccSpell(spellID)
     -- printSuccSpell2(spellID)
     self:updateFailedSpellBySuccess(spellID)
-    self:updateAuraBySuccess(spellID, castBarID)
     if spellID == 384255 then
         self:ClearAllFuyutsuiBars()
         print("切换天赋")
@@ -1559,33 +1554,7 @@ end
 function Fuyutsui:SPELL_UPDATE_COOLDOWN(_, spellID)
     -- print(spellID, C_Spell.GetSpellName(spellID), C_Spell.GetSpellLink(spellID))
     if issecretvalue(spellID) then return end
-    self:updateAuraBySpellCooldown(spellID)
     self:updateKnightStatus(spellID)
-end
-
-function Fuyutsui:SPELL_UPDATE_ICON(_, spellID)
-    if issecretvalue(spellID) then return end
-    self:updateAuraByIcon(spellID)
-end
-
-function Fuyutsui:COOLDOWN_VIEWER_SPELL_OVERRIDE_UPDATED(_, baseSpellID, overrideSpellID)
-    self:updateAuraBySpellOverride(baseSpellID, overrideSpellID)
-end
-
-function Fuyutsui:SPELL_ACTIVATION_OVERLAY_GLOW_SHOW(_, spellId)
-    self:updateAuraByOverlayGlow(spellId)
-end
-
-function Fuyutsui:SPELL_ACTIVATION_OVERLAY_GLOW_HIDE(_, spellId)
-    self:updateAuraByOverlayGlow(spellId)
-end
-
-function Fuyutsui:SPELL_ACTIVATION_OVERLAY_SHOW(_, spellId)
-    self:updateAuraByActivationOverlayShow(spellId)
-end
-
-function Fuyutsui:SPELL_ACTIVATION_OVERLAY_HIDE(_, spellId)
-    self:updateAuraByActivationOverlayHide(spellId)
 end
 
 local potions = {
@@ -1792,12 +1761,10 @@ function Fuyutsui:OnUpdate(elapsed)
     self:updateUnitCastingOrChannelingInfo("target")
     self:updateUnitCastingOrChannelingInfo("focus")
     self:updateGroupInRangeAndHealth()
-    self:updateAura()
     -- 2. 低频逻辑（每 0.2 秒执行）
     self.timeElapsed = self.timeElapsed + elapsed
     if self.timeElapsed > 0.2 then
         self:updateSpellCooldown()
-        self:updateAuraBlocks()
         self:updatePlayerAssistant()
         self:updateRune()
         self:updateTargetRangeBlock()
