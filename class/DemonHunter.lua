@@ -62,7 +62,6 @@ Fuyutsui.ClassBlocks = {
         [19] = { type = "block", name = "首领战" },
         [20] = { type = "block", name = "难度" },
         [21] = { type = "block", name = "敌人人数" },
-        [22] = { type = "block", name = "防御光环" },
         [23] = { type = "block", name = "目标施法" },
         [24] = { type = "block", name = "目标引导" },
         [25] = { type = "block", name = "焦点施法" },

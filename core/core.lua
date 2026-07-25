@@ -1,24 +1,84 @@
 local addon, ns = ...
 local className, classFilename, classId = UnitClass("player")
-Fuyutsui = LibStub("AceAddon-3.0"):NewAddon("Fuyutsui", "AceEvent-3.0", "AceConsole-3.0")
-local AC = LibStub("AceConfig-3.0") -- AceConfig-3.0 是 Ace3 库中的一个模块，用于注册和管理配置选项
-local ACD = LibStub("AceConfigDialog-3.0")
+
+Fuyutsui = Fuyutsui or {}
+
+local eventFrame = CreateFrame("Frame", "FuyutsuiEventFrame")
+
+--- 与 AceEvent 一致：回调为 addon[event](addon, event, ...)
+function Fuyutsui:RegisterEvent(event)
+    eventFrame:RegisterEvent(event)
+end
+
+function Fuyutsui:UnregisterEvent(event)
+    eventFrame:UnregisterEvent(event)
+end
+
+function Fuyutsui:UnregisterAllEvents()
+    eventFrame:UnregisterAllEvents()
+end
+
+local function CopyDefaults(dst, src)
+    if type(dst) ~= "table" or type(src) ~= "table" then
+        return
+    end
+    for k, v in pairs(src) do
+        if type(v) == "table" then
+            if type(dst[k]) ~= "table" then
+                dst[k] = {}
+            end
+            CopyDefaults(dst[k], v)
+        elseif dst[k] == nil then
+            dst[k] = v
+        end
+    end
+end
+
+local function GetCharKey()
+    local name = UnitName("player") or "Unknown"
+    local realm = GetRealmName() or "Unknown"
+    return name .. " - " .. realm
+end
+
+--- 兼容原 AceDB-3.0 的 FuyutsuiADB 布局（char / profiles / profileKeys）
+local function InitDB()
+    if type(FuyutsuiADB) ~= "table" then
+        FuyutsuiADB = {}
+    end
+    local sv = FuyutsuiADB
+    sv.char = sv.char or {}
+    sv.profiles = sv.profiles or {}
+    sv.profileKeys = sv.profileKeys or {}
+
+    local charKey = GetCharKey()
+    if type(sv.char[charKey]) ~= "table" then
+        sv.char[charKey] = {}
+    end
+    local char = sv.char[charKey]
+    CopyDefaults(char, Fuyutsui.defaults.char)
+
+    local profileName = sv.profileKeys[charKey] or "Default"
+    sv.profileKeys[charKey] = profileName
+    if type(sv.profiles[profileName]) ~= "table" then
+        sv.profiles[profileName] = {}
+    end
+    local profile = sv.profiles[profileName]
+    CopyDefaults(profile, Fuyutsui.defaults.profile)
+
+    Fuyutsui.db = {
+        char = char,
+        profile = profile,
+    }
+end
 
 function Fuyutsui:OnInitialize()
-    -- 使用“默认”配置文件，而非特定角色的配置文件。
-    -- https://www.wowace.com/projects/ace3/pages/api/ace-db-3-0
-    self.db = LibStub("AceDB-3.0"):New("FuyutsuiADB", self.defaults, true)
-    -- 注册一个选项表，并将其添加到暴雪选项窗口中。
-    -- https://www.wowace.com/projects/ace3/pages/api/ace-config-3-0
-    AC:RegisterOptionsTable("Fuyutsui_Options", self.options)
-    self.optionsFrame = ACD:AddToBlizOptions("Fuyutsui_Options", "Fuyutsui")
-    -- 添加一个子选项表 —— 即我们的配置文件面板。
-    local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
-    AC:RegisterOptionsTable("Fuyutsui_Profiles", profiles)
-    ACD:AddToBlizOptions("Fuyutsui_Profiles", "Profiles", "Fuyutsui")
-    -- 注册斜杠命令
-    self:RegisterChatCommand("fu", "SlashCommand")
-    self:RegisterChatCommand("Fuyutsui", "SlashCommand")
+    InitDB()
+
+    SLASH_FUYUTSUI1 = "/fu"
+    SLASH_FUYUTSUI2 = "/fuyutsui"
+    SlashCmdList["FUYUTSUI"] = function(msg, editbox)
+        Fuyutsui:SlashCommand(msg, editbox)
+    end
 
     self:GetCharacterInfo()
 end
@@ -69,7 +129,6 @@ function Fuyutsui:OnEnable()
     self:RegisterEvent("UPDATE_SHAPESHIFT_FORMS")
     self:RegisterEvent("ENCOUNTER_START")
     self:RegisterEvent("ENCOUNTER_END")
-    self:RegisterEvent("UNIT_AURA")
     self:RegisterEvent("SPELL_UPDATE_COOLDOWN")
     self:RegisterEvent("SPELL_UPDATE_ICON")
     self:RegisterEvent("COOLDOWN_VIEWER_SPELL_OVERRIDE_UPDATED")
@@ -86,6 +145,7 @@ function Fuyutsui:OnEnable()
     self:RegisterEvent("ENCOUNTER_TIMELINE_EVENT_ADDED")
     self:RegisterEvent("ENCOUNTER_TIMELINE_EVENT_REMOVED")
     self:RegisterEvent("ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED")
+    self:RegisterEvent("UNIT_AURA")
     if self.StartFrameUpdates then
         self:StartFrameUpdates()
     end
@@ -111,12 +171,12 @@ local function SaveConfig()
     c.potion = c.potion or 0
 end
 
---- 与斜杠 / 配置界面一致：print、同步顶部像素、规范化 db.char
+--- 与斜杠一致：print、同步顶部像素、规范化 db.char
 function Fuyutsui:SwitchCooldown()
     local c = self.db and self.db.char
     if not c then return end
     if c.cooldowns == 0 then
-        print("|cff00ff00[Fuyutsui]|r 爆发已|cffff0000关闭|r") -- 修改"关闭"为红色
+        print("|cff00ff00[Fuyutsui]|r 爆发已|cffff0000关闭|r")
     else
         print("|cff00ff00[Fuyutsui]|r 爆发已|cff00ff00开启|r")
     end
@@ -152,7 +212,7 @@ function Fuyutsui:SwitchDpsMode()
     local c = self.db and self.db.char
     if not c then return end
     if c.dpsMode == 0 then
-        print("|cff00ff00[Fuyutsui]|r 输出模式已修改为|cff00ff00官方一键辅助|r") -- 修改"关闭"为红色
+        print("|cff00ff00[Fuyutsui]|r 输出模式已修改为|cff00ff00官方一键辅助|r")
     else
         print("|cff00ff00[Fuyutsui]|r 输出模式已修改为|cff00ff00手动编写逻辑|r")
     end
@@ -194,33 +254,10 @@ function Fuyutsui:SwitchPotion()
     end
 end
 
---- AceConsole：由 RegisterChatCommand("fu"|"fuyutsui", "SlashCommand") 分发，勿再手写 SlashCmdList
 function Fuyutsui:SlashCommand(input, editbox)
-    input = (input or ""):trim()
+    input = strtrim(input or "")
     local command = string.lower(input)
 
-    -- Ace 调试 / 选项（子命令优先于游戏逻辑同名）
-    if command == "enable" then
-        self:Enable()
-        self:Print("Enabled.")
-        return
-    elseif command == "disable" then
-        self:Disable()
-        self:Print("Disabled.")
-        return
-    elseif command == "message" then
-        print("this is our saved message:", self.db and self.db.profile and self.db.profile.someInput)
-        return
-    elseif command == "options" or command == "config" then
-        if self.optionsFrame and self.optionsFrame.name then
-            Settings.OpenToCategory(self.optionsFrame.name)
-        else
-            self:Print("选项界面未就绪。")
-        end
-        return
-    end
-
-    -- 游戏内功能
     local c = self.db and self.db.char
     if command == "cd" then
         if not c then return end
@@ -275,7 +312,7 @@ function Fuyutsui:SlashCommand(input, editbox)
         local secStr = command:match("^delay%s+(.+)$")
         local sec = 1
         if secStr then
-            local trimmed = secStr:match("^%s*(.-)%s*$") or ""
+            local trimmed = strtrim(secStr)
             if trimmed ~= "" then
                 local parsed = tonumber(trimmed)
                 if parsed and parsed > 0 then
@@ -305,7 +342,7 @@ function Fuyutsui:SlashCommand(input, editbox)
         if not delayAlreadyActive then
             self:Print("延迟已生效，" .. sec .. " 秒后恢复。")
         end
-    elseif command == "help" then
+    elseif command == "help" or command == "" then
         print("|cff00ff00Fuyutsui|r 命令列表:")
         print("爆发开关: /fu cd")
         print("|cff00ff00开启|r爆发: /fu cd on")
@@ -320,35 +357,11 @@ function Fuyutsui:SlashCommand(input, editbox)
         print("|cff00ff00开启|r药水: /fu potion on")
         print("|cffff0000关闭|r药水: /fu potion off")
         print("临时 delay 标志（db.char.delay 置 1 持续 x 秒后归零）: /fu delay [秒]，省略秒数则为 1 秒")
-        print("界面设置(Ace): /fu options")
-    elseif command == "gui" then
-        if self.OpenInfoGUI then
-            self:OpenInfoGUI()
-        end
+        print("帮助: /fu help")
     else
-        if self.OpenInfoGUI then
-            self:OpenInfoGUI()
-        elseif self.optionsFrame and self.optionsFrame.name then
-            Settings.OpenToCategory(self.optionsFrame.name)
-        else
-            self:Print("输入 /fu help 查看命令。")
-        end
+        self:Print("输入 /fu help 查看命令。")
     end
 end
-
-function SetTestSecret(set)
-    SetCVar("secretChallengeModeRestrictionsForced", set)
-    SetCVar("secretCombatRestrictionsForced", set)
-    SetCVar("secretEncounterRestrictionsForced", set)
-    SetCVar("secretMapRestrictionsForced", set)
-    SetCVar("secretPvPMatchRestrictionsForced", set)
-    SetCVar("secretAuraDataRestrictionsForced", set)
-    SetCVar("scriptErrors", set);
-    SetCVar("doNotFlashLowHealthWarning", set);
-end
-
--- /script SetTestSecret(0)
-SetTestSecret(1)
 
 function Fuyutsui:IterateGroupMembers(reversed, forceParty)
     local unit = (not forceParty and IsInRaid()) and 'raid' or 'party'
@@ -401,30 +414,41 @@ Fuyutsui.defaults = {
         quickButtonShow = true,
     },
 }
-Fuyutsui.options = {
-    type = "group",
-    name = "Fuyutsui",
-    args = {
-        intro = {
-            type = "description",
-            name = "与 /fu 子命令配合；游戏内开关仍保存在「角色专用」变量 FuyutsuiADB（db.char）。",
-            fontSize = "medium",
-            order = 0,
-        },
-        someInput = {
-            type = "input",
-            name = "示例文本",
-            desc = "/fu message 会打印此项（profile）",
-            order = 10,
-            width = "full",
-            get = function()
-                return (Fuyutsui.db and Fuyutsui.db.profile and Fuyutsui.db.profile.someInput) or ""
-            end,
-            set = function(_, v)
-                if Fuyutsui.db and Fuyutsui.db.profile then
-                    Fuyutsui.db.profile.someInput = v or ""
-                end
-            end,
-        },
-    }
-}
+
+local initialized = false
+local enabled = false
+
+eventFrame:RegisterEvent("ADDON_LOADED")
+eventFrame:RegisterEvent("PLAYER_LOGIN")
+eventFrame:SetScript("OnEvent", function(_, event, ...)
+    if event == "ADDON_LOADED" then
+        local name = ...
+        if name ~= addon then
+            return
+        end
+        eventFrame:UnregisterEvent("ADDON_LOADED")
+        if not initialized then
+            initialized = true
+            Fuyutsui:OnInitialize()
+        end
+        if IsLoggedIn() and not enabled then
+            enabled = true
+            Fuyutsui:OnEnable()
+        end
+        return
+    end
+
+    if event == "PLAYER_LOGIN" then
+        eventFrame:UnregisterEvent("PLAYER_LOGIN")
+        if not enabled then
+            enabled = true
+            Fuyutsui:OnEnable()
+        end
+        return
+    end
+
+    local handler = Fuyutsui[event]
+    if handler then
+        handler(Fuyutsui, event, ...)
+    end
+end)

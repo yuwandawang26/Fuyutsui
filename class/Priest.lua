@@ -21,15 +21,11 @@ Fuyutsui.ClassBlocks = {
         [21] = { type = "block", name = "目标生命值" },
         [22] = { type = "block", name = "施法技能" },
         [23] = { type = "block", name = "施法目标" },
-        [24] = { type = "aura", name = "虚空之盾", auraName = "虚空之盾", showKey = "remaining" },
-        [25] = { type = "aura", name = "圣光涌动", auraName = "圣光涌动", showKey = "remaining" },
-        [26] = { type = "aura", name = "涌动层数", auraName = "圣光涌动", showKey = "count" },
-        [27] = { type = "aura", name = "熵能裂隙", auraName = "熵能裂隙", showKey = "remaining" },
-        [28] = { type = "aura", name = "暗影愈合", auraName = "暗影愈合", showKey = "remaining" },
-        [29] = { type = "aura", name = "暗影层数", auraName = "暗影愈合", showKey = "count" },
-        [30] = { type = "aura", name = "福音层数", auraName = "福音", showKey = "count" },
-        [46] = { type = "aura", name = "祸福相依", auraName = "祸福相依", showKey = "remaining" },
-        [47] = { type = "aura", name = "祸福层数", auraName = "祸福相依", showKey = "count" },
+        [24] = { type = "aura", name = "虚空之盾", spellId = 17 },
+        [25] = { type = "aura", name = "圣光涌动", spellId = 114255 },
+        [27] = { type = "aura", name = "熵能裂隙", spellId = 447444 },
+        [30] = { type = "aura", name = "福音", spellId = 472433, maxApps = 2 },
+        [46] = { type = "aura", name = "祸福相依", spellId = 390787, maxApps = 10 },
         [31] = { type = "spell", spellId = 8122, name = "心灵尖啸" },
         [32] = { type = "spell", spellId = 32375, name = "群体驱散" },
         [33] = { type = "spell", spellId = 527, name = "纯净术" },
@@ -51,8 +47,6 @@ Fuyutsui.ClassBlocks = {
         [48] = { type = "block", name = "延迟" },
         [52] = { type = "block", name = "大红冷却" },
         [53] = { type = "block", name = "敌人人数" },
-        [54] = { type = "block", name = "有光环敌人数量" },
-        [55] = { type = "block", name = "目标光环数量" },
         [56] = { type = "block", name = "目标施法" },
         [57] = { type = "block", name = "目标施法可打断" },
         [70] = {
@@ -60,11 +54,6 @@ Fuyutsui.ClassBlocks = {
             num = 5,
             healthPercent = 1,
             role = 2,
-            dispel = 3,
-            auras = {
-                [4] = { 194384 },      -- 救赎, 194384
-                [5] = { 17, 1253593 }, -- 真言术：盾, 虚空护盾, 17, 1253593
-            },
         },
     },
     [2] = {
@@ -111,11 +100,6 @@ Fuyutsui.ClassBlocks = {
             num = 5,
             healthPercent = 1,
             role = 2,
-            dispel = 3,
-            auras = {
-                [4] = { 41635 }, -- 愈合祷言, 41635
-                [5] = { 139 },   -- 恢复, 139
-            },
         },
     },
     [3] = {

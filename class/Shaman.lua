@@ -156,12 +156,6 @@ Fuyutsui.ClassBlocks = {
             num = 6,
             healthPercent = 1,
             role = 2,
-            dispel = 3,
-            auras = {
-                [4] = { 61295 },       -- 激流
-                [5] = { 974, 383648 }, -- 大地之盾
-                [6] = { 382024 },      -- 大地生命武器
-            },
         },
     },
 }

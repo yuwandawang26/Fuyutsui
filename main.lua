@@ -2,13 +2,6 @@ local addon, ns = ...
 local isSec = issecretvalue
 local rc = LibStub("LibRangeCheck-3.0")
 
-local GetAuraDuration = C_UnitAuras.GetAuraDuration
-local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
-local GetUnitAuraInstanceIDs = C_UnitAuras.GetUnitAuraInstanceIDs
-local GetAuraDispelTypeColor = C_UnitAuras.GetAuraDispelTypeColor
-local GetAuraDataByAuraInstanceID = C_UnitAuras.GetAuraDataByAuraInstanceID
-local IsAuraFilteredOutByInstanceID = C_UnitAuras.IsAuraFilteredOutByInstanceID
-
 local GetSpellName = C_Spell.GetSpellName
 local GetSpellCooldown = C_Spell.GetSpellCooldown
 local GetSpellChargeDuration = C_Spell.GetSpellChargeDuration
@@ -18,9 +11,9 @@ local EvaluateColorFromBoolean = C_CurveUtil.EvaluateColorFromBoolean
 local IsSpellKnown = C_SpellBook.IsSpellKnown
 local IsSpellInSpellBook = C_SpellBook.IsSpellInSpellBook
 
-local state = Fuyutsui.state; state.auras = { buffs = {}, debuffs = {}, }
+local state = Fuyutsui.state
 local blocks = Fuyutsui.blocks
-local target = Fuyutsui.target; target.auras = { debuffs = {} }
+local target = Fuyutsui.target
 local focus = Fuyutsui.focus
 local nameplate = Fuyutsui.nameplate
 local group = Fuyutsui.group
@@ -83,26 +76,9 @@ local helpfulSpells = {
     [77472] = 15,   -- 治疗波
 }
 
-local dispelCurve = C_CurveUtil.CreateColorCurve()
-target.enemyCurve = C_CurveUtil.CreateColorCurve()
-target.friendCurve = C_CurveUtil.CreateColorCurve()
-
-dispelCurve:SetType(Enum.LuaCurveType.Step)
-target.enemyCurve:SetType(Enum.LuaCurveType.Step)
-target.friendCurve:SetType(Enum.LuaCurveType.Step)
-
 -- ================================================================
 --                          通用函数
 -- ================================================================
-
--- 更新单位拥有玩家光环的数量
-function Fuyutsui:updateUnitAuraCount(unit)
-    local auraInstanceIDs = GetUnitAuraInstanceIDs(unit, "HARMFUL|PLAYER", 1, 4)
-    if auraInstanceIDs then
-        return #auraInstanceIDs
-    end
-    return 0
-end
 
 -- 更新单位距离
 local function updateUnitRange(unit)
@@ -137,31 +113,6 @@ function Fuyutsui:SPELL_UPDATE_CHARGES(_)
     -- getSpellChargesInfo()
 end
 
--- 驱散能力映射
-local dispelAbilities = {
-    [1] = { 527, 360823, 4987, 115450, 88423, 77130 },              -- 魔法驱散
-    [2] = { 383016, 51886, 392378, 2782, 475 },                     -- 诅咒驱散
-    [3] = { 390632, 213634, 393024, 213644, 388874, 218164 },       -- 疾病驱散
-    [4] = { 392378, 2782, 393024, 213644, 388874, 218164, 365585 }, -- 中毒驱散
-    [11] = {}                                                       -- 流血驱散
-}
-
--- 进攻驱散能力映射
-local offensiveDispelAbilities = {
-    [1] = { 528 },  -- 魔法
-    [9] = { 2908 }, -- 激怒
-}
-
--- 检查玩家是否学习了多个法术中的任意一个
-local function hasLearnedAnySpell(spellIDs)
-    for _, spellID in ipairs(spellIDs) do
-        if IsSpellKnown(spellID) then
-            return true
-        end
-    end
-    return false
-end
-
 local function updateCooldownSpellKnown()
     spells = {}
     if not blocks.spells then return end
@@ -184,54 +135,6 @@ end
 -- 更新法术已知状态
 function Fuyutsui:updateSpellKnown()
     updateCooldownSpellKnown()
-
-    -- 动态生成防御驱散能力
-    local dispelCapabilities = {
-        [1] = false,  -- 魔法驱散
-        [2] = false,  -- 疾病驱散
-        [3] = false,  -- 诅咒驱散
-        [4] = false,  -- 中毒驱散
-        [11] = false, -- 流血
-    }
-    -- 动态生成进攻驱散能力
-    local offensiveDispelCapabilities = {
-        [1] = false, -- 魔法
-        [9] = false, -- 激怒
-    }
-
-    for debuffType, spellIDs in pairs(dispelAbilities) do
-        dispelCapabilities[debuffType] = hasLearnedAnySpell(spellIDs)
-    end
-
-    for debuffType, spellIDs in pairs(offensiveDispelAbilities) do
-        offensiveDispelCapabilities[debuffType] = hasLearnedAnySpell(spellIDs)
-    end
-
-    dispelCurve:ClearPoints()
-    target.enemyCurve:ClearPoints()
-    target.friendCurve:ClearPoints()
-
-    for i, v in pairs(dispelCapabilities) do
-        if v then
-            dispelCurve:AddPoint(i, CreateColor(0, 1, i / 255, 1))
-            target.friendCurve:AddPoint(i, CreateColor(0, 1, (i + 11) / 255, 1))
-        else
-            dispelCurve:AddPoint(i, CreateColor(0, 0, 0, 1))
-            target.friendCurve:AddPoint(i, CreateColor(0, 0, 11 / 255, 1))
-        end
-    end
-
-    for i, v in pairs(offensiveDispelCapabilities) do
-        if v then
-            if i == 9 then
-                target.enemyCurve:AddPoint(9, CreateColor(0, 1, 3 / 255, 1))
-            else
-                target.enemyCurve:AddPoint(i, CreateColor(0, 1, (i + 1) / 255, 1))
-            end
-        else
-            target.enemyCurve:AddPoint(i, CreateColor(0, 0, 1 / 255, 1))
-        end
-    end
 end
 
 -- ================================================================
@@ -307,7 +210,6 @@ function Fuyutsui:loadPlayerBlocks(specIndex)
                 blocks.countBars[key] = value
             end
         end
-
         if type(v) ~= "table" or not v.type then
             -- 跳过 powerType 等非条目字段
         elseif v.type == "block" then
@@ -317,7 +219,15 @@ function Fuyutsui:loadPlayerBlocks(specIndex)
                 blocks.state[v.name] = k
             end
         elseif v.type == "aura" then
-            blocks.auras[k] = v
+            if v.spellId then
+                -- AuraContainer：按 spellId 在像素位 index 显示
+                blocks.auras[k] = v
+            elseif v.auraName and v.showKey then
+                -- 旧逻辑光环：由 core/auras.lua + CreatTexture 写入
+                blocks.auras[k] = v
+            else
+                print(("loadPlayerBlocks: 索引 %s 的 aura 缺少 spellId 或 auraName/showKey，已跳过"):format(tostring(k)))
+            end
         elseif v.type == "spell" then
             if not v.spellId then
                 print(("loadPlayerBlocks: 索引 %s 的 spell 缺少 spellId，已跳过"):format(tostring(k)))
@@ -343,11 +253,6 @@ function Fuyutsui:loadPlayerBlocks(specIndex)
             blocks.groups.num = v.num
             blocks.groups.healthPercent = v.healthPercent
             blocks.groups.role = v.role
-            blocks.groups.dispel = v.dispel
-            blocks.groups.auras = v.auras
-            if v.rejuv then
-                blocks.groups.rejuv = v.rejuv
-            end
         end
     end
     self.blocks = blocks
@@ -622,29 +527,13 @@ end
 
 -- 15. 更新目标类型
 local function getTargetDispelType()
-    local unit = "target"
-    if not UnitExists(unit) then return 0 end
-    local filter, curve, b = nil, nil, 0
-
+    if not UnitExists("target") then return 0 end
     if target.canAttack then
-        b = 1 / 255
-        curve = target.enemyCurve
-        filter = "HELPFUL|RAID_PLAYER_DISPELLABLE"
+        return 1 / 255
     elseif target.canAssist then
-        b = 11 / 255
-        curve = target.friendCurve
-        filter = "HARMFUL|RAID_PLAYER_DISPELLABLE"
-    else
-        return 0
+        return 11 / 255
     end
-
-    local auraInstanceIDs = GetUnitAuraInstanceIDs(unit, filter, 1, 4)
-
-    if auraInstanceIDs and #auraInstanceIDs > 0 then
-        local color = GetAuraDispelTypeColor(unit, auraInstanceIDs[1], curve)
-        return color.b
-    end
-    return b
+    return 0
 end
 
 function Fuyutsui:updateTargetType()
@@ -655,15 +544,6 @@ function Fuyutsui:updateTargetType()
     end
     target.type = targetType
     self:CreatTexture(blocks.state["目标类型"], targetType)
-end
-
-function Fuyutsui:updateTargetAuraCount()
-    if not UnitExists("target") then return end
-    if blocks and blocks.state["目标光环数量"] then
-        local auraCount = self:updateUnitAuraCount("target")
-        state.targetAuraCount = auraCount / 255 or 0
-        self:CreatTexture(blocks.state["目标光环数量"], state.targetAuraCount)
-    end
 end
 
 -- 16. 更新玩家队伍类型
@@ -727,10 +607,16 @@ end
 
 -- 创建玩家bar信息
 function Fuyutsui:updatePlayerBarInfo()
+    if self.RefreshPlayerAuraContainers then
+        self:RefreshPlayerAuraContainers()
+    end
     if blocks.countBars then
         for k, v in pairs(blocks.countBars) do
             self:CreateAutoLayoutBar(v.valueType, v.minValue, v.maxValue, v.spellId)
         end
+    end
+    if self.LayoutAuraApplicationBars then
+        self:LayoutAuraApplicationBars()
     end
 end
 
@@ -828,51 +714,6 @@ function Fuyutsui:updateDiseaseJudge()
             self:CreatTexture(blocks.state["疾病判断"], state.diseaseJudge)
             diseaseJudgeTimer = nil
         end)
-    end
-end
-
--- 更新防御光环
-function Fuyutsui:GetDefensiveAuraInstanceID(unit, info)
-    if info.addedAuras then
-        for i = 1, 2 do
-            local aura = GetAuraDataByIndex(unit, i, "HELPFUL|BIG_DEFENSIVE")
-            if not issecretvalue(aura) and aura then
-                state.DefensiveAuraInstanceID = aura.auraInstanceID
-            end
-        end
-    end
-    if info.updatedAuraInstanceIDs then
-        for _, v in pairs(info.updatedAuraInstanceIDs) do
-            if v == state.DefensiveAuraInstanceID then
-                local aura = GetAuraDataByAuraInstanceID(unit, v)
-                state.DefensiveAuraInstanceID = aura
-            end
-        end
-    end
-    if info.removedAuraInstanceIDs then
-        for _, v in pairs(info.removedAuraInstanceIDs) do
-            if v == state.DefensiveAuraInstanceID then
-                state.DefensiveAuraInstanceID = nil
-            end
-        end
-    end
-end
-
-function Fuyutsui:GetDefensiveAuraDuration()
-    if blocks and blocks.state["防御光环"] then
-        if state.DefensiveAuraInstanceID then
-            local duration = GetAuraDuration("player", state.DefensiveAuraInstanceID)
-            if duration then
-                local auraduration = duration:EvaluateRemainingDuration(curve255)
-                ---@diagnostic disable-next-line: param-type-mismatch
-                local _, _, b = auraduration:GetRGB()
-                self:CreatTexture(blocks.state["防御光环"], b)
-            else
-                self:CreatTexture(blocks.state["防御光环"], 0)
-            end
-        else
-            self:CreatTexture(blocks.state["防御光环"], 0)
-        end
     end
 end
 
@@ -988,25 +829,6 @@ function Fuyutsui:updateItemCoolDown()
     end
 end
 
--- 更新玩家完整光环信息
-function Fuyutsui:updatePlayerFullAura()
-    local unit = "player"
-    state.auras = {
-        buffs = {},
-        debuffs = {},
-    }
-    for i = 1, 40 do
-        local buff = GetAuraDataByIndex(unit, i, "HELPFUL")
-        local debuff = GetAuraDataByIndex(unit, i, "HARMFUL")
-        if buff then
-            state.auras.buffs[buff.auraInstanceID] = buff
-        end
-        if debuff then
-            state.auras.debuffs[debuff.auraInstanceID] = debuff
-        end
-    end
-end
-
 -- 死亡骑士天启骑士检测
 -- 激活的天启骑士
 local ActiveKnightSpells = {
@@ -1051,26 +873,6 @@ function Fuyutsui:updateKnightStatusCount()
         if blocks.state["天启骑士数量"] then
             self:CreatTexture(blocks.state["天启骑士数量"], count / 255)
         end
-    end
-end
-
--- 萨满: 漩涡武器
-
-local function GetMaelstromWeaponCount()
-    -- 344179
-    local count = 0
-    for k, v in pairs(state.auras.buffs) do
-        if not isSec(v.spellId) and v.spellId == 344179 then
-            count = v.applications
-        end
-    end
-    return count
-end
-
-function Fuyutsui:updateMaelstromWeaponCount()
-    if blocks and blocks.state["漩涡武器层数"] then
-        local count = GetMaelstromWeaponCount()
-        self:CreatTexture(blocks.state["漩涡武器层数"], count / 255)
     end
 end
 
@@ -1211,23 +1013,11 @@ function Fuyutsui:updateTargetHealth()
     end
 end
 
-function Fuyutsui:updateTargetFullAura()
-    local unit = "target"
-    target.auras = { debuffs = {} }
-    for i = 1, 40 do
-        local debuff = GetAuraDataByIndex(unit, i, "HARMFUL|PLAYER")
-        if debuff then
-            target.auras.debuffs[debuff.auraInstanceID] = debuff
-        end
-    end
-end
-
 -- 更新目标完整信息
 function Fuyutsui:updateTargetFullInfo()
     self:updateTargetCanAttack()
     self:updateTargetDeath()
     self:updateTargetHealth()
-    self:updateTargetFullAura()
 end
 
 -- ================================================================
@@ -1255,7 +1045,6 @@ local testEncounter = {
 -- 更新范围内敌方姓名版数量
 function Fuyutsui:updateEnemyCount()
     local count = 0
-    local hasAuraCount = 0
     local inTestMap = state.mapID and testMap[state.mapID]
     local inTestEncounter = state.encounterID and testEncounter[state.encounterID]
     for unit, data in pairs(nameplate) do
@@ -1266,20 +1055,12 @@ function Fuyutsui:updateEnemyCount()
         if data.canAttack and data.maxRange and data.maxRange <= self.state.specRange
             and (data.affectingCombat or inTestMap or inTestEncounter) then
             count = count + 1
-            local hasAura = self:updateUnitAuraCount(unit)
-            if hasAura > 0 then
-                hasAuraCount = hasAuraCount + 1
-            end
         end
     end
     state.enemyCount = count / 255 or 0
-    state.hasAuraEnemyCount = hasAuraCount / 255 or 0
     if blocks then
         if blocks.state["敌人人数"] then
             self:CreatTexture(blocks.state["敌人人数"], state.enemyCount)
-        end
-        if blocks.state["有光环敌人数量"] then
-            self:CreatTexture(blocks.state["有光环敌人数量"], state.hasAuraEnemyCount)
         end
     end
 end
@@ -1427,78 +1208,6 @@ local function updateUnitIncomingHealsCurve2()
     end
 end
 
-function Fuyutsui:updateUnitFullAura(unit)
-    local obj = group[unit]
-    if not obj then return end
-    obj.aura = {}
-    for i = 1, 40 do
-        local buff = GetAuraDataByIndex(unit, i, "HELPFUL")
-        if buff and not isSec(buff.spellId) and buff.sourceUnit == "player" then
-            obj.aura[buff.auraInstanceID] = buff
-        end
-    end
-end
-
-local function getMaxAuraByTable(unit, spellIds)
-    local obj = group[unit]
-    if not obj or not obj.aura then return end
-    local maxAura = nil
-    for i, spellId in pairs(spellIds) do
-        for auraInstanceID, aura in pairs(obj.aura) do
-            if isSec(aura.spellId) then
-                obj.aura[auraInstanceID] = nil
-            else
-                if aura.spellId == spellId and aura.expirationTime and (not maxAura or aura.expirationTime > maxAura.expirationTime) then
-                    maxAura = aura
-                end
-            end
-        end
-    end
-    return maxAura
-end
-
-local function getRejuvCount(unit)
-    local obj = group[unit]
-    if not obj or not obj.aura then return end
-    local rejuvCount = 0
-    for auraInstanceID, aura in pairs(obj.aura) do
-        if aura.spellId == 774 or aura.spellId == 155777 then
-            rejuvCount = rejuvCount + 1
-        end
-    end
-    return rejuvCount
-end
-
-function Fuyutsui:OnUpdateUnitAura()
-    if not blocks or not blocks.groups or not blocks.groups.auras then return end
-    for unit, data in pairs(group) do
-        for i, spellIds in pairs(blocks.groups.auras) do
-            local index = blocks.groups.start + (data.index - 1) * blocks.groups.num + i
-            local maxAura = getMaxAuraByTable(unit, spellIds)
-            if maxAura and maxAura.auraInstanceID then
-                local duration = GetAuraDuration(unit, maxAura.auraInstanceID)
-                if maxAura.expirationTime == 0 then
-                    self:CreatTexture(index, 1)
-                elseif duration then
-                    local auraduration = duration:EvaluateRemainingDuration(curve255)
-                    ---@diagnostic disable-next-line: param-type-mismatch
-                    local _, _, b = auraduration:GetRGB()
-                    self:CreatTexture(index, b)
-                else
-                    self:CreatTexture(index, 0)
-                end
-            else
-                self:CreatTexture(index, 0)
-            end
-        end
-        if blocks.groups.rejuv then
-            local index = blocks.groups.start + (data.index - 1) * blocks.groups.num + blocks.groups.rejuv
-            local rejuvCount = getRejuvCount(unit)
-            self:CreatTexture(index, rejuvCount / 255)
-        end
-    end
-end
-
 function Fuyutsui:clearGroupBlocks()
     if blocks.groups and blocks.groups.start then
         local startIndex = blocks.groups.start
@@ -1533,11 +1242,9 @@ function Fuyutsui:updateGroup()
             healAbsorb = 0,
             inComingHeals = 0,
             curveTimer = nil,
-            aura = {}
         }
         self:updateUnitValid(unit)
         self:updateUnitHealthInfo(unit)
-        self:updateUnitFullAura(unit)
         i = i + 1
     end
 end
@@ -1569,7 +1276,6 @@ end
 function Fuyutsui:PLAYER_ENTERING_WORLD()
     state.mapID = C_Map.GetBestMapForUnit("player") or 0
     self:updateHeroTalent()
-    self:updatePlayerFullAura()
     C_Timer.After(5, function()
         self:updateGroup()
     end)
@@ -1737,7 +1443,7 @@ function Fuyutsui:UNIT_SPELLCAST_FAILED(_, unitTarget, castGUID, spellID, castBa
 end
 
 function Fuyutsui:SPELL_UPDATE_COOLDOWN(_, spellID)
-    -- print(spellID, C_Spell.GetSpellName(spellID))
+    -- print(spellID, C_Spell.GetSpellName(spellID), C_Spell.GetSpellLink(spellID))
     if issecretvalue(spellID) then return end
     self:updateAuraBySpellCooldown(spellID)
     self:updateKnightStatus(spellID)
@@ -1940,173 +1646,6 @@ function Fuyutsui:ENCOUNTER_END(_, encounterID, encounterName, difficultyID, gro
     self:updateEncounterID(0, 0)
 end
 
-function Fuyutsui:TestFiltered(unit, auraInstanceID)
-    local AuraFilters = {
-        "HELPFUL",
-        "HELPFUL HARMFUL",
-        "HELPFUL PLAYER",
-        "HELPFUL RAID",
-        "HELPFUL CANCELABLE",
-        "HELPFUL NOT_CANCELABLE",
-        "HELPFUL INCLUDE_NAME_PLATE_ONLY",
-        "HELPFUL MAW",
-        "HELPFUL EXTERNAL_DEFENSIVE",
-        "HELPFUL CROWD_CONTROL",
-        "HELPFUL RAID_IN_COMBAT",
-        "HELPFUL RAID_PLAYER_DISPELLABLE",
-        "HELPFUL BIG_DEFENSIVE",
-        "HELPFUL IMPORTANT",
-    }
-    local aura = GetAuraDataByAuraInstanceID(unit, auraInstanceID)
-    if aura then
-        for _, filter in pairs(AuraFilters) do
-            local isFiltered = IsAuraFilteredOutByInstanceID(unit, auraInstanceID, filter)
-            local boolColored
-            if isFiltered then
-                boolColored = "|cffff0000" .. tostring(false) .. "|r"
-            else
-                boolColored = "|cff00ff00" .. tostring(true) .. "|r"
-            end
-            print(auraInstanceID, aura.name, filter, boolColored)
-        end
-    end
-end
-
-function FuyutsuiPrintPlayerAuraInfo()
-    local playerAura = state.auras
-    if not playerAura then return end
-    print("|cnGREEN_FONT_COLOR:玩家光环: |r")
-    for k, v in pairs(playerAura.buffs) do
-        print(k, v.spellId, v.name, v.duration)
-    end
-    for k, v in pairs(playerAura.debuffs) do
-        print(k, v.spellId, v.name, v.duration)
-    end
-end
-
-function Fuyutsui:updatePlayerAuraInfo(unit, info)
-    local auras = state.auras
-    if info.isFullUpdate then self:updatePlayerFullAura() end
-    if info.addedAuras then
-        for k, v in pairs(info.addedAuras) do
-            -- print("|cnGREEN_FONT_COLOR:新增光环: |r", v.spellId, C_Spell.GetSpellLink(v.spellId))
-            if v.isHelpful then
-                auras.buffs[v.auraInstanceID] = v
-            elseif v.isHarmful then
-                auras.debuffs[v.auraInstanceID] = v
-            end
-            if not isSec(v.spellId) then
-                -- print("|cnGREEN_FONT_COLOR:新增非秘密值光环: |r", v.spellId, C_Spell.GetSpellLink(v.spellId))
-            end
-        end
-    end
-    if info.updatedAuraInstanceIDs then
-        for _, v in pairs(info.updatedAuraInstanceIDs) do
-            local aura = GetAuraDataByAuraInstanceID(unit, v)
-            if aura then
-                if auras.buffs[aura.auraInstanceID] then
-                    auras.buffs[aura.auraInstanceID] = aura
-                elseif auras.debuffs[aura.auraInstanceID] then
-                    auras.debuffs[aura.auraInstanceID] = aura
-                end
-            end
-        end
-    end
-    if info.removedAuraInstanceIDs then
-        for _, v in pairs(info.removedAuraInstanceIDs) do
-            if auras.buffs[v] then
-                auras.buffs[v] = nil
-            elseif auras.debuffs[v] then
-                auras.debuffs[v] = nil
-            end
-        end
-    end
-end
-
-function Fuyutsui:updateTargetAuraInfo(unit, info)
-    if info.isFullUpdate then
-        self:updateTargetFullAura()
-    end
-    if info.addedAuras then
-        for k, v in pairs(info.addedAuras) do
-            local isFiltered = IsAuraFilteredOutByInstanceID(unit, v.auraInstanceID, "HARMFUL|PLAYER")
-            if not isFiltered then
-                target.auras.debuffs[v.auraInstanceID] = v
-            end
-        end
-    end
-    if info.updatedAuraInstanceIDs then
-        for _, v in pairs(info.updatedAuraInstanceIDs) do
-            local aura = GetAuraDataByAuraInstanceID(unit, v)
-            if aura and target.auras.debuffs[v] then
-                target.auras.debuffs[v] = aura
-            end
-        end
-    end
-    if info.removedAuraInstanceIDs then
-        for _, v in pairs(info.removedAuraInstanceIDs) do
-            if target.auras.debuffs[v] then
-                target.auras.debuffs[v] = nil
-            end
-        end
-    end
-end
-
-function Fuyutsui:updateGroupAuraInfo(unit, info)
-    local obj = group[unit]
-    if obj then
-        if info.isFullUpdate then
-            self:updateUnitFullAura(unit)
-        end
-        if info.addedAuras then
-            for k, v in pairs(info.addedAuras) do
-                -- print("|cnGREEN_FONT_COLOR:新增光环: |r", v.auraInstanceID, v.spellId, v.name, v.duration)
-                if not isSec(v.spellId) and v.sourceUnit == "player" then
-                    obj.aura[v.auraInstanceID] = v
-                end
-            end
-        end
-        if info.updatedAuraInstanceIDs then
-            for _, v in pairs(info.updatedAuraInstanceIDs) do
-                local aura = GetAuraDataByAuraInstanceID(unit, v)
-                -- print("|cnYELLOW_FONT_COLOR:更新光环: |r", aura.auraInstanceID, aura.spellId, aura.name)
-                if aura and not isSec(aura.spellId) and aura.sourceUnit == "player" then
-                    obj.aura[v] = aura
-                end
-            end
-        end
-        if info.removedAuraInstanceIDs then
-            for _, v in pairs(info.removedAuraInstanceIDs) do
-                -- print("|cnRED_FONT_COLOR:移除光环: |r", v)
-                obj.aura[v] = nil
-            end
-        end
-        if blocks.groups then
-            local index = blocks.groups.start + (obj.index - 1) * blocks.groups.num + blocks.groups.dispel
-            local auraInstanceIDs = GetUnitAuraInstanceIDs(unit, "HARMFUL|RAID_PLAYER_DISPELLABLE", 1, 4)
-            if auraInstanceIDs and #auraInstanceIDs > 0 then
-                local color = GetAuraDispelTypeColor(unit, auraInstanceIDs[1], dispelCurve)
-                if color then
-                    self:CreatTexture(index, color.b)
-                end
-            else
-                self:CreatTexture(index, 0)
-            end
-        end
-    end
-end
-
-function Fuyutsui:UNIT_AURA(_, unit, info)
-    self:updateGroupAuraInfo(unit, info)
-    if unit == "target" then
-        self:updateTargetAuraInfo(unit, info)
-    elseif unit == "player" then
-        self:updatePlayerAuraInfo(unit, info)
-        self:GetDefensiveAuraInstanceID(unit, info)
-        self:updateMaelstromWeaponCount()
-    end
-end
-
 function Fuyutsui:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 
 end
@@ -2140,14 +1679,10 @@ function Fuyutsui:OnUpdate(elapsed)
     self:updateUnitCastingOrChannelingInfo("focus")
     self:updateGroupInRangeAndHealth()
     self:updateAura()
-    self:updateTargetAuraCount()
     -- 2. 低频逻辑（每 0.2 秒执行）
     self.timeElapsed = self.timeElapsed + elapsed
     if self.timeElapsed > 0.2 then
-        self:GetDefensiveAuraDuration()
-        self:UpdateAuraIcons(state.auras.buffs, target.auras.debuffs)
         self:updateSpellCooldown()
-        self:OnUpdateUnitAura()
         self:updateAuraBlocks()
         self:updatePlayerAssistant()
         self:updateRune()

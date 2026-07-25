@@ -4,9 +4,8 @@
 ## Version: 1.2.2.4
 ## Author: Wayne Bian
 ## IconTexture: Interface\AddOns\Fuyutsui\core\Spell_Misc_EmotionHappy.blp
-## OptionalDeps: LibRangeCheck-3.0, Ace3
+## OptionalDeps: LibRangeCheck-3.0
 ## SavedVariables: FuyutsuiADB
-## X-Embeds: Ace3
 
 ## Category-enUS: Combat
 ## Category-deDE: Kampf
@@ -50,4 +49,3 @@ class/DemonHunter.lua
 class/Evoker.lua
 
 main.lua
-gui.lua

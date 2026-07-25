@@ -92,10 +92,6 @@ Fuyutsui.ClassBlocks = {
             num = 5,
             healthPercent = 1,
             role = 2,
-            dispel = 3,
-            aura = {
-                [4] = { 409311, 410089 }, -- 先知先觉
-            },
         }
     },
 }

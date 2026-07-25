@@ -109,11 +109,6 @@ Fuyutsui.ClassBlocks = {
             num = 5,
             healthPercent = 1,
             role = 2,
-            dispel = 3,
-            auras = {
-                [4] = { 119611 }, -- 复苏之雾, 119611
-                [5] = { 124682 }, -- 氤氲之雾, 124682
-            },
         },
     },
     [3] = {

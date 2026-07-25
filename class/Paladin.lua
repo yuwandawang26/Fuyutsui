@@ -49,12 +49,6 @@ Fuyutsui.ClassBlocks = {
             num = 6,
             healthPercent = 1,
             role = 2,
-            dispel = 3,
-            auras = {
-                [4] = { 156322 },        -- 永恒之火, 156322
-                [5] = { 1244893 },       -- 救世道标, 1244893
-                [6] = { 53563, 156910 }, -- 圣光道标, 信仰道标, 53563, 156910
-            },
         },
     },
     [2] = {
@@ -113,7 +107,6 @@ Fuyutsui.ClassBlocks = {
             num = 3,
             healthPercent = 1,
             role = 2,
-            dispel = 3,
         },
     },
     [3] = {
@@ -169,7 +162,6 @@ Fuyutsui.ClassBlocks = {
             num = 3,
             healthPercent = 1,
             role = 2,
-            dispel = 3,
         },
     },
 } -- 创建圣骑士宏{

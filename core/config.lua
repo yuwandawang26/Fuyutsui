@@ -854,52 +854,6 @@ Fuyutsui.rangeSpecID = {
     [73] = 15,   -- 防护
     [1446] = 15, -- Initial
 }
--- 无秘密值光环
-Fuyutsui.noSecretAuras = {
-    -- 恩护 唤魔师
-    [355941] = true,  -- Dream Breath
-    [363502] = true,  -- Dream Flight
-    [364343] = true,  -- Echo
-    [366155] = true,  -- Reversion
-    [367364] = true,  -- Echo Reversion
-    [373267] = true,  -- Lifebind
-    [376788] = true,  -- Echo Dream Breath
-    -- 增辉 唤魔师
-    [360827] = true,  -- Blistering Scales
-    [395152] = true,  -- Ebon Might
-    [410089] = true,  -- Prescience
-    [410263] = true,  -- Inferno's Blessing
-    [410686] = true,  -- Symbiotic Bloom
-    [413984] = true,  -- Shifting Sands
-    -- 恢复 德鲁伊
-    [774] = true,     -- Rejuv, 回春
-    [8936] = true,    -- Regrowth, 愈合
-    [33763] = true,   -- Lifebloom, 生命绽放
-    [48438] = true,   -- Wild Growth, 野性生长
-    [155777] = true,  -- Germination, 萌芽
-    -- 戒律 牧师
-    [17] = true,      -- 真言术：盾
-    [194384] = true,  -- 救赎
-    [1253593] = true, -- 虚空护盾
-    -- 神圣 牧师
-    [139] = true,     -- 恢复
-    [41635] = true,   -- 愈合祷言
-    [77489] = true,   -- 圣光回响
-    -- 织雾 武僧
-    [115175] = true,  -- Soothing Mist 抚慰之雾
-    [119611] = true,  -- Renewing Mist 复苏之雾
-    [124682] = true,  -- Enveloping Mist 氤氲之雾
-    [450769] = true,  -- Aspect of Harmony 和谐化身
-    -- 恢复 萨满
-    [974] = true,
-    [383648] = true,  -- Earth Shield 大地之盾
-    [61295] = true,   -- Riptide
-    -- 神圣 圣骑士
-    [53563] = true,   -- Beacon of Light, 圣光道标
-    [156322] = true,  -- Eternal Flame, 永恒之火
-    [156910] = true,  -- Beacon of Faith, 信仰道标
-    [1244893] = true, -- Beacon of the Savior, 救世道标
-}
 -- 动作条
 Fuyutsui.actionBars = {
     { startSlot = 1,   endSlot = 12,  bindingPrefix = "ACTIONBUTTON" },

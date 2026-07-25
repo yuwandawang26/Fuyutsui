@@ -5,8 +5,8 @@
 ## 仓库结构
 
 - `Fuyutsui.toc` 是 AddOn 入口和加载顺序。改新增 Lua 文件时必须同步这里。
-- `embeds.xml` 与 `libs/` 加载 Ace3、LibStub、LibRangeCheck 等库。通常不要改 vendored libs。
-- `core/core.lua` 创建全局 `Fuyutsui` AceAddon，注册 SavedVariables、选项、斜杠命令和事件。
+- `embeds.xml` 与 `libs/` 加载 LibStub；`LibRangeCheck-3.0` 由 toc 直接加载。通常不要改 vendored libs。
+- `core/core.lua` 创建全局 `Fuyutsui` 表，用原生 `CreateFrame` 事件、`SlashCmdList` 和 `FuyutsuiADB` SavedVariables。
 - `core/config.lua` 是静态配置表：法术列表、事件常量、英雄天赋、难度、boss、能量类型、动作条、按键编码、角色映射等。
 - `core/block.lua` 管理顶部像素条和计数条。`Fuyutsui:CreatTexture(index, b)` 是主要输出 API。
 - `core/macro.lua` 创建 SecureActionButton 宏并绑定预设按键。
@@ -15,7 +15,6 @@
 - `core/quickbutton.lua` 创建游戏内快速切换按钮，操作爆发、AOE、输出模式、药水开关。
 - `class/*.lua` 按职业声明 `Fuyutsui.ClassBlocks` 和 `Fuyutsui.MacrosList`。每个文件开头会用 `UnitClassBase("player")` 过滤非当前职业。
 - `main.lua` 是运行时主逻辑：加载职业配置、更新状态、处理 WoW 事件、按帧刷新色块。
-- `gui.lua` 定义 AceConfig 配置和 `/fu gui` 信息窗口。
 - `Keymap.md` 记录键位编码对照。
 
 ## 加载顺序很重要
@@ -27,7 +26,6 @@
 3. `core/quickbutton.lua`、`core/config.lua`、`core/block.lua`、`core/macro.lua`、`core/keybinds.lua`、`core/auras.lua` 继续给 `Fuyutsui` 挂方法和数据。
 4. 所有 `class/*.lua` 依次加载，但只有当前玩家职业文件真正生效。
 5. `main.lua` 消费前面的表并注册运行时逻辑。
-6. `gui.lua` 最后覆盖/扩展 `Fuyutsui.options`，并提供 GUI。
 
 不要把依赖 `Fuyutsui` 的代码放到 `core/core.lua` 之前。新增模块时尽量放到它依赖的数据之后、被消费之前。
 
@@ -102,13 +100,11 @@ Fuyutsui.ClassBlocks = {
 
 ## 命令和配置
 
-斜杠命令由 AceConsole 注册，不要再手写 `SlashCmdList`。
+斜杠命令由 `SlashCmdList["FUYUTSUI"]` 注册（`/fu`、`/fuyutsui`）。
 
 常用命令：
 
-- `/fu` 或 `/fuyutsui`：默认打开 GUI。
-- `/fu help`：命令帮助。
-- `/fu options` 或 `/fu config`：打开设置。
+- `/fu` 或 `/fu help`：命令帮助。
 - `/fu cd [on|off]`：爆发开关。
 - `/fu aoemode [auto|aoe]`：AOE/单体模式。
 - `/fu dpsmode [manual|assistant]`：手写逻辑/官方一键辅助模式。
@@ -138,6 +134,6 @@ Fuyutsui.ClassBlocks = {
 - 读取或修改 `core/block.lua` 前注意当前工作区可能已有未提交改动，避免覆盖用户修改。
 - 不要格式化整个仓库或 vendored `libs/`。
 - 修改加载文件后检查 `Fuyutsui.toc`。
-- 修改职业色块后用 `/reload` 在游戏内验证，并打开 `/fu gui` 查看索引映射是否符合预期。
+- 修改职业色块后用 `/reload` 在游戏内验证索引映射是否符合预期。
 - 无法在普通 shell 中完整跑 WoW API 测试；最多做静态检查、搜索引用和语法层面的人工复核。
 
