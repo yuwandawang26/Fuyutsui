@@ -4,7 +4,9 @@ language: "zh-CN"
 game_flavor: "Mainline PTR"
 interface_version: "12.1.0"
 verified_build: "12.1.0.68914"
-verified_date: "2026-07-24"
+verified_date: "2026-07-25"
+ptr_iteration: "PTR 7"
+ptr_change_note_date: "2026-07-23"
 stability: "PTR API，正式服上线前仍可能变化"
 primary_topic: "CustomAuraContainerTemplate / CustomAuraButtonTemplate"
 ---
@@ -12,7 +14,33 @@ primary_topic: "CustomAuraContainerTemplate / CustomAuraButtonTemplate"
 # World of Warcraft AuraContainer：AI 技术参考
 
 > 本文面向需要生成、审查或解释 WoW 插件 Lua 代码的 AI。  
-> 结论以 **12.1.0 PTR build 68914** 的界面源码为准，不应把较早 PTR 周次的示例当成最终接口。
+> 结论以 **12.1.0 PTR 7 / build 68914** 的界面源码与 PTR 7 变更说明为准，不应把较早 PTR 周次的示例当成最终接口。
+
+## 0. PTR 7 变更索引
+
+网页变更记录日期：**2026-07-23**。以下索引用于帮助 AI 快速确认 PTR 7 的每项变化已经在本文落地。
+
+| PTR 7 变化 | 对插件的含义 | 本文位置 |
+|---|---|---|
+| AuraGroup 支持按列布局 | 可将主布局轴设为垂直轴，先向下排列再换列 | 10.2 |
+| 插件可在战斗中创建 AuraContainer | 不再把战斗状态当作创建容器的绝对阻塞条件 | 4.3 |
+| AuraButton Tooltip 可调整锚点 | 使用 `SetTooltipAnchorPoint` | 18.6 |
+| AuraButton Tooltip 可在战斗中隐藏 | 使用 `SetHideTooltipInCombat` | 18.6 |
+| 新增仅按 aura instance ID 排序 | 使用 `AuraContainerSortMethod.AuraInstanceIDOnly` | 9 |
+| 单个 AuraButton 可显示多个驱散纹理 | 多次调用 `AddDispelTypeTexture` | 11、18.5 |
+| 新增全局 Tooltip NineSlice/Backdrop/TextureSlice API | 样式作用于所有 AuraButton，而非某个容器 | 18.7 |
+| UI 加载/重载期间允许原生按钮 API，直到 `PLAYER_LOGIN` | 区分原生 ScriptObject API 与 AuraButton 公开 API | 4.3、11.2 |
+| 新增插件安全的 `ResizeToBoundsRect` | 可主动让 Frame 匹配子对象整体边界 | 10.4 |
+| 修复回调外无法调用 AuraButton API | 公开按钮 API 不再限定只能在 `initializeFrame` 内调用 | 11.2 |
+| 修复鼠标悬停时切换容器显隐的 Lua 错误 | 不再需要为该旧问题添加规避代码 | 19.3 |
+| 修复 `CastingBarTypeInfo` 姓名板 taint | 删除针对该旧问题的临时污染规避逻辑 | 19.3 |
+| 修复 `PingableUnitFrameTemplate` Lua 错误 | 删除针对该旧问题的临时规避逻辑 | 19.3 |
+| 按钮子组件配置后不能重新设置父对象 | 注册前完成父子结构，之后不要调用 `SetParent` | 11.1 |
+| 添加 AuraGroup 后不再提供相关 `OnSizeChanged` 更新 | 不通过容器尺寸或锚定对象尺寸事件推断光环状态 | 10.3 |
+| 多个 Unit API 在单位身份 secret 时返回 secret | 不组合这些返回值识别或比较 secret 单位 | 19.1 |
+| `UnitIsCharmed`、`UnitIsPossessed` 随 secret 光环返回 secret | 不用它们绕过光环 secrecy | 19.1 |
+| `GetGuildInfo` 不再接受复合 unit token | 传入单一有效 unit token | 19.2 |
+| 活跃 PvP 比赛中 `UnitName` 不再返回 secret | 仅限该场景，不要推广成全局规则 | 19.2 |
 
 ## 1. 一句话定义
 
@@ -46,14 +74,17 @@ container:AddAuraGroup("debuffs", "HARMFUL", options)
 
 1. 使用 `CustomAuraContainerTemplate` 创建容器。
 2. 使用 `AddAuraGroup` 显示多个光环；使用 `AddAuraSlot` 显示优先级最高的单个光环。
-3. 只在 `initializeFrame(button)` 中创建并注册按钮的显示子对象。
-4. 注册给按钮的显示对象必须是该按钮的直接或间接子对象。
+3. 优先在 `initializeFrame(button)` 中创建并注册按钮的显示子对象；PTR 7 已修复公开 AuraButton API 无法在该回调之外调用的问题。
+4. 注册给按钮的显示对象必须是该按钮的直接或间接子对象；配置完成后不能再重新设置父对象。
 5. 不要创建自定义 `OnUpdate` 去轮询 `C_UnitAuras`。
 6. 不要依赖读取 `button` 内部光环数据、私有字段或安全实现细节。
 7. 不要直接创建 `CustomAuraButtonTemplate` 按钮；让容器创建和管理按钮。
 8. SpellID 过滤使用集合形式：`{ [spellID] = true }`，不是 `{ spellID }`。
 9. 剩余时间颜色曲线应注册到 `SetDurationText`；不能假设普通 `Texture` 或图标支持持续时间颜色绑定。
 10. 12.1.0 当前参数名是 `textColor`，不是较早 PTR 示例中的 `textColorCurve`。
+11. AuraContainer 可以在战斗中创建，但这不等于所有原生布局方法在任意时刻都可自由调用。
+12. 添加 AuraGroup 后，不要依赖 AuraContainer 或锚定到它的 Frame 的 `OnSizeChanged`。
+13. AuraButton Tooltip 的 NineSlice、Backdrop、TextureSlice 样式是全局设置，不是单容器设置。
 
 ## 3. 对象模型
 
@@ -127,10 +158,25 @@ UNIT_AURA / OnUpdate
 
 建议：
 
-- 在插件加载阶段或进入世界前完成结构初始化。
-- 尽量不要在战斗中首次创建整套容器。
+- 可以在插件加载阶段、进入世界后或战斗中创建 AuraContainer；PTR 7 已正式支持战斗中创建。
 - 在 `initializeFrame` 中一次性创建所有子对象和绑定。
-- 后续只通过容器公开的 setter 修改过滤、排序或布局。
+- PTR 7 已修复 AuraButton 公开 API 只能在 `initializeFrame` 中调用的问题；例如 `SetIcon`、`SetDurationText` 等公开配置方法可以在回调之外调用。
+- UI 加载或重载期间，AuraButton 允许调用 `SetPoint`、`SetSize` 等原生 ScriptObject API，直到执行 `PLAYER_LOGIN`。
+- `PLAYER_LOGIN` 之后不要假设受限按钮仍允许任意原生布局修改；需要动态调整时优先使用容器或 AuraButton 的公开 API。
+- AuraButton 子组件配置后会获得禁止更换父对象的限制，因此不要对已注册的 `Texture`、`FontString`、`Cooldown` 或 `StatusBar` 调用 `SetParent`。
+
+战斗中创建并不改变推荐结构：
+
+```lua
+local function InitializeAuraButton(button)
+    -- 此处一次性建立尺寸、锚点、子对象和显示绑定。
+    button:SetSize(24, 24)
+
+    local icon = button:CreateTexture(nil, "ARTWORK")
+    icon:SetAllPoints()
+    button:SetIcon(icon)
+end
+```
 
 ## 5. 容器基础接口
 
@@ -143,6 +189,22 @@ UNIT_AURA / OnUpdate
 | `SetEnabled(enabled)` | 启用或禁用刷新 |
 | `IsEnabled()` | 查询启用状态 |
 | `UpdateAllAuras()` | 请求完整刷新 |
+
+来自容器流式布局接口：
+
+| 方法 | 用途 |
+|---|---|
+| `GetFlowLayoutAxis()` | 获取主布局轴 |
+| `SetFlowLayoutAxis(layoutAxis)` | 设置按行或按列布局 |
+| `GetFlowLayoutAnchorPoint()` | 获取布局起点 |
+| `SetFlowLayoutAnchorPoint(anchorPoint)` | 设置布局起点 |
+| `GetFlowLayoutGrowthDirection()` | 获取水平、垂直增长方向 |
+| `SetFlowLayoutGrowthDirection(horizontal, vertical)` | 设置两个方向 |
+| `GetFlowLayoutPadding()` | 获取四周内边距 |
+| `SetFlowLayoutPadding(left, right, top, bottom)` | 设置内边距 |
+| `GetFlowLayoutMaximumLineSize()` | 获取一行或一列的最大长度 |
+| `SetFlowLayoutMaximumLineSize(sizeOrNil)` | 设置换行/换列阈值；`nil` 表示无限 |
+| `ResetFlowLayoutOptions()` | 恢复容器流式布局默认值 |
 
 来自 `CustomAuraContainer`：
 
@@ -355,6 +417,8 @@ AuraContainerSortMethod.NameOnly
 AuraContainerSortMethod.AuraInstanceIDOnly
 ```
 
+`AuraInstanceIDOnly` 是 PTR 7 新增的确定性排序方式，只按 `auraInstanceID` 排序。它不表达持续时间、名称、优先级或驱散价值；需要这些语义时应选择对应的其他排序方法。
+
 方向：
 
 ```lua
@@ -398,9 +462,88 @@ layout = {
 - 水平向右增长。
 - 垂直向下换行。
 - 内边距均为 0。
-- 默认最大行宽为 `math.huge`。
+- 默认一行或一列的最大长度为 `math.huge`。
 
 容器会在布局完成后自动 `SetSize(width, height)`。因此，直接给容器设置固定尺寸不能可靠地把它当作裁切视口。
+
+### 10.1 按行布局
+
+默认主轴是水平轴：
+
+```lua
+container:SetFlowLayoutAxis(AnchorUtil.FlowLayoutAxis.Horizontal)
+container:SetFlowLayoutAnchorPoint("TOPLEFT")
+container:SetFlowLayoutGrowthDirection(
+    AnchorUtil.FlowDirection.Right,
+    AnchorUtil.FlowDirection.Down
+)
+
+-- 每行达到 200 UI 单位后换到下一行。
+container:SetFlowLayoutMaximumLineSize(200)
+```
+
+水平主轴下：
+
+- 元素先沿水平方向排列。
+- 达到 `maximumLineSize` 后沿垂直方向换行。
+
+### 10.2 PTR 7：按列布局
+
+把主轴改为垂直轴即可让元素先向下排列，再向右换列：
+
+```lua
+container:SetFlowLayoutAxis(AnchorUtil.FlowLayoutAxis.Vertical)
+container:SetFlowLayoutAnchorPoint("TOPLEFT")
+container:SetFlowLayoutGrowthDirection(
+    AnchorUtil.FlowDirection.Right,
+    AnchorUtil.FlowDirection.Down
+)
+
+-- 每列达到 120 UI 单位后换到右侧下一列。
+container:SetFlowLayoutMaximumLineSize(120)
+```
+
+垂直主轴下：
+
+- 元素先沿垂直方向排列。
+- 达到 `maximumLineSize` 后沿水平方向换列。
+- `elementSpacing` 是列内相邻元素的间距。
+- `lineSpacing` 是相邻列之间的间距。
+
+### 10.3 OnSizeChanged 限制
+
+AuraContainer 一旦添加了 AuraGroup：
+
+- AuraContainer 不再接收 `OnSizeChanged` 更新。
+- 锚定到该 AuraContainer 的 Frame 也不再接收相应 `OnSizeChanged` 更新。
+- 该限制只在添加 AuraGroup 后生效。
+
+不要使用尺寸事件推断可见光环数量：
+
+```lua
+-- 添加 AuraGroup 后不可靠。
+container:SetScript("OnSizeChanged", function(self, width, height)
+    -- 不要在这里推断光环数量或触发布局。
+end)
+```
+
+如果需要固定裁切视口，应使用不锚定依赖 AuraContainer 尺寸事件的独立父 Frame，参见第 14.3 节。
+
+### 10.4 ResizeToBoundsRect
+
+PTR 7 新增插件安全方法：
+
+```lua
+frame:ResizeToBoundsRect()
+```
+
+它会把 Frame 调整到其子对象整体边界的大小，适合普通包装 Frame 或静态组合组件。
+
+注意：
+
+- 它是主动调用的尺寸同步方法，不是 AuraContainer 的尺寸变化通知。
+- 它不能恢复被禁止的 AuraContainer `OnSizeChanged` 回调。
+- 不要因为存在此方法，就通过高频轮询尺寸来推断动态光环状态。
 
 ## 11. CustomAuraButton 显示通道
 
@@ -427,12 +570,59 @@ button:RemoveDispelTypeTexture(index)
 button:ClearDispelTypeTextures()
 ```
 
+PTR 7 的“多个驱散纹理”意味着同一个按钮可以同时注册例如一个边框和一个角标：
+
+```lua
+local border = button:CreateTexture(nil, "OVERLAY")
+border:SetAllPoints()
+button:AddDispelTypeTexture(border, {
+    style = Enum.CustomAuraButtonDispelTypeTextureStyle.Border,
+})
+
+local cornerIcon = button:CreateTexture(nil, "OVERLAY")
+cornerIcon:SetPoint("TOPRIGHT")
+cornerIcon:SetSize(10, 10)
+button:AddDispelTypeTexture(cornerIcon, {
+    style = Enum.CustomAuraButtonDispelTypeTextureStyle.Icon,
+})
+```
+
 兼容别名：
 
 - `SetAuraBorder` 是 `AddDispelTypeTexture` 相关旧别名。
 - `SetAuraSymbol` 是 `SetDispelTypeText` 的旧别名。
 
 源码已注明这些别名会在 12.1 之后移除。新代码应使用 `DispelType` 命名。
+
+### 11.1 子组件父级不可变
+
+显示对象一旦传给 AuraButton 配置 API，就不能再重新设置父对象：
+
+```lua
+button:SetIcon(icon)
+
+-- 错误：配置完成后不要重新设置父对象。
+icon:SetParent(otherFrame)
+```
+
+容器会验证显示对象必须是按钮的子孙，并向已配置对象添加 `ChangeParent` 禁止项。需要更换结构时，应在配置前建立正确父子关系，或者创建新的显示对象。
+
+### 11.2 AuraButton API 的调用位置
+
+PTR 7 修复了公开按钮 API 只能在 `initializeFrame` 中调用的问题。以下类型的接口可以在获得按钮引用后调用：
+
+```lua
+button:SetTooltipAnchorPoint("ANCHOR_RIGHT", 8, 0)
+button:SetHideTooltipInCombat(true)
+button:SetDurationText(durationText, options)
+```
+
+但必须区分：
+
+- `SetDurationText`、`SetTooltipAnchorPoint` 等是 AuraButton 公开配置 API。
+- `SetPoint`、`SetSize`、`SetParent` 等是原生 ScriptObject API。
+- UI 加载/重载到 `PLAYER_LOGIN` 之前，AuraButton 明确允许原生 API 调用。
+- 子对象注册完成后，`SetParent` 明确不允许。
 
 ## 12. 剩余时间颜色曲线
 
@@ -865,7 +1055,166 @@ Enum.CustomAuraButtonDispelTypeTextureStyle.CustomAsset
 
 再次强调：`customDispelColorCurve` 根据驱散类型选颜色，不根据剩余时间选颜色。
 
-## 19. 常见错误
+### 18.6 AuraButton Tooltip 锚点与战斗隐藏
+
+每个 AuraButton 可以单独配置 Tooltip 锚点：
+
+```lua
+button:SetTooltipAnchorPoint("ANCHOR_RIGHT", 8, 0)
+
+local point, offsetX, offsetY = button:GetTooltipAnchorPoint()
+```
+
+允许的锚点名称：
+
+```text
+ANCHOR_LEFT
+ANCHOR_RIGHT
+ANCHOR_BOTTOMLEFT
+ANCHOR_BOTTOM
+ANCHOR_BOTTOMRIGHT
+ANCHOR_TOPLEFT
+ANCHOR_TOP
+ANCHOR_TOPRIGHT
+ANCHOR_CURSOR
+ANCHOR_NONE
+ANCHOR_PRESERVE
+ANCHOR_CURSOR_LEFT
+ANCHOR_CURSOR_RIGHT
+```
+
+可以让指定按钮的 Tooltip 在玩家战斗中不显示：
+
+```lua
+button:SetHideTooltipInCombat(true)
+
+if button:ShouldHideTooltipInCombat() then
+    -- 这里只表示配置状态，不表示玩家当前是否在战斗。
+end
+```
+
+### 18.7 全局 AuraButton Tooltip 样式
+
+以下 API 是**全局 API**，作用于所有 AuraButton Tooltip，不属于某一个容器：
+
+```lua
+AuraContainerInbound.SetTooltipNineSlice(options)
+AuraContainerInbound.SetTooltipBackdrop(options)
+AuraContainerInbound.SetTooltipTextureSlice(options)
+AuraContainerInbound.ResetTooltipStyle()
+```
+
+NineSlice 示例：
+
+```lua
+AuraContainerInbound.SetTooltipNineSlice({
+    layoutName = "TooltipDefaultLayout",
+    borderColor = CreateColor(0.2, 0.6, 1.0, 1),
+    centerColor = CreateColor(0.02, 0.02, 0.04, 0.95),
+    anchorOffsets = {
+        left = -4,
+        right = 4,
+        top = 4,
+        bottom = -4,
+    },
+})
+```
+
+Backdrop 示例：
+
+```lua
+AuraContainerInbound.SetTooltipBackdrop({
+    backdropInfo = {
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        edgeSize = 12,
+        insets = {
+            left = 3,
+            right = 3,
+            top = 3,
+            bottom = 3,
+        },
+    },
+    borderColor = CreateColor(0.2, 0.6, 1.0, 1),
+    centerColor = CreateColor(0.02, 0.02, 0.04, 0.95),
+})
+```
+
+`backdropInfo.bgFile` 和 `backdropInfo.edgeFile` 至少应提供一个。
+
+TextureSlice 示例：
+
+```lua
+AuraContainerInbound.SetTooltipTextureSlice({
+    asset = "Interface\\Buttons\\WHITE8X8",
+    color = CreateColor(0.02, 0.02, 0.04, 0.95),
+    drawLayer = "BACKGROUND",
+    drawLayerSublevel = 0,
+    anchorOffsets = {
+        left = -4,
+        right = 4,
+        top = 4,
+        bottom = -4,
+    },
+})
+```
+
+重要行为：
+
+- 每次调用上述样式 setter 都会先清除当前 AuraButton Tooltip 样式。
+- 因此 NineSlice、Backdrop、TextureSlice 是替换关系，不是三个可以叠加的独立单容器层。
+- 多个插件调用时，最后一次全局设置会影响其他插件创建的 AuraButton。
+- 恢复 Blizzard 默认样式使用 `AuraContainerInbound.ResetTooltipStyle()`。
+
+## 19. PTR 7 的外围安全与兼容性改动
+
+这些变化不属于 AuraContainer 的显示选项，但可能影响单位框体、姓名板和光环插件。
+
+### 19.1 secret Unit API
+
+当单位身份是 secret 时，以下 API 现在可能返回 secret 值：
+
+```text
+UnitClass
+UnitClassBase
+UnitIsOwnerOrControllerOfUnit
+UnitSex
+UnitSexBase
+UnitPhaseReason
+UnitGroupRolesAssigned
+UnitGroupRolesAssignedEnum
+UnitIsRaidOfficer
+UnitInRaid
+UnitIsPVP
+UnitRace
+UnitIsGroupLeader
+UnitIsGroupAssistant
+UnitLeadsAnyGroup
+UnitGetAvailableRoles
+GetInspectSpecialization
+```
+
+当光环是 secret 时，以下 API 现在也可能返回 secret 值：
+
+```text
+UnitIsCharmed
+UnitIsPossessed
+```
+
+AI 不应生成通过组合这些 API 来比较、识别或反推 secret 单位的代码。返回值可能不能安全用于普通 Lua 分支、字符串拼接、表键、相等性比较或调试输出。
+
+### 19.2 其他 API 行为
+
+- `GetGuildInfo` 不再接受复合 unit token。
+- `UnitName` 在进行中的 PvP 比赛里不再返回 secret 值；不要把该行为推广到其他场景。
+
+### 19.3 同批修复
+
+- 修复鼠标悬停在可见 AuraButton 时切换 AuraContainer 显隐产生 Lua 错误的问题。
+- 修复 `CastingBarTypeInfo` 表导致姓名板 taint 的问题。
+- 修复插件使用 `PingableUnitFrameTemplate` 时产生 Lua 错误的问题。
+
+## 20. 常见错误
 
 | 错误 | 原因 | 正确做法 |
 |---|---|---|
@@ -880,15 +1229,24 @@ Enum.CustomAuraButtonDispelTypeTextureStyle.CustomAsset
 | 直接创建 AuraButton | 生命周期和安全限制由容器管理 | 通过 AuraGroup/AuraSlot 创建 |
 | 在按钮受限后检查其私有字段 | 可能被禁止访问 | 初始化阶段只注册显示对象 |
 | 继续使用 `SetAuraBorder` | 已标为 12.1 后移除 | 使用 `AddDispelTypeTexture` |
+| 认为战斗中不能创建 AuraContainer | PTR 7 已增加支持 | 可以创建，但仍应在初始化回调中一次建立按钮结构 |
+| 认为所有按钮 API 只能在 `initializeFrame` 调用 | PTR 7 已修复该问题 | 公开 AuraButton API 可在回调外调用；原生布局 API 仍受时机和安全限制 |
+| 注册子组件后调用 `SetParent` | 配置对象带有 `ChangeParent` 禁止项 | 在注册前确定父子结构 |
+| 监听容器 `OnSizeChanged` 推断光环数量 | 添加 AuraGroup 后不会收到该更新 | 使用声明式布局，不观察尺寸推断状态 |
+| 为每个容器分别调用 Tooltip 样式 setter | Tooltip 样式 API 是全局的 | 统一协调一次全局样式，必要时恢复默认 |
+| 用水平轴配置却期待按列排列 | 水平轴先排一行 | 使用 `AnchorUtil.FlowLayoutAxis.Vertical` |
 
-## 20. AI 生成代码检查清单
+## 21. AI 生成代码检查清单
 
 在回答 AuraContainer 编码问题前，AI 应逐项检查：
 
 - [ ] 是否说明目标版本和 PTR 不稳定性？
 - [ ] 是否使用 `"AuraContainer"` + `"CustomAuraContainerTemplate"`？
 - [ ] 所有显示 Region 是否创建为 AuraButton 子孙？
-- [ ] 是否只在 `initializeFrame` 中建立显示结构？
+- [ ] 是否优先在 `initializeFrame` 中一次建立显示结构？
+- [ ] 是否避免在子组件注册后调用 `SetParent`？
+- [ ] 是否区分公开 AuraButton API 与受时机限制的原生 ScriptObject API？
+- [ ] 是否知道 AuraContainer 可以在战斗中创建？
 - [ ] SpellID 表是否为 map/set，而非数组？
 - [ ] 是否说明 SpellID 身份过滤限制？
 - [ ] 是否避免把 `maxDuration` 解释成剩余时间？
@@ -896,14 +1254,19 @@ Enum.CustomAuraButtonDispelTypeTextureStyle.CustomAsset
 - [ ] 是否避免声称普通 Icon/Texture 可绑定持续时间颜色？
 - [ ] 是否区分 duration curve 与 dispel type curve？
 - [ ] 是否说明 AuraGroup 自动布局、AuraSlot 手动锚定？
+- [ ] 若使用列布局，是否将主轴设置为 `AnchorUtil.FlowLayoutAxis.Vertical`？
+- [ ] 是否避免依赖 AuraContainer 或其锚定对象的 `OnSizeChanged`？
 - [ ] 若需要裁切，是否显式使用 `SetClipsChildren(true)`？
+- [ ] 是否说明 Tooltip 外观 setter 是全局设置？
 - [ ] 是否避免 `C_UnitAuras` + `OnUpdate` 轮询方案？
 - [ ] 是否避免已弃用的 `SetAuraBorder` / `SetAuraSymbol`？
 
-## 21. 机器可读摘要
+## 22. 机器可读摘要
 
 ```yaml
 aura_container:
+  ptr_iteration: 7
+  combat_creation_supported: true
   create:
     frame_type: AuraContainer
     template: CustomAuraContainerTemplate
@@ -918,6 +1281,11 @@ aura_container:
     - candidate_filter_declaration
     - button_visual_construction
     - display_binding_registration
+  flow_layout:
+    row_axis: AnchorUtil.FlowLayoutAxis.Horizontal
+    column_axis: AnchorUtil.FlowLayoutAxis.Vertical
+    maximum_line_size_api: SetFlowLayoutMaximumLineSize
+  on_size_changed_after_group_added: suppressed
 
 group:
   api: AddAuraGroup
@@ -951,15 +1319,32 @@ duration_color:
 clipping:
   required_call: SetClipsChildren(true)
   fixed_container_viewport: use_separate_parent_frame
+
+aura_button:
+  public_api_outside_initialize_frame: supported
+  native_script_object_api_during_reload_until: PLAYER_LOGIN
+  configured_child_reparenting: forbidden
+  multiple_dispel_textures: supported
+  tooltip:
+    per_button_anchor_api: SetTooltipAnchorPoint
+    per_button_hide_in_combat_api: SetHideTooltipInCombat
+    global_style_namespace: AuraContainerInbound
+
+frame:
+  addon_safe_resize_to_child_bounds: ResizeToBoundsRect
 ```
 
-## 22. 源码依据
+## 23. 源码依据
 
-核对快照：**PTR 12.1.0.68914，2026-07-24**。
+网页变更记录：**2026-07-23，Midnight 12.1.0 PTR Changes 7（Build 68914）**。  
+文档核对快照：**PTR 7 / 12.1.0.68914，2026-07-25**。
 
-- [Patch 12.1.0 API changes](https://warcraft.wiki.gg/wiki/Patch_12.1.0/API_changes)
+- [Patch 12.1.0 API changes — 2026-07-23](https://warcraft.wiki.gg/wiki/Patch_12.1.0/API_changes#2026-07-23)
 - [Blizzard_CustomAuraContainer.lua](https://github.com/Gethe/wow-ui-source/blob/ptr/Interface/AddOns/Blizzard_AuraContainer/Blizzard_CustomAuraContainer.lua)
 - [Blizzard_CustomAuraButton.lua](https://github.com/Gethe/wow-ui-source/blob/ptr/Interface/AddOns/Blizzard_AuraContainer/Blizzard_CustomAuraButton.lua)
+- [Blizzard_AuraButton.lua](https://github.com/Gethe/wow-ui-source/blob/ptr/Interface/AddOns/Blizzard_AuraContainer/Blizzard_AuraButton.lua)
+- [Blizzard_AuraContainerFlowLayout.lua](https://github.com/Gethe/wow-ui-source/blob/ptr/Interface/AddOns/Blizzard_AuraContainer/Blizzard_AuraContainerFlowLayout.lua)
+- [Blizzard_AuraContainerInbound.lua](https://github.com/Gethe/wow-ui-source/blob/ptr/Interface/AddOns/Blizzard_AuraContainer/Blizzard_AuraContainerInbound.lua)
 - [Blizzard_AuraContainerShared.lua](https://github.com/Gethe/wow-ui-source/blob/ptr/Interface/AddOns/Blizzard_AuraContainer/Blizzard_AuraContainerShared.lua)
 - [Blizzard_AuraContainerUtil.lua](https://github.com/Gethe/wow-ui-source/blob/ptr/Interface/AddOns/Blizzard_AuraContainer/Blizzard_AuraContainerUtil.lua)
 - [AuraContainerUtilDocumentation.lua](https://github.com/Gethe/wow-ui-source/blob/ptr/Interface/AddOns/Blizzard_APIDocumentationGenerated/AuraContainerUtilDocumentation.lua)

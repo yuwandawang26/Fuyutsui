@@ -76,6 +76,14 @@ local helpfulSpells = {
     [77472] = 15,   -- 治疗波
 }
 
+local dispelCurve = C_CurveUtil.CreateColorCurve()
+target.enemyCurve = C_CurveUtil.CreateColorCurve()
+target.friendCurve = C_CurveUtil.CreateColorCurve()
+
+dispelCurve:SetType(Enum.LuaCurveType.Step)
+target.enemyCurve:SetType(Enum.LuaCurveType.Step)
+target.friendCurve:SetType(Enum.LuaCurveType.Step)
+
 -- ================================================================
 --                          通用函数
 -- ================================================================
@@ -109,8 +117,29 @@ local function getSpellChargesInfo()
     end
 end
 
-function Fuyutsui:SPELL_UPDATE_CHARGES(_)
-    -- getSpellChargesInfo()
+-- 驱散能力映射
+local dispelAbilities = {
+    [1] = { 527, 360823, 4987, 115450, 88423, 77130 },              -- 魔法驱散
+    [2] = { 383016, 51886, 392378, 2782, 475 },                     -- 诅咒驱散
+    [3] = { 390632, 213634, 393024, 213644, 388874, 218164 },       -- 疾病驱散
+    [4] = { 392378, 2782, 393024, 213644, 388874, 218164, 365585 }, -- 中毒驱散
+    [11] = {}                                                       -- 流血驱散
+}
+
+-- 进攻驱散能力映射
+local offensiveDispelAbilities = {
+    [1] = { 528 },  -- 魔法
+    [9] = { 2908 }, -- 激怒
+}
+
+-- 检查玩家是否学习了多个法术中的任意一个
+local function hasLearnedAnySpell(spellIDs)
+    for _, spellID in ipairs(spellIDs) do
+        if IsSpellKnown(spellID) then
+            return true
+        end
+    end
+    return false
 end
 
 local function updateCooldownSpellKnown()
@@ -132,9 +161,80 @@ local function updateCooldownSpellKnown()
     end)
 end
 
+-- 防御驱散数字键 -> AuraContainer includeDispelTypes 名称
+-- 与 dispelAbilities 键一致：1魔法 2诅咒 3疾病 4中毒 11流血
+local DEFENSIVE_DISPEL_TYPE_NAMES = {
+    [1] = "Magic",
+    [2] = "Curse",
+    [3] = "Disease",
+    [4] = "Poison",
+    [11] = "Bleed",
+}
+
 -- 更新法术已知状态
 function Fuyutsui:updateSpellKnown()
     updateCooldownSpellKnown()
+
+    -- 动态生成防御驱散能力
+    local dispelCapabilities = {
+        [1] = false,  -- 魔法
+        [2] = false,  -- 诅咒
+        [3] = false,  -- 疾病
+        [4] = false,  -- 中毒
+        [11] = false, -- 流血
+    }
+    -- 动态生成进攻驱散能力
+    local offensiveDispelCapabilities = {
+        [1] = false, -- 魔法
+        [9] = false, -- 激怒
+    }
+
+    for debuffType, spellIDs in pairs(dispelAbilities) do
+        dispelCapabilities[debuffType] = hasLearnedAnySpell(spellIDs)
+    end
+
+    for debuffType, spellIDs in pairs(offensiveDispelAbilities) do
+        offensiveDispelCapabilities[debuffType] = hasLearnedAnySpell(spellIDs)
+    end
+
+    self.dispelCapabilities = dispelCapabilities
+    self.offensiveDispelCapabilities = offensiveDispelCapabilities
+
+    -- 供 AuraContainer includeDispelTypes 使用：{ Magic = true, ... }
+    local includeDispelTypes = {}
+    for id, can in pairs(dispelCapabilities) do
+        local name = DEFENSIVE_DISPEL_TYPE_NAMES[id]
+        if can and name then
+            includeDispelTypes[name] = true
+        end
+    end
+    self.includeDispelTypes = includeDispelTypes
+
+    dispelCurve:ClearPoints()
+    target.enemyCurve:ClearPoints()
+    target.friendCurve:ClearPoints()
+
+    for i, v in pairs(dispelCapabilities) do
+        if v then
+            dispelCurve:AddPoint(i, CreateColor(0, 1, i / 255, 1))
+            target.friendCurve:AddPoint(i, CreateColor(0, 1, (i + 11) / 255, 1))
+        else
+            dispelCurve:AddPoint(i, CreateColor(0, 0, 0, 1))
+            target.friendCurve:AddPoint(i, CreateColor(0, 0, 11 / 255, 1))
+        end
+    end
+
+    for i, v in pairs(offensiveDispelCapabilities) do
+        if v then
+            if i == 9 then
+                target.enemyCurve:AddPoint(9, CreateColor(0, 1, 3 / 255, 1))
+            else
+                target.enemyCurve:AddPoint(i, CreateColor(0, 1, (i + 1) / 255, 1))
+            end
+        else
+            target.enemyCurve:AddPoint(i, CreateColor(0, 0, 1 / 255, 1))
+        end
+    end
 end
 
 -- ================================================================
@@ -219,14 +319,14 @@ function Fuyutsui:loadPlayerBlocks(specIndex)
                 blocks.state[v.name] = k
             end
         elseif v.type == "aura" then
-            if v.spellId then
-                -- AuraContainer：按 spellId 在像素位 index 显示
+            if v.spellId or v.spellIds then
+                -- AuraContainer：spellId / spellIds（任一命中即显示）在像素位 index
                 blocks.auras[k] = v
             elseif v.auraName and v.showKey then
                 -- 旧逻辑光环：由 core/auras.lua + CreatTexture 写入
                 blocks.auras[k] = v
             else
-                print(("loadPlayerBlocks: 索引 %s 的 aura 缺少 spellId 或 auraName/showKey，已跳过"):format(tostring(k)))
+                print(("loadPlayerBlocks: 索引 %s 的 aura 缺少 spellId/spellIds 或 auraName/showKey，已跳过"):format(tostring(k)))
             end
         elseif v.type == "spell" then
             if not v.spellId then
@@ -253,9 +353,17 @@ function Fuyutsui:loadPlayerBlocks(specIndex)
             blocks.groups.num = v.num
             blocks.groups.healthPercent = v.healthPercent
             blocks.groups.role = v.role
+            -- 成员可驱散减益偏移
+            blocks.groups.dispel = v.dispel
+            -- 成员光环偏移：pixel = start + (memberIndex-1)*num + offset
+            blocks.groups.aura = v.aura
         end
     end
     self.blocks = blocks
+    -- 专精/配置变化后重建队伍光环槽
+    if self.ReleaseGroupAuraContainers then
+        self:ReleaseGroupAuraContainers()
+    end
 end
 
 -- 载入玩家宏
@@ -1220,6 +1328,9 @@ end
 function Fuyutsui:updateGroup()
     self.group = {}
     self.groupList = {}
+    -- 同步局部别名，避免继续写入旧表
+    group = self.group
+    groupList = self.groupList
     local i = 1
     for unit in self:IterateGroupMembers() do
         table.insert(groupList, unit)
@@ -1246,6 +1357,9 @@ function Fuyutsui:updateGroup()
         self:updateUnitValid(unit)
         self:updateUnitHealthInfo(unit)
         i = i + 1
+    end
+    if self.RefreshGroupAuraContainers then
+        self:RefreshGroupAuraContainers()
     end
 end
 

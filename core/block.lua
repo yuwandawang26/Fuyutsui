@@ -8,7 +8,7 @@ local screenWidth = GetScreenWidth()
 -- 主色条（FuyutsuiColorBars / CreatTexture）
 local BLOCK_FIX_COUNT = 510        -- 总色块数量
 local BLOCK_FIRST_SCHEME_MAX = 255 -- 第一套索引方案上限（其后用 r=1/255）
-local BLOCK_HEIGHT = 1             -- 色块高度
+local BLOCK_HEIGHT = 5             -- 色块高度
 local BLOCK_SPACING = 0            -- 色块间距
 local COLOR_BARS_STRATA = "BACKGROUND"
 local COLOR_BARS_LEVEL = 5001
@@ -20,11 +20,11 @@ local BAR_FRAME_HEIGHT = 20 -- 计数条容器高度
 local BAR_START_INDEX = 2   -- 首条占用起始单元
 local BAR_STRATA = "BACKGROUND"
 local BAR_LEVEL = 1
-local BAR_STATUS_LEVEL = 5002 -- StatusBar 层级
+local BAR_STATUS_LEVEL = 4999 -- StatusBar 层级
 local BAR_END_COLOR = { 200 / 255, 200 / 255, 200 / 255, 1 }
 
 -- AuraContainer 计时色块（█）
-local AURA_BLOCK_HEIGHT = 10     -- 高单独设置；宽与主色块一致
+local AURA_BLOCK_HEIGHT = 10    -- 高单独设置；宽与主色块一致
 local AURA_DURATION_CHAR = "█"
 local AURA_ENABLE_MOUSE = false -- false = 关闭悬停提示
 local AURA_DURATION_STRATA = "TOOLTIP"
@@ -55,6 +55,20 @@ local BAR_CONFIG = {
 
 local AURA_BLOCK_W = BLOCK_FIX_CONFIG.blockWidth
 local AURA_BLOCK_H = AURA_BLOCK_HEIGHT
+
+--- 索引 1..255 → r=0, g=i/255；256..510 → r=1/255, g=(i-255)/255
+local function EncodeBlockChannels(index)
+    if index > BLOCK_FIRST_SCHEME_MAX then
+        return 1 / 255, (index - BLOCK_FIRST_SCHEME_MAX) / 255
+    end
+    return 0, index / 255
+end
+
+local function EnsureAuraContainerLoaded()
+    if C_AddOns and not C_AddOns.IsAddOnLoaded("Blizzard_AuraContainer") then
+        C_AddOns.LoadAddOn("Blizzard_AuraContainer")
+    end
+end
 
 --[[============================================================================
     主色条
@@ -88,11 +102,8 @@ end
 function Fuyutsui:CreatTexture(i, b)
     local tex = creatTextureByIndex(i)
     if tex then
-        if i > BLOCK_FIRST_SCHEME_MAX then
-            tex:SetColorTexture(1 / 255, (i - BLOCK_FIRST_SCHEME_MAX) / 255, b, 1)
-        else
-            tex:SetColorTexture(0, i / 255, b, 1)
-        end
+        local r, g = EncodeBlockChannels(i)
+        tex:SetColorTexture(r, g, b, 1)
     end
 end
 
@@ -121,7 +132,6 @@ local spellIdToBar = {}
 local nextAvailableIndex = BAR_START_INDEX
 local countBarEndTexture = nil
 local auraBarLaidOut = false
-local auraBarSlotButtons = {}
 
 local BAR_EVENTS = { "SPELL_UPDATE_USES", "PLAYER_ENTERING_WORLD", "SPELL_UPDATE_CHARGES" }
 
@@ -220,12 +230,32 @@ function Fuyutsui:ClearAllFuyutsuiBars()
     if Fuyutsui.ReleasePlayerAuraContainers then
         Fuyutsui:ReleasePlayerAuraContainers()
     end
+    if Fuyutsui.ReleaseGroupAuraContainers then
+        Fuyutsui:ReleaseGroupAuraContainers()
+    end
 end
 
 --[[============================================================================
-    AuraContainer（列表来自 ClassBlocks type="aura" + spellId）
-    参考：AuraContainer_AI_Reference_zh-CN.md
+    AuraContainer（列表来自 ClassBlocks type="aura" + spellId/spellIds）
+    includeSpellIDs 可绑多个 ID：任一存在即显示（AuraSlot 取排序最前的一个）
+    参考：AuraContainer_AI_Reference_zh-CN.md（PTR 7）
 ============================================================================]]
+
+--- 归一化为 includeSpellIDs 集合；支持 spellId 或 spellIds = { id1, id2 }
+local function BuildIncludeSpellIDs(info)
+    local set = {}
+    if type(info.spellIds) == "table" then
+        for _, id in ipairs(info.spellIds) do
+            if type(id) == "number" then
+                set[id] = true
+            end
+        end
+    end
+    if type(info.spellId) == "number" then
+        set[info.spellId] = true
+    end
+    return set
+end
 
 local function CollectAuraSpellSlots()
     local slots = {}
@@ -233,29 +263,29 @@ local function CollectAuraSpellSlots()
     if not auras then
         return slots
     end
-    local indices = {}
     for index, info in pairs(auras) do
-        if type(info) == "table" and info.spellId then
-            tinsert(indices, index)
+        if type(info) == "table" then
+            local includeSpellIDs = BuildIncludeSpellIDs(info)
+            if next(includeSpellIDs) then
+                tinsert(slots, {
+                    index = index,
+                    includeSpellIDs = includeSpellIDs,
+                    maxApps = info.maxApps,
+                    name = info.name,
+                })
+            end
         end
     end
-    table.sort(indices)
-    for _, index in ipairs(indices) do
-        local info = auras[index]
-        tinsert(slots, {
-            index = index,
-            spellId = info.spellId,
-            maxApps = info.maxApps,
-            name = info.name,
-        })
-    end
+    table.sort(slots, function(a, b)
+        return a.index < b.index
+    end)
     return slots
 end
 
-local function AuraSlotFilters(spellId)
+local function AuraSlotFilters(includeSpellIDs)
     -- 不要设 maxDuration：任何非 nil 的 maxDuration 都会排除永久光环（持续时间为 0）
     return {
-        includeSpellIDs = { [spellId] = true },
+        includeSpellIDs = includeSpellIDs,
     }
 end
 
@@ -267,26 +297,34 @@ local function AuraBlockXOffset(index)
     return (index - 1) * BLOCK_FIX_CONFIG.blockWidth
 end
 
+local function ConfigureAuraButtonMouse(button)
+    button:SetMouseMotionEnabled(AURA_ENABLE_MOUSE)
+    if AURA_ENABLE_MOUSE then
+        button:SetHideTooltipInCombat(true)
+    end
+end
+
 --- 对齐 CreatTexture(i, b)：绿通道编码索引，蓝通道随剩余秒数 0..255 从 0→1
 local function MakeDurationColorCurve(index)
     local curve = C_CurveUtil.CreateColorCurve()
     curve:SetType(Enum.LuaCurveType.Linear)
-    local i = index / 255
-    if index > BLOCK_FIRST_SCHEME_MAX then
-        i = (index - BLOCK_FIRST_SCHEME_MAX) / 255
-        curve:AddPoint(0, CreateColor(1 / 255, i, 0, 1))
-        curve:AddPoint(255, CreateColor(1 / 255, i, 1, 1))
-    else
-        curve:AddPoint(0, CreateColor(1, i, 0, 1))
-        curve:AddPoint(255, CreateColor(1, i, 1, 1))
-    end
+    local r, g = EncodeBlockChannels(index)
+    curve:AddPoint(0, CreateColor(r, g, 0, 1))
+    curve:AddPoint(255, CreateColor(r, g, 1, 1))
     return curve
 end
 
 local function SetupClippedDuration(button, index)
     button:SetSize(AURA_BLOCK_W, AURA_BLOCK_H)
     button:SetClipsChildren(true)
-    button:SetMouseMotionEnabled(AURA_ENABLE_MOUSE)
+    ConfigureAuraButtonMouse(button)
+    button:SetPoint("TOPLEFT", UIParent, "TOPLEFT", AuraBlockXOffset(index), 0)
+
+    -- 纯色底：固定 (r, g, 1, 1)，层级低于 █
+    local bg = button:CreateTexture(nil, "BACKGROUND")
+    bg:SetAllPoints(button)
+    local r, g = EncodeBlockChannels(index)
+    bg:SetColorTexture(r, g, 1, 1)
 
     local duration = button:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     duration:SetPoint("CENTER", button, "CENTER", 0, 0)
@@ -310,9 +348,10 @@ local function MakeDurationSlotInitializer(index)
     end
 end
 
-local function SetupApplicationBarOnly(button, maxApps)
+local function SetupApplicationBarOnly(button, maxApps, startIndex)
     button:SetSize(AuraBarWidth(maxApps), BAR_CONFIG.height)
-    button:SetMouseMotionEnabled(AURA_ENABLE_MOUSE)
+    ConfigureAuraButtonMouse(button)
+    button:SetPoint("TOPLEFT", countBars, "TOPLEFT", (startIndex - 1) * BAR_CONFIG.width, 0)
 
     local bar = CreateFrame("StatusBar", nil, button)
     bar:SetAllPoints(button)
@@ -326,9 +365,9 @@ local function SetupApplicationBarOnly(button, maxApps)
     })
 end
 
-local function MakeBarSlotInitializer(maxApps)
+local function MakeBarSlotInitializer(maxApps, startIndex)
     return function(button)
-        SetupApplicationBarOnly(button, maxApps)
+        SetupApplicationBarOnly(button, maxApps, startIndex)
     end
 end
 
@@ -346,22 +385,15 @@ function Fuyutsui:ReleasePlayerAuraContainers()
     ReleaseFrame(Fuyutsui.PlayerAuraBarContainer)
     Fuyutsui.PlayerAuraContainer = nil
     Fuyutsui.PlayerAuraBarContainer = nil
-    wipe(auraBarSlotButtons)
     auraBarLaidOut = false
 end
 
----@return boolean
 local function CreatePlayerAuraDurationSlots(spellSlots)
-    if InCombatLockdown() then
-        return false
-    end
     if not spellSlots or #spellSlots == 0 then
-        return true
+        return
     end
 
-    if C_AddOns and not C_AddOns.IsAddOnLoaded("Blizzard_AuraContainer") then
-        C_AddOns.LoadAddOn("Blizzard_AuraContainer")
-    end
+    EnsureAuraContainerLoaded()
 
     local durationSlots = CreateFrame("AuraContainer", "FuyutsuiPlayerAuraDurationSlots", UIParent,
         "CustomAuraContainerTemplate")
@@ -372,16 +404,15 @@ local function CreatePlayerAuraDurationSlots(spellSlots)
     durationSlots:SetFrameLevel(AURA_DURATION_LEVEL)
 
     for _, info in ipairs(spellSlots) do
-        local index = info.index
-        local btn = durationSlots:AddAuraSlot("duration_spell_" .. info.spellId, "HELPFUL", {
-            candidateFilters = AuraSlotFilters(info.spellId),
-            initializeFrame = MakeDurationSlotInitializer(index),
+        durationSlots:AddAuraSlot("duration_index_" .. info.index, "HELPFUL", {
+            candidateFilters = AuraSlotFilters(info.includeSpellIDs),
+            sortMethod = AuraContainerSortMethod.Expiration,
+            sortDirection = AuraContainerSortDirection.Normal,
+            initializeFrame = MakeDurationSlotInitializer(info.index),
         })
-        btn:SetPoint("TOPLEFT", UIParent, "TOPLEFT", AuraBlockXOffset(index), 0)
     end
 
     Fuyutsui.PlayerAuraContainer = durationSlots
-    return true
 end
 
 function Fuyutsui:RefreshPlayerAuraContainers()
@@ -394,29 +425,11 @@ function Fuyutsui:RefreshPlayerAuraContainers()
         return
     end
 
-    if not CreatePlayerAuraDurationSlots(spellSlots) then
-        local waiter = CreateFrame("Frame")
-        waiter:RegisterEvent("PLAYER_REGEN_ENABLED")
-        waiter:SetScript("OnEvent", function(frame)
-            frame:UnregisterAllEvents()
-            frame:SetScript("OnEvent", nil)
-            Fuyutsui:RefreshPlayerAuraContainers()
-        end)
-    end
+    CreatePlayerAuraDurationSlots(spellSlots)
 end
 
 function Fuyutsui:LayoutAuraApplicationBars()
     if auraBarLaidOut then
-        return
-    end
-    if InCombatLockdown() then
-        local waiter = CreateFrame("Frame")
-        waiter:RegisterEvent("PLAYER_REGEN_ENABLED")
-        waiter:SetScript("OnEvent", function(self)
-            self:UnregisterAllEvents()
-            self:SetScript("OnEvent", nil)
-            Fuyutsui:LayoutAuraApplicationBars()
-        end)
         return
     end
 
@@ -433,9 +446,7 @@ function Fuyutsui:LayoutAuraApplicationBars()
         return
     end
 
-    if C_AddOns and not C_AddOns.IsAddOnLoaded("Blizzard_AuraContainer") then
-        C_AddOns.LoadAddOn("Blizzard_AuraContainer")
-    end
+    EnsureAuraContainerLoaded()
 
     local barSlots = Fuyutsui.PlayerAuraBarContainer
     if not barSlots then
@@ -447,29 +458,178 @@ function Fuyutsui:LayoutAuraApplicationBars()
         barSlots:SetFrameStrata(AURA_BAR_STRATA)
         barSlots:SetFrameLevel(AURA_BAR_LEVEL)
         Fuyutsui.PlayerAuraBarContainer = barSlots
-        wipe(auraBarSlotButtons)
 
         for _, info in ipairs(spellSlots) do
             if info.maxApps then
-                local btn = barSlots:AddAuraSlot("bar_spell_" .. info.spellId, "HELPFUL", {
-                    candidateFilters = AuraSlotFilters(info.spellId),
-                    initializeFrame = MakeBarSlotInitializer(info.maxApps),
+                local startIndex = nextAvailableIndex
+                nextAvailableIndex = startIndex + info.maxApps + 3
+                if nextAvailableIndex > BAR_CONFIG.count then
+                    print("警告: Fuyutsui_CountBars 光环层数条空间不足!")
+                    break
+                end
+                barSlots:AddAuraSlot("bar_index_" .. info.index, "HELPFUL", {
+                    candidateFilters = AuraSlotFilters(info.includeSpellIDs),
+                    sortMethod = AuraContainerSortMethod.Expiration,
+                    sortDirection = AuraContainerSortDirection.Normal,
+                    initializeFrame = MakeBarSlotInitializer(info.maxApps, startIndex),
                 })
-                tinsert(auraBarSlotButtons, { button = btn, maxApps = info.maxApps })
             end
         end
     end
 
-    for _, entry in ipairs(auraBarSlotButtons) do
-        local startIndex = nextAvailableIndex
-        nextAvailableIndex = startIndex + entry.maxApps + 3
-        if nextAvailableIndex > BAR_CONFIG.count then
-            print("警告: Fuyutsui_CountBars 光环层数条空间不足!")
-            break
+    auraBarLaidOut = true
+end
+
+--[[============================================================================
+    队伍成员 AuraContainer
+    配置：
+      groups.aura[offset] = { name, spellId/spellIds }  -- HELPFUL|PLAYER
+      groups.dispel = offset                            -- HARMFUL，按玩家可驱散类型过滤
+    像素：start + (memberIndex-1)*num + offset
+============================================================================]]
+
+local groupAuraContainers = {} -- [memberIndex] = AuraContainer
+
+local function CollectGroupAuraDefs(auraTable)
+    local defs = {}
+    if type(auraTable) ~= "table" then
+        return defs
+    end
+    for offset, info in pairs(auraTable) do
+        if type(offset) == "number" and type(info) == "table" then
+            local includeSpellIDs = BuildIncludeSpellIDs(info)
+            if next(includeSpellIDs) then
+                tinsert(defs, {
+                    offset = offset,
+                    includeSpellIDs = includeSpellIDs,
+                    name = info.name,
+                })
+            end
         end
-        entry.button:ClearAllPoints()
-        entry.button:SetPoint("TOPLEFT", countBars, "TOPLEFT", (startIndex - 1) * BAR_CONFIG.width, 0)
+    end
+    table.sort(defs, function(a, b)
+        return a.offset < b.offset
+    end)
+    return defs
+end
+
+local function GroupAuraPixelIndex(groups, memberIndex, offset)
+    return groups.start + (memberIndex - 1) * groups.num + offset
+end
+
+local function CopyIncludeDispelTypes()
+    local src = Fuyutsui.includeDispelTypes
+    if type(src) ~= "table" then
+        return nil
+    end
+    local dst = {}
+    local any = false
+    for name, enabled in pairs(src) do
+        if enabled then
+            dst[name] = true
+            any = true
+        end
+    end
+    if not any then
+        return nil
+    end
+    return dst
+end
+
+function Fuyutsui:ReleaseGroupAuraContainers()
+    for memberIndex, container in pairs(groupAuraContainers) do
+        ReleaseFrame(container)
+        groupAuraContainers[memberIndex] = nil
+    end
+end
+
+local function CreateGroupMemberAuraContainer(memberIndex, groups, auraDefs, includeDispelTypes)
+    EnsureAuraContainerLoaded()
+
+    local container = CreateFrame("AuraContainer", "FuyutsuiGroupAuraSlots_" .. memberIndex, UIParent,
+        "CustomAuraContainerTemplate")
+    container:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 0, 0)
+    container:SetEnabled(true)
+    container:SetFrameStrata(AURA_DURATION_STRATA)
+    container:SetFrameLevel(AURA_DURATION_LEVEL)
+
+    for _, def in ipairs(auraDefs) do
+        local pixelIndex = GroupAuraPixelIndex(groups, memberIndex, def.offset)
+        if pixelIndex > 0 and pixelIndex <= BLOCK_FIX_COUNT then
+            container:AddAuraSlot(
+                "group_" .. memberIndex .. "_aura_" .. def.offset,
+                "HELPFUL|PLAYER",
+                {
+                    candidateFilters = AuraSlotFilters(def.includeSpellIDs),
+                    sortMethod = AuraContainerSortMethod.Expiration,
+                    sortDirection = AuraContainerSortDirection.Normal,
+                    initializeFrame = MakeDurationSlotInitializer(pixelIndex),
+                }
+            )
+        end
     end
 
-    auraBarLaidOut = true
+    -- 可驱散减益：仅包含玩家当前会的驱散类型
+    if groups.dispel and includeDispelTypes then
+        local pixelIndex = GroupAuraPixelIndex(groups, memberIndex, groups.dispel)
+        if pixelIndex > 0 and pixelIndex <= BLOCK_FIX_COUNT then
+            container:AddAuraSlot(
+                "group_" .. memberIndex .. "_dispel",
+                "HARMFUL",
+                {
+                    candidateFilters = {
+                        includeDispelTypes = includeDispelTypes,
+                    },
+                    sortMethod = AuraContainerSortMethod.Expiration,
+                    sortDirection = AuraContainerSortDirection.Normal,
+                    initializeFrame = MakeDurationSlotInitializer(pixelIndex),
+                }
+            )
+        end
+    end
+
+    return container
+end
+
+--- 按当前 groupList 为每个成员创建/绑定单位光环槽
+function Fuyutsui:RefreshGroupAuraContainers()
+    local groups = Fuyutsui.blocks and Fuyutsui.blocks.groups
+    if not groups or not groups.start or not groups.num then
+        self:ReleaseGroupAuraContainers()
+        return
+    end
+
+    local auraDefs = CollectGroupAuraDefs(groups.aura)
+    local includeDispelTypes = groups.dispel and CopyIncludeDispelTypes() or nil
+    if #auraDefs == 0 and not includeDispelTypes then
+        self:ReleaseGroupAuraContainers()
+        return
+    end
+
+    local groupList = Fuyutsui.groupList or {}
+    local group = Fuyutsui.group or {}
+    local used = {}
+
+    for _, unit in ipairs(groupList) do
+        local obj = group[unit]
+        if obj and obj.index then
+            local memberIndex = obj.index
+            used[memberIndex] = true
+            local container = groupAuraContainers[memberIndex]
+            if not container then
+                container = CreateGroupMemberAuraContainer(memberIndex, groups, auraDefs, includeDispelTypes)
+                groupAuraContainers[memberIndex] = container
+            end
+            container:SetUnit(unit)
+            container:SetEnabled(true)
+            container:Show()
+        end
+    end
+
+    for memberIndex, container in pairs(groupAuraContainers) do
+        if not used[memberIndex] then
+            container:SetEnabled(false)
+            container:Hide()
+        end
+    end
 end

@@ -21,7 +21,7 @@ Fuyutsui.ClassBlocks = {
         [21] = { type = "block", name = "目标生命值" },
         [22] = { type = "block", name = "施法技能" },
         [23] = { type = "block", name = "施法目标" },
-        [24] = { type = "aura", name = "虚空之盾", spellId = 17 },
+        [24] = { type = "aura", name = "虚空之盾", spellIds = { 17, 1253593 } },
         [25] = { type = "aura", name = "圣光涌动", spellId = 114255 },
         [27] = { type = "aura", name = "熵能裂隙", spellId = 447444 },
         [30] = { type = "aura", name = "福音", spellId = 472433, maxApps = 2 },
@@ -54,6 +54,11 @@ Fuyutsui.ClassBlocks = {
             num = 5,
             healthPercent = 1,
             role = 2,
+            dispel = 3,
+            aura = {
+                [4] = { name = "救赎", spellId = 194384 },
+                [5] = { name = "真言术：盾", spellIds = { 17, 1253593 } }
+            },
         },
     },
     [2] = {
