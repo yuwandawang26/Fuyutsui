@@ -309,6 +309,11 @@ end
 
 function Fuyutsui:PLAYER_TARGET_CHANGED()
     self:UpdateTargetFullInfo()
+    self:UpdateUnitAuraContainer("target")
+end
+
+function Fuyutsui:PLAYER_FOCUS_CHANGED()
+    self:UpdateUnitAuraContainer("focus")
 end
 
 function Fuyutsui:NAME_PLATE_UNIT_ADDED(_, unit)

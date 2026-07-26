@@ -323,11 +323,34 @@ local function CollectAuraSpellSlots(unitFilter)
     return slots
 end
 
-local function AuraSlotFilters(includeSpellIDs)
-    -- 不要设 maxDuration：任何非 nil 的 maxDuration 都会排除永久光环（持续时间为 0）
-    return {
+-- maxDuration 非 nil 时会排除永久光环（持续时间为 0）；取足够大的上限以覆盖常规限时光环
+local AURA_TIMED_MAX_DURATION = 365 * 24 * 60 * 60
+-- 非身份类过滤：maxDuration=0 不匹配任何光环（用于敌对单位上禁用 HELPFUL 等非法身份过滤场景）
+local AURA_MATCH_NONE_FILTERS = { maxDuration = 0 }
+
+local function AuraSlotFilters(includeSpellIDs, maxDuration)
+    local filters = {
         includeSpellIDs = includeSpellIDs,
     }
+    if maxDuration ~= nil then
+        filters.maxDuration = maxDuration
+    end
+    return filters
+end
+
+--- 敌对单位上 HELPFUL / 友方单位上 HARMFUL 时 includeSpellIDs 会被忽略，槽位可能误匹配任意光环。
+--- 仅在反应允许的场景启用对应 filter。
+local function IsAuraFilterAllowedForUnit(unit, filter)
+    if not UnitExists(unit) then
+        return false
+    end
+    if filter == "HELPFUL" then
+        return UnitCanAssist("player", unit) and true or false
+    end
+    if filter == "HARMFUL" then
+        return UnitCanAttack("player", unit) and not UnitCanAssist("player", unit)
+    end
+    return true
 end
 
 local function AuraBlockXOffset(index)
@@ -341,6 +364,13 @@ local function ConfigureAuraButtonMouse(button)
     end
 end
 
+local function AnchorAuraPixelButton(button, index)
+    button:SetSize(AURA_BLOCK_W, AURA_BLOCK_H)
+    button:SetClipsChildren(true)
+    ConfigureAuraButtonMouse(button)
+    button:SetPoint("TOPLEFT", UIParent, "TOPLEFT", AuraBlockXOffset(index), 0)
+end
+
 --- 对齐 CreateTexture(i, b)：绿通道编码索引，蓝通道随剩余秒数 0..255 从 0→1
 local function MakeDurationColorCurve(index)
     local curve = C_CurveUtil.CreateColorCurve()
@@ -351,17 +381,24 @@ local function MakeDurationColorCurve(index)
     return curve
 end
 
-local function SetupClippedDuration(button, index)
-    button:SetSize(AURA_BLOCK_W, AURA_BLOCK_H)
-    button:SetClipsChildren(true)
-    ConfigureAuraButtonMouse(button)
-    button:SetPoint("TOPLEFT", UIParent, "TOPLEFT", AuraBlockXOffset(index), 0)
-
-    -- 纯色底：固定 (r, g, 1, 1)，层级低于 █
+--- 永久光环槽：整格底层 b=1（无 DurationText）
+local function SetupPermanentAuraPixel(button, index)
+    AnchorAuraPixelButton(button, index)
     local bg = button:CreateTexture(nil, "BACKGROUND")
     bg:SetAllPoints(button)
     local r, g = EncodeBlockChannels(index)
     bg:SetColorTexture(r, g, 1, 1)
+end
+
+--- 限时光环槽：底层 b=0，█ 用剩余时间曲线；叠在永久槽之上
+local function SetupTimedAuraDuration(button, index)
+    AnchorAuraPixelButton(button, index)
+    button:SetFrameLevel((button:GetFrameLevel() or 0) + 2)
+
+    local bg = button:CreateTexture(nil, "BACKGROUND")
+    bg:SetAllPoints(button)
+    local r, g = EncodeBlockChannels(index)
+    bg:SetColorTexture(r, g, 0, 1)
 
     local duration = button:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     duration:SetPoint("CENTER", button, "CENTER", 0, 0)
@@ -379,9 +416,66 @@ local function SetupClippedDuration(button, index)
     })
 end
 
-local function MakeDurationSlotInitializer(index)
+local function MakePermanentSlotInitializer(index)
     return function(button)
-        SetupClippedDuration(button, index)
+        SetupPermanentAuraPixel(button, index)
+    end
+end
+
+local function MakeTimedSlotInitializer(index)
+    return function(button)
+        SetupTimedAuraDuration(button, index)
+    end
+end
+
+local function AddDurationAuraSlotPair(container, slotKeyPrefix, filter, includeSpellIDs, index)
+    -- 先限时后永久：若容器对 auraInstance 互斥分配，避免限时光环被永久槽抢走。
+    -- 限时槽：maxDuration 排除永久；底层 b=0 + █ 曲线
+    container:AddAuraSlot(slotKeyPrefix .. "_timed_" .. index, filter, {
+        candidateFilters = AuraSlotFilters(includeSpellIDs, AURA_TIMED_MAX_DURATION),
+        sortMethod = AuraContainerSortMethod.Expiration,
+        sortDirection = AuraContainerSortDirection.Normal,
+        initializeFrame = MakeTimedSlotInitializer(index),
+    })
+    -- 永久槽：无 maxDuration；永久命中时整格 b=1（限时若也命中则被上层限时槽盖住）
+    container:AddAuraSlot(slotKeyPrefix .. "_permanent_" .. index, filter, {
+        candidateFilters = AuraSlotFilters(includeSpellIDs),
+        sortMethod = AuraContainerSortMethod.Expiration,
+        sortDirection = AuraContainerSortDirection.Normal,
+        initializeFrame = MakePermanentSlotInitializer(index),
+    })
+
+    container.fuyutsuiAuraSlots = container.fuyutsuiAuraSlots or {}
+    tinsert(container.fuyutsuiAuraSlots, {
+        keyPrefix = slotKeyPrefix,
+        index = index,
+        filter = filter,
+        includeSpellIDs = includeSpellIDs,
+    })
+end
+
+local function ApplyUnitAuraReactionFilters(container, unit)
+    local slots = container and container.fuyutsuiAuraSlots
+    if not slots then
+        return
+    end
+    for _, slot in ipairs(slots) do
+        local timedKey = slot.keyPrefix .. "_timed_" .. slot.index
+        local permanentKey = slot.keyPrefix .. "_permanent_" .. slot.index
+        if IsAuraFilterAllowedForUnit(unit, slot.filter) then
+            container:SetAuraSlotCandidateFilters(
+                timedKey,
+                AuraSlotFilters(slot.includeSpellIDs, AURA_TIMED_MAX_DURATION)
+            )
+            container:SetAuraSlotCandidateFilters(
+                permanentKey,
+                AuraSlotFilters(slot.includeSpellIDs)
+            )
+        else
+            -- 不用空 includeSpellIDs：非法身份场景下 SpellID 过滤会被忽略
+            container:SetAuraSlotCandidateFilters(timedKey, AURA_MATCH_NONE_FILTERS)
+            container:SetAuraSlotCandidateFilters(permanentKey, AURA_MATCH_NONE_FILTERS)
+        end
     end
 end
 
@@ -434,7 +528,8 @@ end
 local function SetupApplicationBarOnly(button, maxApps, startIndex)
     button:SetSize(maxApps * BAR_CONFIG.width, BAR_CONFIG.height)
     ConfigureAuraButtonMouse(button)
-    button:SetPoint("TOPLEFT", countBars, "TOPLEFT", (startIndex - 1) * BAR_CONFIG.width, 0)
+    -- 右移 1px，避免白色填充未完全盖住背后背景色
+    button:SetPoint("TOPLEFT", countBars, "TOPLEFT", (startIndex - 1) * BAR_CONFIG.width + 1, 0)
 
     local bar = CreateFrame("StatusBar", nil, button)
     bar:SetAllPoints(button)
@@ -504,15 +599,11 @@ local function CreateUnitAuraDurationSlots(unit, spellSlots)
 
     for _, info in ipairs(spellSlots) do
         local filter = info.filter or "HELPFUL"
-        durationSlots:AddAuraSlot("duration_index_" .. info.index, filter, {
-            candidateFilters = AuraSlotFilters(info.includeSpellIDs),
-            sortMethod = AuraContainerSortMethod.Expiration,
-            sortDirection = AuraContainerSortDirection.Normal,
-            initializeFrame = MakeDurationSlotInitializer(info.index),
-        })
+        AddDurationAuraSlotPair(durationSlots, "duration_index", filter, info.includeSpellIDs, info.index)
     end
 
     Fuyutsui[key] = durationSlots
+    ApplyUnitAuraReactionFilters(durationSlots, unit)
 end
 
 function Fuyutsui:RefreshUnitAuraContainers()
@@ -523,6 +614,23 @@ function Fuyutsui:RefreshUnitAuraContainers()
                 CreateUnitAuraDurationSlots(unit, spellSlots)
             end
         end
+    end
+end
+
+--- 切换 target/focus 时：按敌友启用对应 filter，并整表刷新
+function Fuyutsui:UpdateUnitAuraContainer(unit)
+    local key = UNIT_AURA_CONTAINER_KEYS[unit]
+    if not key then
+        return
+    end
+    local container = Fuyutsui[key]
+    if not container then
+        return
+    end
+    if container.fuyutsuiAuraSlots then
+        ApplyUnitAuraReactionFilters(container, unit)
+    elseif container.UpdateAllAuras then
+        container:UpdateAllAuras()
     end
 end
 
@@ -659,15 +767,12 @@ local function CreateGroupMemberAuraContainer(memberIndex, groups, auraDefs, inc
     for _, def in ipairs(auraDefs) do
         local pixelIndex = GroupAuraPixelIndex(groups, memberIndex, def.offset)
         if pixelIndex > 0 and pixelIndex <= BLOCK_FIX_COUNT then
-            container:AddAuraSlot(
+            AddDurationAuraSlotPair(
+                container,
                 "group_" .. memberIndex .. "_aura_" .. def.offset,
                 "HELPFUL|PLAYER",
-                {
-                    candidateFilters = AuraSlotFilters(def.includeSpellIDs),
-                    sortMethod = AuraContainerSortMethod.Expiration,
-                    sortDirection = AuraContainerSortDirection.Normal,
-                    initializeFrame = MakeDurationSlotInitializer(pixelIndex),
-                }
+                def.includeSpellIDs,
+                pixelIndex
             )
         end
     end
