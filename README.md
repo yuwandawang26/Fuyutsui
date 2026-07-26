@@ -4,7 +4,7 @@ World of Warcraft Retail Lua AddOn。在屏幕顶部绘制 **510** 个极窄色�
 
 | 项目 | 说明 |
 | --- | --- |
-| 版本 | 见 `Fuyutsui.toc`（当前 `1.2.2.4`） |
+| 版本 | 见 `Fuyutsui.toc`（当前 `1.2.1`） |
 | 接口 | Retail（`Interface` 120000+） |
 | 作者 | Wayne Bian |
 | 存档 | `FuyutsuiADB`（SavedVariables） |
