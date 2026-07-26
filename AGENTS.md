@@ -64,7 +64,11 @@ Fuyutsui.ClassBlocks = {
             ["目标"] = { "类型", "生命值", ... },
             ["焦点"] = { "施法", ... },
         },
-        auras = { { spellId = 54149, name = "圣光灌注" }, ... },
+        auras = {
+            player = { { spellId = 54149, name = "圣光灌注" }, ... },
+            target = { harmful = { ... }, helpful = { ... } },
+            focus = { harmful = { ... }, helpful = { ... } },
+        },
         spells = { { spellId = 20473, name = "神圣震击" }, ... },
         group = { num = 6, healthPercent = 1, role = 2, dispel = 3, aura = 4 },
     },
@@ -86,8 +90,8 @@ Fuyutsui.ClassBlocks = {
 
 如果新增一个职业光环，通常要同时：
 
-1. 在对应 `class/*.lua` 专精中加入带 `spellId`/`spellIds` 的 aura 条目。
-2. 确认 `core/block.lua` 的 AuraContainer 会按该索引创建 duration slot（及可选层数条）。
+1. 在对应 `class/*.lua` 专精的 `auras.player` / `auras.target.harmful|helpful` / `auras.focus.*` 中加入带 `spellId`/`spellIds` 的条目。
+2. 确认 `core/block.lua` 的单位 AuraContainer 会按该索引创建 duration slot（玩家可选层数条）。
 
 ## 宏和按键
 

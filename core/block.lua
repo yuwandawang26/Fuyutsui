@@ -269,12 +269,13 @@ function Fuyutsui:ClearAllFuyutsuiBars()
 end
 
 --[[============================================================================
-    AuraContainer（列表来自 ClassBlocks type="aura" + spellId/spellIds）
+    AuraContainer（列表来自 ClassBlocks auras + spellId/spellIds）
+    单位：player / target / focus；filter：HELPFUL / HARMFUL
     includeSpellIDs 可绑多个 ID：任一存在即显示（AuraSlot 取排序最前的一个）
     参考：AuraContainer_AI_Reference_zh-CN.md（PTR 7）
 ============================================================================]]
 
---- 归一化为 includeSpellIDs 集合；支持 spellId 或 spellIds = { id1, id2 }
+--- 归一化为 includeSpellIDs 集合；支持 spellId、spellIds=number 或 spellIds={ id1, id2 }
 local function BuildIncludeSpellIDs(info)
     local set = {}
     if type(info.spellIds) == "table" then
@@ -283,6 +284,8 @@ local function BuildIncludeSpellIDs(info)
                 set[id] = true
             end
         end
+    elseif type(info.spellIds) == "number" then
+        set[info.spellIds] = true
     end
     if type(info.spellId) == "number" then
         set[info.spellId] = true
@@ -290,7 +293,7 @@ local function BuildIncludeSpellIDs(info)
     return set
 end
 
-local function CollectAuraSpellSlots()
+local function CollectAuraSpellSlots(unitFilter)
     local slots = {}
     local auras = Fuyutsui.blocks and Fuyutsui.blocks.auras
     if not auras then
@@ -298,14 +301,19 @@ local function CollectAuraSpellSlots()
     end
     for index, info in pairs(auras) do
         if type(info) == "table" then
-            local includeSpellIDs = BuildIncludeSpellIDs(info)
-            if next(includeSpellIDs) then
-                tinsert(slots, {
-                    index = index,
-                    includeSpellIDs = includeSpellIDs,
-                    maxApps = info.maxApps,
-                    name = info.name,
-                })
+            local unit = info.unit or "player"
+            if not unitFilter or unit == unitFilter then
+                local includeSpellIDs = BuildIncludeSpellIDs(info)
+                if next(includeSpellIDs) then
+                    tinsert(slots, {
+                        index = index,
+                        includeSpellIDs = includeSpellIDs,
+                        maxApps = info.maxApps,
+                        name = info.name,
+                        unit = unit,
+                        filter = info.filter or "HELPFUL",
+                    })
+                end
             end
         end
     end
@@ -453,31 +461,50 @@ local function ReleaseFrame(frame)
     frame:SetParent(nil)
 end
 
-function Fuyutsui:ReleasePlayerAuraContainers()
-    ReleaseFrame(Fuyutsui.PlayerAuraContainer)
+local UNIT_AURA_CONTAINER_KEYS = {
+    player = "PlayerAuraContainer",
+    target = "TargetAuraContainer",
+    focus = "FocusAuraContainer",
+}
+
+function Fuyutsui:ReleaseUnitAuraContainers()
+    for _, key in pairs(UNIT_AURA_CONTAINER_KEYS) do
+        ReleaseFrame(Fuyutsui[key])
+        Fuyutsui[key] = nil
+    end
     ReleaseFrame(Fuyutsui.PlayerAuraBarContainer)
-    Fuyutsui.PlayerAuraContainer = nil
     Fuyutsui.PlayerAuraBarContainer = nil
     auraBarLaidOut = false
 end
 
-local function CreatePlayerAuraDurationSlots(spellSlots)
+-- 兼容旧名
+function Fuyutsui:ReleasePlayerAuraContainers()
+    self:ReleaseUnitAuraContainers()
+end
+
+local function CreateUnitAuraDurationSlots(unit, spellSlots)
     if not spellSlots or #spellSlots == 0 then
+        return
+    end
+
+    local key = UNIT_AURA_CONTAINER_KEYS[unit]
+    if not key then
         return
     end
 
     EnsureAuraContainerLoaded()
 
-    local durationSlots = CreateFrame("AuraContainer", "FuyutsuiPlayerAuraDurationSlots", UIParent,
-        "CustomAuraContainerTemplate")
+    local frameName = "Fuyutsui" .. unit:gsub("^%l", string.upper) .. "AuraDurationSlots"
+    local durationSlots = CreateFrame("AuraContainer", frameName, UIParent, "CustomAuraContainerTemplate")
     durationSlots:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 0, 0)
-    durationSlots:SetUnit("player")
+    durationSlots:SetUnit(unit)
     durationSlots:SetEnabled(true)
     durationSlots:SetFrameStrata(AURA_DURATION_STRATA)
     durationSlots:SetFrameLevel(AURA_DURATION_LEVEL)
 
     for _, info in ipairs(spellSlots) do
-        durationSlots:AddAuraSlot("duration_index_" .. info.index, "HELPFUL", {
+        local filter = info.filter or "HELPFUL"
+        durationSlots:AddAuraSlot("duration_index_" .. info.index, filter, {
             candidateFilters = AuraSlotFilters(info.includeSpellIDs),
             sortMethod = AuraContainerSortMethod.Expiration,
             sortDirection = AuraContainerSortDirection.Normal,
@@ -485,29 +512,32 @@ local function CreatePlayerAuraDurationSlots(spellSlots)
         })
     end
 
-    Fuyutsui.PlayerAuraContainer = durationSlots
+    Fuyutsui[key] = durationSlots
 end
 
+function Fuyutsui:RefreshUnitAuraContainers()
+    for unit, key in pairs(UNIT_AURA_CONTAINER_KEYS) do
+        if not Fuyutsui[key] then
+            local spellSlots = CollectAuraSpellSlots(unit)
+            if #spellSlots > 0 then
+                CreateUnitAuraDurationSlots(unit, spellSlots)
+            end
+        end
+    end
+end
+
+-- 兼容旧名
 function Fuyutsui:RefreshPlayerAuraContainers()
-    if Fuyutsui.PlayerAuraContainer then
-        return
-    end
-
-    local spellSlots = CollectAuraSpellSlots()
-    if #spellSlots == 0 then
-        return
-    end
-
-    CreatePlayerAuraDurationSlots(spellSlots)
+    self:RefreshUnitAuraContainers()
 end
 
---- 在计数条之后排布层数条，最后放置 BAR_END_COLOR
+--- 在计数条之后排布层数条，最后放置 BAR_END_COLOR（仅玩家光环 maxApps）
 function Fuyutsui:LayoutAuraApplicationBars()
     if auraBarLaidOut then
         return
     end
 
-    local spellSlots = CollectAuraSpellSlots()
+    local spellSlots = CollectAuraSpellSlots("player")
     local appSlots = {}
     for _, info in ipairs(spellSlots) do
         if info.maxApps then
@@ -538,7 +568,7 @@ function Fuyutsui:LayoutAuraApplicationBars()
                     break
                 end
                 CreateHorizontalBarBackgrounds(startIndex, info.maxApps)
-                barSlots:AddAuraSlot("bar_index_" .. info.index, "HELPFUL", {
+                barSlots:AddAuraSlot("bar_index_" .. info.index, info.filter or "HELPFUL", {
                     candidateFilters = AuraSlotFilters(info.includeSpellIDs),
                     sortMethod = AuraContainerSortMethod.Expiration,
                     sortDirection = AuraContainerSortDirection.Normal,

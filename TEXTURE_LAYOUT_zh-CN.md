@@ -93,18 +93,31 @@ states = {
 
 ---
 
-## 4. `auras`：玩家光环像素
+## 4. `auras`：单位光环像素
 
 ```lua
 auras = {
-    { name = "虚空之盾", spellIds = 1253590 },
-    { name = "圣光涌动", spellId = 114255, maxApps = 2 },
+    player = {
+        { name = "虚空之盾", spellId = 1253590 },
+        { name = "圣光涌动", spellId = 114255, maxApps = 2 },
+    },
+    target = {
+        harmful = { { name = "暗言术：痛", spellId = 589 } },   -- 敌对：HARMFUL
+        helpful = { { name = "救赎", spellId = 194384 } },     -- 友善：HELPFUL
+    },
+    focus = {
+        harmful = {},
+        helpful = { { name = "真言术：盾", spellIds = { 17, 1253593 } } },
+    },
 }
 ```
 
-- 每条有效光环（含 `spellId` 或 `spellIds`）占主色块 **1** 格：剩余时间等由 AuraContainer 刷到该索引。
-- `maxApps` **不**额外占主色块；层数画在横向条上（见第 7 节）。
+分配顺序：`player` → `target.harmful` → `target.helpful` → `focus.harmful` → `focus.helpful`。
+
+- 每条有效光环（含 `spellId` 或 `spellIds`）占主色块 **1** 格：由对应单位的 AuraContainer 刷新。
+- `maxApps` **不**额外占主色块；层数条目前只排布 `player` 光环（见第 7 节）。
 - 缺少 `spellId`/`spellIds` 的条目会跳过并打印警告，**不占位**。
+- 兼容旧扁平数组：整表当作 `player` / `HELPFUL`。
 
 ---
 

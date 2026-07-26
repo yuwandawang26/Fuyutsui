@@ -75,14 +75,42 @@ function Fuyutsui:LoadPlayerBlocks(specIndex)
         end
     end
 
+    -- auras 支持：
+    --   旧：{ { spellId=... }, ... }  → 视为 player / HELPFUL
+    --   新：{ player={...}, target={ harmful={...}, helpful={...} }, focus={...} }
     if type(t.auras) == "table" then
-        for _, aura in ipairs(t.auras) do
-            if type(aura) == "table" and (aura.spellId or aura.spellIds) then
-                blocks.auras[index] = aura
-                index = index + 1
-            else
-                print("LoadPlayerBlocks: aura 缺少 spellId/spellIds，已跳过")
+        local function AppendAuraList(list, unit, filter)
+            if type(list) ~= "table" then return end
+            for _, aura in ipairs(list) do
+                if type(aura) == "table" and (aura.spellId or aura.spellIds) then
+                    blocks.auras[index] = {
+                        name = aura.name,
+                        spellId = aura.spellId,
+                        spellIds = aura.spellIds,
+                        maxApps = aura.maxApps,
+                        unit = unit,
+                        filter = filter,
+                    }
+                    index = index + 1
+                else
+                    print("LoadPlayerBlocks: aura 缺少 spellId/spellIds，已跳过")
+                end
             end
+        end
+
+        local nested = t.auras.player or t.auras.target or t.auras.focus
+        if nested then
+            AppendAuraList(t.auras.player, "player", "HELPFUL")
+            if type(t.auras.target) == "table" then
+                AppendAuraList(t.auras.target.harmful, "target", "HARMFUL")
+                AppendAuraList(t.auras.target.helpful, "target", "HELPFUL")
+            end
+            if type(t.auras.focus) == "table" then
+                AppendAuraList(t.auras.focus.harmful, "focus", "HARMFUL")
+                AppendAuraList(t.auras.focus.helpful, "focus", "HELPFUL")
+            end
+        else
+            AppendAuraList(t.auras, "player", "HELPFUL")
         end
     end
 
@@ -140,6 +168,11 @@ function Fuyutsui:LoadPlayerBlocks(specIndex)
     end
 
     self.blocks = blocks
+    if self.ReleaseUnitAuraContainers then
+        self:ReleaseUnitAuraContainers()
+    elseif self.ReleasePlayerAuraContainers then
+        self:ReleasePlayerAuraContainers()
+    end
     if self.ReleaseGroupAuraContainers then
         self:ReleaseGroupAuraContainers()
     end
