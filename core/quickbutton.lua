@@ -2,14 +2,10 @@ local addon, ns = ...
 
 local DRAG_THRESHOLD = 10
 
-local function CharCfg()
-    return Fuyutsui.db and Fuyutsui.db.char
-end
-
 function Fuyutsui:UpdateQuickToggleVisibility()
     local f = self.quickToggleFrame
     if not f then return end
-    local c = CharCfg()
+    local c = self:GetCharConfig()
     local show = not c or (c.quickButtonShow ~= false)
     self:RefreshQuickToggleAppearance()
     if show then
@@ -22,7 +18,7 @@ end
 function Fuyutsui:RefreshQuickToggleAppearance()
     local f = self.quickToggleFrame
     if not f then return end
-    local c = CharCfg()
+    local c = self:GetCharConfig()
     if not c then return end
     local cdOn = (c.cooldowns or 0) == 1
     local aoe = c.aoeMode or 0
@@ -45,7 +41,7 @@ function Fuyutsui:RefreshQuickToggleAppearance()
 end
 
 local function SaveQuickButtonPosition(self)
-    local c = CharCfg()
+    local c = Fuyutsui:GetCharConfig()
     if not c then return end
     local p, _, rp, x, y = self:GetPoint(1)
     if p and x and y then
@@ -62,7 +58,7 @@ function Fuyutsui:InitQuickToggleButton()
         return
     end
 
-    local c = CharCfg()
+    local c = Fuyutsui:GetCharConfig()
     local f = CreateFrame("Button", "FuyutsuiQuickToggle", UIParent, "BackdropTemplate")
     f:SetSize(50, 64)
     f:SetFrameStrata("MEDIUM")
@@ -151,7 +147,7 @@ function Fuyutsui:InitQuickToggleButton()
             if self._dragActive then
                 finishLeftDrag(self)
             elseif not self._didDrag then
-                local ch = CharCfg()
+                local ch = Fuyutsui:GetCharConfig()
                 if ch and Fuyutsui.SwitchCooldown then
                     ch.cooldowns = (ch.cooldowns == 0) and 1 or 0
                     Fuyutsui:SwitchCooldown()
@@ -164,7 +160,7 @@ function Fuyutsui:InitQuickToggleButton()
     end)
 
     f:SetScript("OnClick", function(self, button)
-        local ch = CharCfg()
+        local ch = Fuyutsui:GetCharConfig()
         if button == "RightButton" then
             if ch and Fuyutsui.SwitchAoeMode then
                 ch.aoeMode = (ch.aoeMode == 0) and 1 or 0

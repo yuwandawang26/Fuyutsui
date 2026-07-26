@@ -2,165 +2,217 @@ if UnitClassBase("player") ~= "WARRIOR" then return end
 local addon, ns = ...
 Fuyutsui.ClassBlocks = {
     [1] = {
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "生命值" },
-        [12] = { type = "block", name = "怒气值" },
-        [13] = { type = "block", name = "目标类型" },
-        [14] = { type = "block", name = "队伍人数" },
-        [15] = { type = "block", name = "首领战" },
-        [16] = { type = "block", name = "难度" },
-        [17] = { type = "block", name = "目标生命值" },
-        [18] = { type = "block", name = "敌人人数" },
-
-        [23] = { type = "aura", name = "斩杀高亮", auraName = "斩杀高亮", showKey = "remaining" },
-        [24] = { type = "aura", name = "英勇打击高亮", auraName = "英勇打击高亮", showKey = "remaining" },
-        [25] = { type = "aura", name = "顺劈斩高亮", auraName = "顺劈斩高亮", showKey = "remaining" },
-        [26] = { type = "aura", name = "致死高亮", auraName = "致死高亮", showKey = "remaining" },
-
-        [47] = { type = "block", name = "目标施法" },
-        [48] = { type = "block", name = "目标施法可打断" },
-        [49] = { type = "block", name = "焦点施法" },
-        [50] = { type = "block", name = "焦点施法可打断" },
-        [51] = { type = "block", name = "目标引导" },
-        [52] = { type = "block", name = "目标引导可打断" },
-        [53] = { type = "block", name = "焦点引导" },
-        [54] = { type = "block", name = "焦点引导可打断" },
-
-        [31] = { type = "spell", spellId = 202168, name = "胜利在望" },
-        [32] = { type = "spell", spellId = 376079, name = "勇士之矛" },
-        [33] = { type = "spell", spellId = 6544, name = "英勇飞跃" },
-        [34] = { type = "spell", spellId = 97462, name = "集结呐喊" },
-        [35] = { type = "spell", spellId = 46968, name = "震荡波" },
-        [36] = { type = "spell", spellId = 107570, name = "风暴之锤" },
-        [37] = { type = "spell", spellId = 384110, name = "破裂投掷" },
-        [38] = { type = "spell", spellId = 64382, name = "碎裂投掷" },
-        [39] = { type = "spell", spellId = 5246, name = "破胆怒吼" },
-        [40] = { type = "spell", spellId = 7384, name = "压制" },
-        [41] = { type = "spell", spellId = 7384, name = "压制", charge = true },
-        [42] = { type = "spell", spellId = 163201, name = "斩杀" },
-        [43] = { type = "spell", spellId = 845, name = "顺劈斩" },
-        [44] = { type = "spell", spellId = 12294, name = "致死打击" },
-        [45] = { type = "spell", spellId = 167105, name = "巨人打击" },
-        [46] = { type = "spell", spellId = 436358, name = "崩摧" },
-        [55] = { type = "spell", spellId = 6552, name = "拳击" },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "生命值",
+                "怒气值",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "敌人人数",
+            },
+            ["目标"] = {
+                "类型",
+                "生命值",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        -- TODO spellId: 斩杀高亮
+        -- TODO spellId: 英勇打击高亮
+        -- TODO spellId: 顺劈斩高亮
+        -- TODO spellId: 致死高亮
+        spells = {
+            { spellId = 202168, name = "胜利在望" },
+            { spellId = 376079, name = "勇士之矛" },
+            { spellId = 6544, name = "英勇飞跃" },
+            { spellId = 97462, name = "集结呐喊" },
+            { spellId = 46968, name = "震荡波" },
+            { spellId = 107570, name = "风暴之锤" },
+            { spellId = 384110, name = "破裂投掷" },
+            { spellId = 64382, name = "碎裂投掷" },
+            { spellId = 5246, name = "破胆怒吼" },
+            { spellId = 7384, name = "压制" },
+            { spellId = 7384, name = "压制", charge = true },
+            { spellId = 163201, name = "斩杀" },
+            { spellId = 845, name = "顺劈斩" },
+            { spellId = 12294, name = "致死打击" },
+            { spellId = 167105, name = "巨人打击" },
+            { spellId = 436358, name = "崩摧" },
+            { spellId = 6552, name = "拳击" },
+        },
     },
     [2] = {
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "生命值" },
-        [12] = { type = "block", name = "怒气值" },
-        [13] = { type = "block", name = "目标类型" },
-        [14] = { type = "block", name = "队伍人数" },
-        [15] = { type = "block", name = "首领战" },
-        [16] = { type = "block", name = "难度" },
-        [17] = { type = "block", name = "目标生命值" },
-        [18] = { type = "block", name = "敌人人数" },
-
-        [21] = { type = "block", name = "目标施法" },
-        [22] = { type = "block", name = "目标施法可打断" },
-        [23] = { type = "block", name = "焦点施法" },
-        [24] = { type = "block", name = "焦点施法可打断" },
-        [25] = { type = "block", name = "目标引导" },
-        [26] = { type = "block", name = "目标引导可打断" },
-        [27] = { type = "block", name = "焦点引导" },
-        [28] = { type = "block", name = "焦点引导可打断" },
-
-        [31] = { type = "spell", spellId = 202168, name = "胜利在望" },
-        [32] = { type = "spell", spellId = 376079, name = "勇士之矛" },
-        [33] = { type = "spell", spellId = 6544, name = "英勇飞跃" },
-        [34] = { type = "spell", spellId = 97462, name = "集结呐喊" },
-        [35] = { type = "spell", spellId = 46968, name = "震荡波" },
-        [36] = { type = "spell", spellId = 107570, name = "风暴之锤" },
-        [37] = { type = "spell", spellId = 384110, name = "破裂投掷" },
-        [38] = { type = "spell", spellId = 64382, name = "碎裂投掷" },
-        [39] = { type = "spell", spellId = 5246, name = "破胆怒吼" },
-        [40] = { type = "spell", spellId = 1719, name = "鲁莽" },
-        [41] = { type = "spell", spellId = 6552, name = "拳击" },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "生命值",
+                "怒气值",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "敌人人数",
+            },
+            ["目标"] = {
+                "类型",
+                "生命值",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        spells = {
+            { spellId = 202168, name = "胜利在望" },
+            { spellId = 376079, name = "勇士之矛" },
+            { spellId = 6544, name = "英勇飞跃" },
+            { spellId = 97462, name = "集结呐喊" },
+            { spellId = 46968, name = "震荡波" },
+            { spellId = 107570, name = "风暴之锤" },
+            { spellId = 384110, name = "破裂投掷" },
+            { spellId = 64382, name = "碎裂投掷" },
+            { spellId = 5246, name = "破胆怒吼" },
+            { spellId = 1719, name = "鲁莽" },
+            { spellId = 6552, name = "拳击" },
+        },
     },
     [3] = {
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "生命值" },
-        [12] = { type = "block", name = "怒气值" },
-        [13] = { type = "block", name = "目标类型" },
-        [14] = { type = "block", name = "队伍人数" },
-        [15] = { type = "block", name = "首领战" },
-        [16] = { type = "block", name = "难度" },
-        [17] = { type = "block", name = "目标生命值" },
-        [18] = { type = "block", name = "敌人人数" },
-
-        [47] = { type = "block", name = "目标施法" },
-        [48] = { type = "block", name = "目标施法可打断" },
-        [49] = { type = "block", name = "焦点施法" },
-        [50] = { type = "block", name = "焦点施法可打断" },
-        [51] = { type = "block", name = "目标引导" },
-        [52] = { type = "block", name = "目标引导可打断" },
-        [53] = { type = "block", name = "焦点引导" },
-        [54] = { type = "block", name = "焦点引导可打断" },
-
-        [25] = { type = "aura", name = "盾牌格挡", auraName = "盾牌格挡", showKey = "remaining" },
-
-        [31] = { type = "spell", spellId = 202168, name = "胜利在望" },
-        [32] = { type = "spell", spellId = 376079, name = "勇士之矛" },
-        [33] = { type = "spell", spellId = 6544, name = "英勇飞跃" },
-        [34] = { type = "spell", spellId = 97462, name = "集结呐喊" },
-        [35] = { type = "spell", spellId = 46968, name = "震荡波" },
-        [36] = { type = "spell", spellId = 107570, name = "风暴之锤" },
-        [37] = { type = "spell", spellId = 384110, name = "破裂投掷" },
-        [38] = { type = "spell", spellId = 64382, name = "碎裂投掷" },
-        [39] = { type = "spell", spellId = 5246, name = "破胆怒吼" },
-        [40] = { type = "spell", spellId = 2565, name = "盾牌格挡" },
-        [41] = { type = "spell", spellId = 2565, name = "盾牌格挡", charge = true },
-        [42] = { type = "spell", spellId = 385952, name = "盾牌冲锋" },
-        [43] = { type = "spell", spellId = 107574, name = "天神下凡" },
-        [44] = { type = "spell", spellId = 1160, name = "挫志怒吼" },
-        [45] = { type = "spell", spellId = 6552, name = "拳击" },
-        [46] = { type = "spell", spellId = 190456, name = "无视苦痛" },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "生命值",
+                "怒气值",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "敌人人数",
+            },
+            ["目标"] = {
+                "类型",
+                "生命值",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        -- TODO spellId: 盾牌格挡
+        spells = {
+            { spellId = 202168, name = "胜利在望" },
+            { spellId = 376079, name = "勇士之矛" },
+            { spellId = 6544, name = "英勇飞跃" },
+            { spellId = 97462, name = "集结呐喊" },
+            { spellId = 46968, name = "震荡波" },
+            { spellId = 107570, name = "风暴之锤" },
+            { spellId = 384110, name = "破裂投掷" },
+            { spellId = 64382, name = "碎裂投掷" },
+            { spellId = 5246, name = "破胆怒吼" },
+            { spellId = 2565, name = "盾牌格挡" },
+            { spellId = 2565, name = "盾牌格挡", charge = true },
+            { spellId = 385952, name = "盾牌冲锋" },
+            { spellId = 107574, name = "天神下凡" },
+            { spellId = 1160, name = "挫志怒吼" },
+            { spellId = 6552, name = "拳击" },
+            { spellId = 190456, name = "无视苦痛" },
+        },
     },
 }
-Fuyutsui.MacrosList = {
-    dynamicSpells = {},
-    specialSpells = {},
-    staticSpells = {
-        [1] = "英勇投掷",
-        [2] = "战斗怒吼",
-        [3] = "猛击",
-        [4] = "撕裂",
-        [5] = "斩杀",
-        [6] = "剑刃风暴",
-        [7] = "崩摧",
-        [8] = "致死打击",
-        [9] = "巨人打击",
-        [10] = "顺劈斩",
-        [11] = "压制",
-        [12] = "横扫攻击",
-        [13] = "天神下凡",
-        [14] = "旋风斩",
-        [15] = "斩杀",
-        [16] = "嗜血",
-        [17] = "暴怒",
-        [18] = "奥丁之怒",
-        [19] = "怒击",
-        [20] = "雷霆一击",
-        [21] = "复仇",
-        [22] = "胜利在望",
-        [23] = "勇士之矛",
-        [24] = "英勇飞跃",
-        [25] = "集结呐喊",
-        [26] = "震荡波",
-        [27] = "风暴之锤",
-        [28] = "盾牌猛击",
-        [29] = "破裂投掷",
-        [30] = "碎裂投掷",
-        [31] = "破胆怒吼",
-        [32] = "鲁莽",
-        [33] = "盾牌格挡",
-        [34] = "盾牌冲锋",
-        [35] = "挫志怒吼",
-        [36] = "无视苦痛",
-        [37] = "破坏者",
-        [38] = "拳击",
-        [39] = "[@focus]拳击",
-    },
+
+Fuyutsui.spellsList = {
+
+    [384255]  = { index = 151, },              -- 切换天赋
+    [200749]  = { index = 152, },              -- 切换专精
+    -- 种族
+    [59547]   = { index = 122, },              -- 纳鲁的赐福
+    [28730]   = { index = 101, },              -- 奥术洪流(法师)
+    [232633]  = { index = 101, },              -- 奥术洪流(牧师)
+    [129597]  = { index = 101, },              -- 奥术洪流(武僧)
+    -- 战士
+    [202168]  = { index = 1, failed = true },  -- 胜利在望
+    [376079]  = { index = 2, failed = true },  -- 勇士之矛
+    [6544]    = { index = 3, failed = true },  -- 英勇飞跃
+    [97462]   = { index = 4, failed = true },  -- 集结呐喊
+    [46968]   = { index = 5, failed = true },  -- 震荡波
+    [107570]  = { index = 6, failed = true },  -- 风暴之锤
+    [384110]  = { index = 7, failed = true },  -- 破裂投掷
+    [64382]   = { index = 8, failed = true },  -- 碎裂投掷
+    [5246]    = { index = 9, failed = true },  -- 破胆怒吼
+    [385952]  = { index = 10, failed = true }, -- 盾牌冲锋
+    [57755]   = { index = 11, },               -- 英勇投掷
+    [6673]    = { index = 12, },               -- 战斗怒吼
+    [1464]    = { index = 13, },               -- 猛击
+    [772]     = { index = 14, },               -- 撕裂
+    [281000]  = { index = 15, },               -- 斩杀
+    [227847]  = { index = 16, },               -- 剑刃风暴
+    [436358]  = { index = 17, },               -- 崩摧
+    [12294]   = { index = 18, },               -- 致死打击
+    [167105]  = { index = 19, },               -- 巨人打击
+    [845]     = { index = 20, },               -- 顺劈斩
+    [7384]    = { index = 21, },               -- 压制
+    [260708]  = { index = 22, },               -- 横扫攻击
+    [107574]  = { index = 23, },               -- 天神下凡
+    [190411]  = { index = 24, },               -- 旋风斩
+    [5308]    = { index = 25, },               -- 斩杀
+    [23881]   = { index = 26, },               -- 嗜血
+    [184367]  = { index = 27, },               -- 暴怒
+    [385059]  = { index = 28, },               -- 奥丁之怒
+    [85288]   = { index = 29, },               -- 怒击
+    [6343]    = { index = 30, },               -- 雷霆一击
+    [435222]  = { index = 31, },               -- 雷霆轰击
+    [6572]    = { index = 32, },               -- 复仇
+    [23922]   = { index = 33, },               -- 盾牌猛击
+    [163201]  = { index = 34, },               -- 斩杀
+    [1269383] = { index = 35, },               -- 英勇打击
+    [335096]  = { index = 36, },               -- 浴血奋战
+    [335100]  = { index = 37, },               -- 碎甲猛击
+    [228920]  = { index = 38, },               -- 破坏者
+    [280735]  = { index = 39, },               -- 斩杀（点了屠杀天赋）
 }

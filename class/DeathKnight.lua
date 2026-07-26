@@ -2,201 +2,256 @@ if UnitClassBase("player") ~= "DEATHKNIGHT" then return end
 local addon, ns = ...
 Fuyutsui.ClassBlocks = {
     [1] = {
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "符文能量" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "符文" },
-        [22] = { type = "block", name = "目标生命值" },
-        [23] = { type = "block", name = "敌人人数" },
-        [24] = { type = "block", name = "目标施法" },
-        [25] = { type = "block", name = "目标施法可打断" },
-        [26] = { type = "block", name = "焦点施法" },
-        [27] = { type = "block", name = "焦点施法可打断" },
-        [28] = { type = "block", name = "目标引导" },
-        [29] = { type = "block", name = "目标引导可打断" },
-        [30] = { type = "block", name = "焦点引导" },
-        [31] = { type = "block", name = "焦点引导可打断" },
-        [40] = { type = "spell", spellId = 49576, name = "死亡之握" },
-        [41] = { type = "spell", spellId = 51052, name = "反魔法领域" },
-        [42] = { type = "spell", spellId = 221562, name = "窒息" },
-        [43] = { type = "spell", spellId = 207167, name = "致盲冰雨" },
-        [44] = { type = "spell", spellId = 46585, name = "亡者复生" },
-        [45] = { type = "spell", spellId = 55233, name = "吸血鬼之血" },
-        [46] = { type = "spell", spellId = 48792, name = "冰封之韧" },
-        [47] = { type = "spell", spellId = 49039, name = "巫妖之躯" },
-        [48] = { type = "spell", spellId = 108199, name = "血魔之握" },
-        [49] = { type = "spell", spellId = 1263569, name = "憎恶附肢" },
-        [50] = { type = "spell", spellId = 50, name = "吞噬" },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "符文能量",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "符文",
+                "敌人人数",
+            },
+            ["目标"] = {
+                "类型",
+                "生命值",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        spells = {
+            { spellId = 49576, name = "死亡之握" },
+            { spellId = 51052, name = "反魔法领域" },
+            { spellId = 221562, name = "窒息" },
+            { spellId = 207167, name = "致盲冰雨" },
+            { spellId = 46585, name = "亡者复生" },
+            { spellId = 55233, name = "吸血鬼之血" },
+            { spellId = 48792, name = "冰封之韧" },
+            { spellId = 49039, name = "巫妖之躯" },
+            { spellId = 108199, name = "血魔之握" },
+            { spellId = 1263569, name = "憎恶附肢" },
+            { spellId = 50, name = "吞噬" },
+        },
     },
     [2] = {
-        ["countBars"] = {
-            { valueType = "charge", name = "符文武器增效", minValue = 0, maxValue = 2, spellId = 47568 },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "符文能量",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "符文",
+                "敌人人数",
+                "爆发开关",
+                "输出模式",
+                "AOE开关",
+                "爆发药水开关",
+                "鲁莽药水冷却",
+            },
+            ["目标"] = {
+                "类型",
+                "生命值",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
         },
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "符文能量" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "符文" },
-        [22] = { type = "block", name = "目标生命值" },
-        [23] = { type = "block", name = "敌人人数" },
-        [24] = { type = "aura", name = "黑暗援助", auraName = "黑暗援助", showKey = "remaining" },
-        [25] = { type = "aura", name = "杀戮机器", auraName = "杀戮机器", showKey = "count" },
-        [26] = { type = "aura", name = "白霜", auraName = "白霜", showKey = "remaining" },
-        [27] = { type = "aura", name = "冰霜灾祸", auraName = "冰霜灾祸", showKey = "remaining" },
-        [51] = { type = "aura", name = "锋锐之霜", auraName = "锋锐之霜", showKey = "count" },
-        [52] = { type = "aura", name = "冰霜之柱", auraName = "冰霜之柱", showKey = "remaining" },
-        [53] = { type = "aura", name = "霜巢之眷", auraName = "霜巢之眷", showKey = "remaining" },
-        [54] = { type = "aura", name = "霜巢之眷-冰霜巨龙之怒", auraName = "霜巢之眷-冰霜巨龙之怒", showKey = "remaining" },
-        [28] = { type = "block", name = "目标施法" },
-        [29] = { type = "block", name = "目标施法可打断" },
-        [30] = { type = "block", name = "焦点施法" },
-        [31] = { type = "block", name = "焦点施法可打断" },
-        [32] = { type = "block", name = "目标引导" },
-        [33] = { type = "block", name = "目标引导可打断" },
-        [34] = { type = "block", name = "焦点引导" },
-        [35] = { type = "block", name = "焦点引导可打断" },
-        [36] = { type = "block", name = "爆发开关" },
-        [37] = { type = "block", name = "输出模式" },
-        [38] = { type = "block", name = "AOE开关" },
-        [39] = { type = "block", name = "爆发药水开关" },
-        [40] = { type = "spell", spellId = 49576, name = "死亡之握" },
-        [41] = { type = "spell", spellId = 51052, name = "反魔法领域" },
-        [42] = { type = "spell", spellId = 221562, name = "窒息" },
-        [43] = { type = "spell", spellId = 207167, name = "致盲冰雨" },
-        [44] = { type = "spell", spellId = 51271, name = "冰霜之柱" },
-        [45] = { type = "spell", spellId = 279302, name = "冰霜巨龙之怒" },
-        [46] = { type = "spell", spellId = 439843, name = "死神印记" },
-        [47] = { type = "spell", spellId = 47568, name = "符文武器增效" },
-        [48] = { type = "spell", spellId = 47568, name = "符文武器增效", charge = true },
-        [49] = { type = "spell", spellId = 1249658, name = "冰龙吐息" },
-        [50] = { type = "block", name = "鲁莽药水冷却" },
+        -- TODO spellId: 黑暗援助
+        -- TODO spellId: 杀戮机器
+        -- TODO spellId: 白霜
+        -- TODO spellId: 冰霜灾祸
+        -- TODO spellId: 锋锐之霜
+        -- TODO spellId: 冰霜之柱
+        -- TODO spellId: 霜巢之眷
+        -- TODO spellId: 霜巢之眷-冰霜巨龙之怒
+        spells = {
+            { spellId = 49576, name = "死亡之握" },
+            { spellId = 51052, name = "反魔法领域" },
+            { spellId = 221562, name = "窒息" },
+            { spellId = 207167, name = "致盲冰雨" },
+            { spellId = 51271, name = "冰霜之柱" },
+            { spellId = 279302, name = "冰霜巨龙之怒" },
+            { spellId = 439843, name = "死神印记" },
+            { spellId = 47568, name = "符文武器增效" },
+            { spellId = 47568, name = "符文武器增效", charge = true, maxCharge = 2 },
+            { spellId = 1249658, name = "冰龙吐息" },
+        },
     },
     [3] = {
-        ["countBars"] = {
-            { valueType = "castCount", name = "天灾打击", minValue = 0, maxValue = 20, spellId = 55090 },
-            { valueType = "charge", name = "腐化", minValue = 0, maxValue = 3, spellId = 1247378 },
-            { valueType = "charge", name = "枯萎凋零", minValue = 0, maxValue = 2, spellId = 43265 }
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "符文能量",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "符文",
+                "敌人人数",
+                "爆发开关",
+                "输出模式",
+                "AOE开关",
+                "疾病判断",
+                "鲁莽药水冷却",
+                "大红冷却",
+                "爆发药水开关",
+                "延迟",
+                "天启骑士数量",
+            },
+            ["目标"] = {
+                "类型",
+                "生命值",
+                "距离",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
         },
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "符文能量" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "符文" },
-        [22] = { type = "block", name = "目标生命值" },
-        [23] = { type = "block", name = "敌人人数" },
-        [24] = { type = "block", name = "爆发开关" },
-        [25] = { type = "block", name = "输出模式" },
-        [26] = { type = "block", name = "AOE开关" },
-        [30] = { type = "block", name = "爆发药水开关" },
-        [32] = { type = "block", name = "目标距离" },
-        [27] = { type = "block", name = "疾病判断" },
-        [28] = { type = "block", name = "鲁莽药水冷却" },
-        [29] = { type = "block", name = "大红冷却" },
-        [31] = { type = "block", name = "延迟" },
-        [33] = { type = "block", name = "目标施法" },
-        [34] = { type = "block", name = "目标施法可打断" },
-        [35] = { type = "block", name = "焦点施法" },
-        [36] = { type = "block", name = "焦点施法可打断" },
-        [37] = { type = "block", name = "目标引导" },
-        [38] = { type = "block", name = "目标引导可打断" },
-        [39] = { type = "block", name = "焦点引导" },
-        [40] = { type = "block", name = "焦点引导可打断" },
-        [41] = { type = "aura", name = "次级食尸鬼", auraName = "次级食尸鬼", showKey = "remaining" },
-        [42] = { type = "aura", name = "割魂索命", auraName = "割魂索命", showKey = "remaining" },
-        [43] = { type = "aura", name = "末日突降", auraName = "末日突降", showKey = "remaining" },
-        [44] = { type = "aura", name = "末日突降层数", auraName = "末日突降", showKey = "count" },
-        [45] = { type = "aura", name = "黑暗援助", auraName = "黑暗援助", showKey = "remaining" },
-        [46] = { type = "aura", name = "禁断知识", auraName = "禁断知识", showKey = "remaining" },
-        [47] = { type = "aura", name = "脓疮毒镰", auraName = "脓疮毒镰", showKey = "remaining" },
-        [48] = { type = "aura", name = "脓疮毒镰2", auraName = "脓疮毒镰2", showKey = "remaining" },
-        [49] = { type = "aura", name = "枯萎凋零", auraName = "枯萎凋零", showKey = "remaining" },
-        [50] = { type = "aura", name = "亡者指挥官", auraName = "亡者指挥官", showKey = "remaining" },
-        [51] = { type = "aura", name = "寒冰锁链", auraName = "寒冰锁链", showKey = "remaining" },
-        [52] = { type = "aura", name = "暗影之爪层数", auraName = "暗影之爪", showKey = "count" },
-        [53] = { type = "aura", name = "凋萎", auraName = "凋萎", showKey = "remaining" },
-        [54] = { type = "block", name = "天启骑士数量" },
-        [61] = { type = "spell", spellId = 49576, name = "死亡之握" },
-        [62] = { type = "spell", spellId = 51052, name = "反魔法领域" },
-        [63] = { type = "spell", spellId = 221562, name = "窒息" },
-        [64] = { type = "spell", spellId = 207167, name = "致盲冰雨" },
-        [65] = { type = "spell", spellId = 46584, name = "亡者复生" },
-        [66] = { type = "spell", spellId = 42650, name = "亡者大军" },
-        [67] = { type = "spell", spellId = 1247378, name = "腐化", },
-        [68] = { type = "spell", spellId = 1247378, name = "腐化", charge = true },
-        [69] = { type = "spell", spellId = 1233448, name = "黑暗突变" },
-        [70] = { type = "spell", spellId = 343294, name = "灵魂收割" },
-        [71] = { type = "spell", spellId = 43265, name = "枯萎凋零" },
-        [72] = { type = "spell", spellId = 43265, name = "枯萎凋零", charge = true },
+        -- TODO spellId: 次级食尸鬼
+        -- TODO spellId: 割魂索命
+        -- TODO spellId: 末日突降
+        -- TODO spellId: 末日突降层数
+        -- TODO spellId: 黑暗援助
+        -- TODO spellId: 禁断知识
+        -- TODO spellId: 脓疮毒镰
+        -- TODO spellId: 脓疮毒镰2
+        -- TODO spellId: 枯萎凋零
+        -- TODO spellId: 亡者指挥官
+        -- TODO spellId: 寒冰锁链
+        -- TODO spellId: 暗影之爪层数
+        -- TODO spellId: 凋萎
+        spells = {
+            { spellId = 49576, name = "死亡之握" },
+            { spellId = 51052, name = "反魔法领域" },
+            { spellId = 221562, name = "窒息" },
+            { spellId = 207167, name = "致盲冰雨" },
+            { spellId = 46584, name = "亡者复生" },
+            { spellId = 42650, name = "亡者大军" },
+            { spellId = 1247378, name = "腐化" },
+            { spellId = 1247378, name = "腐化", charge = true, maxCharge = 3 },
+            { spellId = 1233448, name = "黑暗突变" },
+            { spellId = 343294, name = "灵魂收割" },
+            { spellId = 43265, name = "枯萎凋零" },
+            { spellId = 43265, name = "枯萎凋零", charge = true, maxCharge = 2 },
+            { spellId = 55090, name = "天灾打击", castCount = 20 },
+        },
     },
 }
-Fuyutsui.MacrosList = {
-    dynamicSpells = {},
-    specialSpells = { [38] = "/castsequence reset=0.5 死亡之握,x", },
-    staticSpells = {
-        [1] = "亡者复生",
-        [2] = "亡者大军",
-        [3] = "凋零缠绕",
-        [4] = "天灾打击",
-        [5] = "扩散",
-        [6] = "爆发",
-        [7] = "脓疮打击",
-        [8] = "腐化",
-        [9] = "黑暗突变",
-        [10] = "灵魂收割",
-        [11] = "灵界打击",
-        [12] = "[spec:1]心脏打击;[spec:3]天灾打击",
-        [13] = "[@player]枯萎凋零",
-        [14] = "死神的抚摸",
-        [15] = "符文刃舞",
-        [16] = "精髓分裂",
-        [17] = "血液沸腾",
-        [18] = "吸血鬼之血",
-        [19] = "冰封之韧",
-        [20] = "巫妖之躯",
-        [21] = "[@cursor]反魔法领域",
-        [22] = "[target=focus,exists] 窒息;窒息",
-        [23] = "致盲冰雨",
-        [24] = "血魔之握",
-        [25] = "憎恶附肢",
-        [26] = "死神印记",
-        [27] = "冰川突进",
-        [28] = "冰霜巨龙之怒",
-        [29] = "冷酷严冬",
-        [30] = "冰霜之柱",
-        [31] = "冰霜打击",
-        [32] = "凛风冲击",
-        [33] = "冰霜之镰",
-        [34] = "冰龙吐息",
-        [35] = "湮灭",
-        [36] = "符文武器增效",
-        [37] = "符文打击",
-        [39] = "吞噬",
-        [40] = "item:241288\n/cast item:241289", -- 鲁莽药水
-        [41] = "item:241304\n/cast item:241305", -- 银月城生命药水
-    }
+
+Fuyutsui.spellsList = {
+
+    [384255]  = { index = 151, },              -- 切换天赋
+    [200749]  = { index = 152, },              -- 切换专精
+    -- 种族
+    [59547]   = { index = 122, },              -- 纳鲁的赐福
+    [28730]   = { index = 101, },              -- 奥术洪流(法师)
+    [232633]  = { index = 101, },              -- 奥术洪流(牧师)
+    [129597]  = { index = 101, },              -- 奥术洪流(武僧)
+    -- 死亡骑士
+    [51052]   = { index = 1, failed = true },  -- 反魔法领域
+    [221562]  = { index = 2, failed = true },  -- 窒息
+    [207167]  = { index = 3, failed = true },  -- 致盲冰雨
+    [42650]   = { index = 4, failed = true },  -- 亡者大军
+    [206930]  = { index = 5, },                -- 心脏打击
+    [43265]   = { index = 6, },                -- 枯萎凋零
+    [195292]  = { index = 7, },                -- 死神的抚摸
+    [49998]   = { index = 8, },                -- 灵界打击
+    [49028]   = { index = 9, },                -- 符文刃舞
+    [195182]  = { index = 10, },               -- 精髓分裂
+    [50842]   = { index = 11, },               -- 血液沸腾
+    [433895]  = { index = 12, },               -- 吸血鬼打击
+    [46584]   = { index = 13, },               -- 亡者复生
+    [47541]   = { index = 14, },               -- 凋零缠绕
+    [55090]   = { index = 15, },               -- 天灾打击
+    [207317]  = { index = 16, },               -- 扩散
+    [77575]   = { index = 17, },               -- 爆发
+    [85948]   = { index = 18, },               -- 脓疮打击
+    [1247378] = { index = 19, },               -- 腐化
+    [1233448] = { index = 20, },               -- 黑暗突变
+    [343294]  = { index = 21, },               -- 灵魂收割
+    [458128]  = { index = 22, },               -- 脓疮毒镰
+    [108199]  = { index = 23, failed = true }, -- 血魔之握
+    [1263569] = { index = 24, failed = true }, -- 憎恶附肢
+    [439843]  = { index = 25, },               -- 死神印记
+    [194913]  = { index = 26, },               -- 冰川突进
+    [279302]  = { index = 27, },               -- 冰霜巨龙之怒
+    [196770]  = { index = 28, },               -- 冷酷严冬
+    [51271]   = { index = 29, },               -- 冰霜之柱
+    [49143]   = { index = 30, },               -- 冰霜打击
+    [49184]   = { index = 31, },               -- 凛风冲击
+    [207230]  = { index = 32, },               -- 冰霜之镰
+    [1249685] = { index = 33, },               -- 冰龙吐息
+    [49020]   = { index = 34, },               -- 湮灭
+    [47568]   = { index = 35, },               -- 符文武器增效
+    [316239]  = { index = 36, },               -- 符文打击
+    [1265384] = { index = 37, },               -- 冰霜巨龙之怒
+    [1228433] = { index = 38, },               -- 冰霜灾祸
+    [49576]   = { index = 39, failed = true }, -- 死亡之握
+    [1263824] = { index = 40 },                -- 吞噬
+    [383269]  = { index = 41 },                -- 灾殃坟茔
+    [1242174] = { index = 42 },                -- 死灵缠绕
 }

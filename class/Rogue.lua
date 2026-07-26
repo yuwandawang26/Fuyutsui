@@ -2,200 +2,258 @@ if UnitClassBase("player") ~= "ROGUE" then return end
 local addon, ns = ...
 Fuyutsui.ClassBlocks = {
     [1] = {
-
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "能量值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "目标施法" },
-        [22] = { type = "block", name = "目标施法可打断" },
-        [23] = { type = "block", name = "焦点施法" },
-        [24] = { type = "block", name = "焦点施法可打断" },
-        [25] = { type = "block", name = "目标引导" },
-        [26] = { type = "block", name = "目标引导可打断" },
-        [27] = { type = "block", name = "焦点引导" },
-        [28] = { type = "block", name = "焦点引导可打断" },
-        [31] = { type = "spell", spellId = 5938, name = "毒刃" },
-        [32] = { type = "spell", spellId = 2094, name = "致盲" },
-        [33] = { type = "spell", spellId = 1966, name = "佯攻" },
-        [34] = { type = "spell", spellId = 1856, name = "消失" },
-        [35] = { type = "spell", spellId = 1833, name = "偷袭" },
-        [36] = { type = "spell", spellId = 114018, name = "潜伏帷幕" },
-        [37] = { type = "spell", spellId = 381623, name = "菊花茶" },
-        [38] = { type = "spell", spellId = 5277, name = "闪避" },
-        [39] = { type = "spell", spellId = 185311, name = "猩红之瓶" },
-        [40] = { type = "spell", spellId = 1725, name = "扰乱" },
-        [41] = { type = "spell", spellId = 2983, name = "疾跑" },
-        [42] = { type = "spell", spellId = 1776, name = "凿击" },
-        [43] = { type = "spell", spellId = 408, name = "肾击" },
-        [44] = { type = "spell", spellId = 31224, name = "暗影斗篷" },
-        [45] = { type = "spell", spellId = 1766, name = "脚踢" },
-        [46] = { type = "spell", spellId = 360194, name = "死亡印记" },
-        [47] = { type = "spell", spellId = 1293340, name = "死亡印记" },
-        [48] = { type = "spell", spellId = 703, name = "锁喉" },
-        [49] = { type = "spell", spellId = 385627, name = "君王之灾" },
-        [50] = { type = "spell", spellId = 36554, name = "暗影步" },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "能量值",
+                "队伍人数",
+                "首领战",
+                "难度",
+            },
+            ["目标"] = {
+                "类型",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        spells = {
+            { spellId = 5938, name = "毒刃" },
+            { spellId = 2094, name = "致盲" },
+            { spellId = 1966, name = "佯攻" },
+            { spellId = 1856, name = "消失" },
+            { spellId = 1833, name = "偷袭" },
+            { spellId = 114018, name = "潜伏帷幕" },
+            { spellId = 381623, name = "菊花茶" },
+            { spellId = 5277, name = "闪避" },
+            { spellId = 185311, name = "猩红之瓶" },
+            { spellId = 1725, name = "扰乱" },
+            { spellId = 2983, name = "疾跑" },
+            { spellId = 1776, name = "凿击" },
+            { spellId = 408, name = "肾击" },
+            { spellId = 31224, name = "暗影斗篷" },
+            { spellId = 1766, name = "脚踢" },
+            { spellId = 360194, name = "死亡印记" },
+            { spellId = 1293340, name = "死亡印记" },
+            { spellId = 703, name = "锁喉" },
+            { spellId = 385627, name = "君王之灾" },
+            { spellId = 36554, name = "暗影步" },
+        },
     },
     [2] = {
-
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "能量值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "目标施法" },
-        [22] = { type = "block", name = "目标施法可打断" },
-        [23] = { type = "block", name = "焦点施法" },
-        [24] = { type = "block", name = "焦点施法可打断" },
-        [25] = { type = "block", name = "目标引导" },
-        [26] = { type = "block", name = "目标引导可打断" },
-        [27] = { type = "block", name = "焦点引导" },
-        [28] = { type = "block", name = "焦点引导可打断" },
-        [31] = { type = "spell", spellId = 5938, name = "毒刃" },
-        [32] = { type = "spell", spellId = 2094, name = "致盲" },
-        [33] = { type = "spell", spellId = 1966, name = "佯攻" },
-        [34] = { type = "spell", spellId = 1856, name = "消失" },
-        [35] = { type = "spell", spellId = 1833, name = "偷袭" },
-        [36] = { type = "spell", spellId = 114018, name = "潜伏帷幕" },
-        [37] = { type = "spell", spellId = 381623, name = "菊花茶" },
-        [38] = { type = "spell", spellId = 5277, name = "闪避" },
-        [39] = { type = "spell", spellId = 185311, name = "猩红之瓶" },
-        [40] = { type = "spell", spellId = 1725, name = "扰乱" },
-        [41] = { type = "spell", spellId = 2983, name = "疾跑" },
-        [42] = { type = "spell", spellId = 1776, name = "凿击" },
-        [43] = { type = "spell", spellId = 408, name = "肾击" },
-        [44] = { type = "spell", spellId = 31224, name = "暗影斗篷" },
-        [45] = { type = "spell", spellId = 1766, name = "脚踢" },
-        [46] = { type = "spell", spellId = 13750, name = "冲动" },
-        [47] = { type = "spell", spellId = 51690, name = "影舞步" },
-        [48] = { type = "spell", spellId = 271877, name = "刀锋冲刺" },
-        [49] = { type = "spell", spellId = 315341, name = "正中眉心" },
-        [50] = { type = "spell", spellId = 13877, name = "剑刃乱舞" },
-        [51] = { type = "spell", spellId = 195475, name = "抓钩" },
-        [52] = { type = "spell", spellId = 195475, name = "抓钩", charge = true },
-        [53] = { type = "spell", spellId = 1214909, name = "命运骨骰" },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "能量值",
+                "队伍人数",
+                "首领战",
+                "难度",
+            },
+            ["目标"] = {
+                "类型",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        spells = {
+            { spellId = 5938, name = "毒刃" },
+            { spellId = 2094, name = "致盲" },
+            { spellId = 1966, name = "佯攻" },
+            { spellId = 1856, name = "消失" },
+            { spellId = 1833, name = "偷袭" },
+            { spellId = 114018, name = "潜伏帷幕" },
+            { spellId = 381623, name = "菊花茶" },
+            { spellId = 5277, name = "闪避" },
+            { spellId = 185311, name = "猩红之瓶" },
+            { spellId = 1725, name = "扰乱" },
+            { spellId = 2983, name = "疾跑" },
+            { spellId = 1776, name = "凿击" },
+            { spellId = 408, name = "肾击" },
+            { spellId = 31224, name = "暗影斗篷" },
+            { spellId = 1766, name = "脚踢" },
+            { spellId = 13750, name = "冲动" },
+            { spellId = 51690, name = "影舞步" },
+            { spellId = 271877, name = "刀锋冲刺" },
+            { spellId = 315341, name = "正中眉心" },
+            { spellId = 13877, name = "剑刃乱舞" },
+            { spellId = 195475, name = "抓钩" },
+            { spellId = 195475, name = "抓钩", charge = true },
+            { spellId = 1214909, name = "命运骨骰" },
+        },
     },
     [3] = {
-
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "能量值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "目标施法" },
-        [22] = { type = "block", name = "目标施法可打断" },
-        [23] = { type = "block", name = "焦点施法" },
-        [24] = { type = "block", name = "焦点施法可打断" },
-        [25] = { type = "block", name = "目标引导" },
-        [26] = { type = "block", name = "目标引导可打断" },
-        [27] = { type = "block", name = "焦点引导" },
-        [28] = { type = "block", name = "焦点引导可打断" },
-        [31] = { type = "spell", spellId = 5938, name = "毒刃" },
-        [32] = { type = "spell", spellId = 2094, name = "致盲" },
-        [33] = { type = "spell", spellId = 1966, name = "佯攻" },
-        [34] = { type = "spell", spellId = 1856, name = "消失" },
-        [35] = { type = "spell", spellId = 1833, name = "偷袭" },
-        [36] = { type = "spell", spellId = 114018, name = "潜伏帷幕" },
-        [37] = { type = "spell", spellId = 381623, name = "菊花茶" },
-        [38] = { type = "spell", spellId = 5277, name = "闪避" },
-        [39] = { type = "spell", spellId = 185311, name = "猩红之瓶" },
-        [40] = { type = "spell", spellId = 1725, name = "扰乱" },
-        [41] = { type = "spell", spellId = 2983, name = "疾跑" },
-        [42] = { type = "spell", spellId = 1776, name = "凿击" },
-        [43] = { type = "spell", spellId = 408, name = "肾击" },
-        [44] = { type = "spell", spellId = 31224, name = "暗影斗篷" },
-        [45] = { type = "spell", spellId = 1766, name = "脚踢" },
-        [46] = { type = "spell", spellId = 36554, name = "暗影步" },
-        [47] = { type = "spell", spellId = 280719, name = "影分身" },
-        [48] = { type = "spell", spellId = 121471, name = "暗影之刃" },
-        [49] = { type = "spell", spellId = 185313, name = "暗影之舞" },
-        [50] = { type = "spell", spellId = 185313, name = "暗影之舞", charge = true },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "能量值",
+                "队伍人数",
+                "首领战",
+                "难度",
+            },
+            ["目标"] = {
+                "类型",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        spells = {
+            { spellId = 5938, name = "毒刃" },
+            { spellId = 2094, name = "致盲" },
+            { spellId = 1966, name = "佯攻" },
+            { spellId = 1856, name = "消失" },
+            { spellId = 1833, name = "偷袭" },
+            { spellId = 114018, name = "潜伏帷幕" },
+            { spellId = 381623, name = "菊花茶" },
+            { spellId = 5277, name = "闪避" },
+            { spellId = 185311, name = "猩红之瓶" },
+            { spellId = 1725, name = "扰乱" },
+            { spellId = 2983, name = "疾跑" },
+            { spellId = 1776, name = "凿击" },
+            { spellId = 408, name = "肾击" },
+            { spellId = 31224, name = "暗影斗篷" },
+            { spellId = 1766, name = "脚踢" },
+            { spellId = 36554, name = "暗影步" },
+            { spellId = 280719, name = "影分身" },
+            { spellId = 121471, name = "暗影之刃" },
+            { spellId = 185313, name = "暗影之舞" },
+            { spellId = 185313, name = "暗影之舞", charge = true },
+        },
     },
 }
-Fuyutsui.MacrosList = {
-    dynamicSpells = {},
-    specialSpells = {},
-    staticSpells = {
-        [1] = "毒刃",
-        [2] = "致盲",
-        [3] = "暗影斗篷",
-        [4] = "凿击",
-        [5] = "嫁祸诀窍",
-        [6] = "闪避",
-        [7] = "迟钝药膏",
-        [8] = "萎缩药膏",
-        [9] = "菊花茶",
-        [10] = "肾击",
-        [11] = "佯攻",
-        [12] = "偷袭",
-        [13] = "消失",
-        [14] = "切割",
-        [15] = "潜伏帷幕",
-        [16] = "扰乱",
-        [17] = "猩红之瓶",
-        [18] = "疾跑",
-        [19] = "闷棍",
-        [20] = "速效药膏",
-        [21] = "致伤药膏",
-        [22] = "夺命药膏",
-        [23] = "增效药膏",
-        [24] = "减速药膏",
-        [25] = "刀扇",
-        [26] = "死亡印记",
-        [27] = "死亡印记",
-        [28] = "锁喉",
-        [29] = "剧毒之刃",
-        [30] = "割裂",
-        [31] = "毁伤",
-        [32] = "君王之灾",
-        [33] = "毒伤",
-        [34] = "暗影步",
-        [35] = "猩红风暴",
-        [36] = "伏击",
-        [37] = "脚踢",
-        [38] = "冲动",
-        [39] = "影舞步",
-        [40] = "正中眉心",
-        [41] = "刀锋冲刺",
-        [42] = "手枪射击",
-        [43] = "剑刃乱舞",
-        [44] = "抓钩",
-        [45] = "命运骨骰",
-        [46] = "斩击",
-        [47] = "时运继延",
-        [48] = "伺机待发",
-        [49] = "黑火药",
-        [50] = "影分身",
-        [51] = "暗影之刃",
-        [52] = "背刺",
-        [53] = "暗影之舞",
-        [54] = "袖剑风暴",
-        [55] = "暗影打击",
-        [56] = "飞镖投掷",
-        [57] = "赤喉之咬",
-        [58] = "影袭",
-        [59] = "致命一击",
-    },
+
+Fuyutsui.spellsList = {
+
+    [384255]  = { index = 151, },              -- 切换天赋
+    [200749]  = { index = 152, },              -- 切换专精
+    -- 种族
+    [59547]   = { index = 122, },              -- 纳鲁的赐福
+    [28730]   = { index = 101, },              -- 奥术洪流(法师)
+    [232633]  = { index = 101, },              -- 奥术洪流(牧师)
+    [129597]  = { index = 101, },              -- 奥术洪流(武僧)
+    -- 盗贼
+    [5938]    = { index = 1, },                -- 毒刃
+    [2094]    = { index = 2, },                -- 致盲
+    [31224]   = { index = 3, },                -- 暗影斗篷
+    [1776]    = { index = 4, },                -- 凿击
+    [57934]   = { index = 5, },                -- 嫁祸诀窍
+    [5277]    = { index = 6, },                -- 闪避
+    [5761]    = { index = 7, },                -- 迟钝药膏
+    [381637]  = { index = 8, },                -- 萎缩药膏
+    [381623]  = { index = 9, },                -- 菊花茶
+    [408]     = { index = 10, },               -- 肾击
+    [1966]    = { index = 11, },               -- 佯攻
+    [1833]    = { index = 12, },               -- 偷袭
+    [1856]    = { index = 13, },               -- 消失
+    [315496]  = { index = 14, },               -- 切割
+    [114018]  = { index = 15, },               -- 潜伏帷幕
+    [1725]    = { index = 16, },               -- 扰乱
+    [185311]  = { index = 17, },               -- 猩红之瓶
+    [2983]    = { index = 18, },               -- 疾跑
+    [6770]    = { index = 19, },               -- 闷棍
+    [315584]  = { index = 20, },               -- 速效药膏
+    [8679]    = { index = 21, },               -- 致伤药膏
+    [2823]    = { index = 22, },               -- 夺命药膏
+    [381664]  = { index = 23, },               -- 增效药膏
+    [3408]    = { index = 24, },               -- 减速药膏
+    [51723]   = { index = 25, },               -- 刀扇
+    [360194]  = { index = 26, },               -- 死亡印记
+    [1293340] = { index = 27, },               -- 死亡印记
+    [703]     = { index = 28, },               -- 锁喉
+    [185565]  = { index = 29, },               -- 剧毒之刃
+    [1943]    = { index = 30, },               -- 割裂
+    [1329]    = { index = 31, },               -- 毁伤
+    [385627]  = { index = 32, },               -- 君王之灾
+    [32645]   = { index = 33, },               -- 毒伤
+    [36554]   = { index = 34, },               -- 暗影步
+    [1247227] = { index = 35, },               -- 猩红风暴
+    [8676]    = { index = 36, },               -- 伏击
+    [1766]    = { index = 37, },               -- 脚踢
+    [13750]   = { index = 38, },               -- 冲动
+    [51690]   = { index = 39, },               -- 影舞步
+    [315341]  = { index = 40, },               -- 正中眉心
+    [271877]  = { index = 41, },               -- 刀锋冲刺
+    [185763]  = { index = 42, },               -- 手枪射击
+    [13877]   = { index = 43, },               -- 剑刃乱舞
+    [195475]  = { index = 44, },               -- 抓钩
+    [1214909] = { index = 45, },               -- 命运骨骰
+    [2098]    = { index = 46, },               -- 斩击
+    [381989]  = { index = 47, },               -- 时运继延
+    [1277933] = { index = 48, },               -- 伺机待发
+    [319175]  = { index = 49, },               -- 黑火药
+    [280719]  = { index = 50, },               -- 影分身
+    [121471]  = { index = 51, },               -- 暗影之刃
+    [53]      = { index = 52, },               -- 背刺
+    [185313]  = { index = 53, },               -- 暗影之舞
+    [197835]  = { index = 54, },               -- 袖剑风暴
+    [185438]  = { index = 55, },               -- 暗影打击
+    [114014]  = { index = 56, },               -- 飞镖投掷
+    [200758]  = { index = 57, },               -- 幽暗之刃(背刺)
+    [426591]  = { index = 58, },               -- 赤喉之咬
+    [193315]  = { index = 59, },               -- 影袭
+    [441776]  = { index = 60, },               -- 致命一击
 }

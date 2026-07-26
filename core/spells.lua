@@ -1,0 +1,256 @@
+local addon, ns = ...
+
+local GetSpellName = C_Spell.GetSpellName
+local GetSpellCooldown = C_Spell.GetSpellCooldown
+local GetSpellChargeDuration = C_Spell.GetSpellChargeDuration
+local GetSpellCooldownDuration = C_Spell.GetSpellCooldownDuration
+local EvaluateColorFromBoolean = C_CurveUtil.EvaluateColorFromBoolean
+
+local IsSpellKnown = C_SpellBook.IsSpellKnown
+local IsSpellInSpellBook = C_SpellBook.IsSpellInSpellBook
+
+local state = Fuyutsui.state
+local target = Fuyutsui.target
+local spellsList = Fuyutsui.spellsList
+
+local spells = {}
+local failedSpell, failedSpellId, failedSpellTimer = nil, nil, nil
+
+local ColorValue255 = CreateColor(0, 0, 1, 1)
+
+local dispelCurve = C_CurveUtil.CreateColorCurve()
+target.enemyCurve = C_CurveUtil.CreateColorCurve()
+target.friendCurve = C_CurveUtil.CreateColorCurve()
+dispelCurve:SetType(Enum.LuaCurveType.Step)
+target.enemyCurve:SetType(Enum.LuaCurveType.Step)
+target.friendCurve:SetType(Enum.LuaCurveType.Step)
+
+local succSpells = {}
+local succIndex = 1
+
+local function DebugPrintNewSpellEntry(spellID)
+    if succSpells[spellID] or Fuyutsui.spellsList[spellID] then return end
+    succSpells[spellID] = true
+    print("[" .. spellID .. "]" .. " = { index = " .. succIndex .. ", }, -- " .. GetSpellName(spellID))
+    succIndex = succIndex + 1
+end
+
+local function DebugPrintSpellBlockLine(spellID)
+    local spellName = C_Spell.GetSpellName(spellID)
+    print("[] = { type = \"spell\", spellId = " .. spellID .. ", name = \"" .. spellName .. "\" },")
+end
+
+Fuyutsui.DebugPrintNewSpellEntry = DebugPrintNewSpellEntry
+Fuyutsui.DebugPrintSpellBlockLine = DebugPrintSpellBlockLine
+
+local dispelAbilities = {
+    [1] = { 527, 360823, 4987, 115450, 88423, 77130 },
+    [2] = { 383016, 51886, 392378, 2782, 475 },
+    [3] = { 390632, 213634, 393024, 213644, 388874, 218164 },
+    [4] = { 392378, 2782, 393024, 213644, 388874, 218164, 365585 },
+    [11] = {},
+}
+
+local offensiveDispelAbilities = {
+    [1] = { 528 },
+    [9] = { 2908 },
+}
+
+local function HasLearnedAnySpell(spellIDs)
+    for _, spellID in ipairs(spellIDs) do
+        if IsSpellKnown(spellID) then
+            return true
+        end
+    end
+    return false
+end
+
+local function UpdateCooldownSpellKnown()
+    spells = {}
+    if not Fuyutsui.blocks or not Fuyutsui.blocks.spells then return end
+    C_Timer.After(1, function()
+        local blocks = Fuyutsui.blocks
+        if not blocks or not blocks.spells then return end
+        for spellID, info in pairs(blocks.spells) do
+            local isKnown = IsSpellKnown(spellID)
+            if info.inSpellBook then
+                isKnown = IsSpellInSpellBook(spellID)
+            end
+            local index = info.index
+            if isKnown or info.forcedKnown then
+                spells[spellID] = info
+            else
+                Fuyutsui:CreateTexture(index, 1)
+            end
+        end
+    end)
+end
+
+local DEFENSIVE_DISPEL_TYPE_NAMES = {
+    [1] = "Magic",
+    [2] = "Curse",
+    [3] = "Disease",
+    [4] = "Poison",
+    [11] = "Bleed",
+}
+
+function Fuyutsui:UpdateSpellKnown()
+    UpdateCooldownSpellKnown()
+
+    local dispelCapabilities = {
+        [1] = false,
+        [2] = false,
+        [3] = false,
+        [4] = false,
+        [11] = false,
+    }
+    local offensiveDispelCapabilities = {
+        [1] = false,
+        [9] = false,
+    }
+
+    for debuffType, spellIDs in pairs(dispelAbilities) do
+        dispelCapabilities[debuffType] = HasLearnedAnySpell(spellIDs)
+    end
+
+    for debuffType, spellIDs in pairs(offensiveDispelAbilities) do
+        offensiveDispelCapabilities[debuffType] = HasLearnedAnySpell(spellIDs)
+    end
+
+    self.dispelCapabilities = dispelCapabilities
+    self.offensiveDispelCapabilities = offensiveDispelCapabilities
+
+    local includeDispelTypes = {}
+    for id, can in pairs(dispelCapabilities) do
+        local name = DEFENSIVE_DISPEL_TYPE_NAMES[id]
+        if can and name then
+            includeDispelTypes[name] = true
+        end
+    end
+    self.includeDispelTypes = includeDispelTypes
+
+    dispelCurve:ClearPoints()
+    target.enemyCurve:ClearPoints()
+    target.friendCurve:ClearPoints()
+
+    for i, v in pairs(dispelCapabilities) do
+        if v then
+            dispelCurve:AddPoint(i, CreateColor(0, 1, i / 255, 1))
+            target.friendCurve:AddPoint(i, CreateColor(0, 1, (i + 11) / 255, 1))
+        else
+            dispelCurve:AddPoint(i, CreateColor(0, 0, 0, 1))
+            target.friendCurve:AddPoint(i, CreateColor(0, 0, 11 / 255, 1))
+        end
+    end
+
+    for i, v in pairs(offensiveDispelCapabilities) do
+        if v then
+            if i == 9 then
+                target.enemyCurve:AddPoint(9, CreateColor(0, 1, 3 / 255, 1))
+            else
+                target.enemyCurve:AddPoint(i, CreateColor(0, 1, (i + 1) / 255, 1))
+            end
+        else
+            target.enemyCurve:AddPoint(i, CreateColor(0, 0, 1 / 255, 1))
+        end
+    end
+end
+
+function Fuyutsui:UpdateSpellFailed(spellID)
+    local isUsable = C_Spell.IsSpellUsable(spellID)
+
+    if spellsList[spellID] and spellsList[spellID].failed then
+        failedSpell = spellsList[spellID].index
+        state.failedSpell = failedSpell / 255 or 0
+    else
+        failedSpell = nil
+        state.failedSpell = 0
+    end
+
+    if not isUsable or not failedSpell then return end
+
+    failedSpellId = spellID
+
+    if failedSpellTimer then
+        failedSpellTimer:Cancel()
+        failedSpellTimer = nil
+    end
+
+    failedSpellTimer = C_Timer.NewTimer(1.5, function()
+        state.failedSpell = 0
+        self:UpdateStateBlock("状态", "法术失败")
+        failedSpellTimer = nil
+        failedSpell = nil
+        failedSpellId = nil
+    end)
+    self:UpdateStateBlock("状态", "法术失败")
+end
+
+function Fuyutsui:UpdateFailedSpellBySuccess(spellID)
+    if spellID ~= failedSpellId then return end
+    failedSpell = nil
+    failedSpellId = nil
+    print("|cff00ff00插入技能: |r", GetSpellName(spellID))
+    state.failedSpell = 0
+    self:UpdateStateBlock("状态", "法术失败")
+end
+
+function Fuyutsui:UpdateSpellCooldown()
+    if not spells then return end
+    local curve255 = self.curve255
+    for spellID, info in pairs(spells) do
+        local index = info.index
+        local cdDurationObj = GetSpellCooldownDuration(spellID)
+        local cdInfo = GetSpellCooldown(spellID)
+        if cdDurationObj and cdInfo then
+            local result = cdDurationObj:EvaluateRemainingDuration(curve255, 1)
+            ColorValue255:SetRGBA(0, index, 254 / 255)
+            ---@diagnostic disable-next-line: param-type-mismatch
+            local value = EvaluateColorFromBoolean(cdInfo.isEnabled, result, ColorValue255)
+            local _, _, b = value:GetRGB()
+            ---@diagnostic disable-next-line: undefined-field
+            if cdInfo.isOnGCD then b = 0 end
+            self:CreateTexture(index, b)
+        else
+            self:CreateTexture(index, 1)
+        end
+        local chargeIndex = info.charge
+        if chargeIndex then
+            local chDurationObj = GetSpellChargeDuration(spellID)
+            if chDurationObj then
+                local result = chDurationObj:EvaluateRemainingDuration(curve255)
+                ---@diagnostic disable-next-line: param-type-mismatch
+                local _, _, b = result:GetRGB()
+                self:CreateTexture(chargeIndex, b)
+            else
+                self:CreateTexture(chargeIndex, 1)
+            end
+        end
+    end
+end
+
+function Fuyutsui:GetItemCount()
+    self.state.HealthPotionCount = C_Item.GetItemCount(241304) + C_Item.GetItemCount(241305)
+    self.state.ManaPotionCount = C_Item.GetItemCount(241301) + C_Item.GetItemCount(241300)
+    self.state.HealthstoneCount = C_Item.GetItemCount(5512) + C_Item.GetItemCount(224464)
+    self.state.RecklessnessCount = C_Item.GetItemCount(241288) + C_Item.GetItemCount(241289)
+    self.state.LightsPotentialCount = C_Item.GetItemCount(241308) + C_Item.GetItemCount(241309)
+end
+
+function Fuyutsui:GetItemRemainingTime(itemID)
+    local startTimeSeconds, durationSeconds, enableCooldownTimer = C_Item.GetItemCooldown(itemID)
+    if not enableCooldownTimer then return 255 end
+    if startTimeSeconds > 0 then
+        return durationSeconds - (GetTime() - startTimeSeconds)
+    else
+        return 0
+    end
+end
+
+function Fuyutsui:UpdateItemCooldown()
+    self:UpdateStateBlock("状态", "大红冷却")
+    self:UpdateStateBlock("状态", "大蓝冷却")
+    self:UpdateStateBlock("状态", "治疗石冷却")
+    self:UpdateStateBlock("状态", "鲁莽药水冷却")
+    self:UpdateStateBlock("状态", "圣光潜力冷却")
+end

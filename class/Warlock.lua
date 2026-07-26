@@ -2,201 +2,255 @@ if UnitClassBase("player") ~= "WARLOCK" then return end
 local addon, ns = ...
 Fuyutsui.ClassBlocks = {
     [1] = {
-
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "法力值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "灵魂碎片" },
-        [22] = { type = "block", name = "施法技能" },
-        [23] = { type = "block", name = "目标施法" },
-        [24] = { type = "block", name = "目标施法可打断" },
-        [25] = { type = "block", name = "焦点施法" },
-        [26] = { type = "block", name = "焦点施法可打断" },
-        [27] = { type = "block", name = "目标引导" },
-        [28] = { type = "block", name = "目标引导可打断" },
-        [29] = { type = "block", name = "焦点引导" },
-        [30] = { type = "block", name = "焦点引导可打断" },
-        [31] = { type = "spell", spellId = 5782, name = "恐惧" },
-        [32] = { type = "spell", spellId = 6789, name = "死亡缠绕" },
-        [33] = { type = "spell", spellId = 20707, name = "灵魂石" },
-        [34] = { type = "spell", spellId = 30283, name = "暗影之怒" },
-        [35] = { type = "spell", spellId = 333889, name = "邪能统御" },
-        [36] = { type = "spell", spellId = 108416, name = "黑暗契约" },
-        [37] = { type = "spell", spellId = 111771, name = "恶魔传送门" },
-        [38] = { type = "spell", spellId = 127174, name = "虚弱灾厄" },
-        [39] = { type = "spell", spellId = 1271802, name = "语言灾厄" },
-        [40] = { type = "spell", spellId = 48018, name = "恶魔法阵" },
-        [41] = { type = "spell", spellId = 48020, name = "恶魔法阵：传送" },
-        [42] = { type = "spell", spellId = 205180, name = "召唤黑眼" },
-        [43] = { type = "spell", spellId = 48181, name = "鬼影缠身" },
-        [44] = { type = "spell", spellId = 1257052, name = "幽冥收割" },
-        [45] = { type = "spell", spellId = 442726, name = "怨毒" },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "法力值",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "灵魂碎片",
+                "施法技能",
+            },
+            ["目标"] = {
+                "类型",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        spells = {
+            { spellId = 5782, name = "恐惧" },
+            { spellId = 6789, name = "死亡缠绕" },
+            { spellId = 20707, name = "灵魂石" },
+            { spellId = 30283, name = "暗影之怒" },
+            { spellId = 333889, name = "邪能统御" },
+            { spellId = 108416, name = "黑暗契约" },
+            { spellId = 111771, name = "恶魔传送门" },
+            { spellId = 127174, name = "虚弱灾厄" },
+            { spellId = 1271802, name = "语言灾厄" },
+            { spellId = 48018, name = "恶魔法阵" },
+            { spellId = 48020, name = "恶魔法阵：传送" },
+            { spellId = 205180, name = "召唤黑眼" },
+            { spellId = 48181, name = "鬼影缠身" },
+            { spellId = 1257052, name = "幽冥收割" },
+            { spellId = 442726, name = "怨毒" },
+        },
     },
     [2] = {
-        ["countBars"] = {
-            { valueType = "castCount", name = "内爆", minValue = 0, maxValue = 20, spellId = 196277 }
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "法力值",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "治疗石冷却",
+                "大红冷却",
+                "灵魂碎片",
+                "施法技能",
+            },
+            ["目标"] = {
+                "类型",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
         },
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "法力值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "治疗石冷却" },
-        [22] = { type = "block", name = "大红冷却" },
-        [23] = { type = "block", name = "灵魂碎片" },
-        [24] = { type = "block", name = "施法技能" },
-        [52] = { type = "block", name = "目标施法" },
-        [53] = { type = "block", name = "目标施法可打断" },
-        [54] = { type = "block", name = "焦点施法" },
-        [55] = { type = "block", name = "焦点施法可打断" },
-        [56] = { type = "block", name = "目标引导" },
-        [57] = { type = "block", name = "目标引导可打断" },
-        [58] = { type = "block", name = "焦点引导" },
-        [59] = { type = "block", name = "焦点引导可打断" },
-        [31] = { type = "spell", spellId = 5782, name = "恐惧" },
-        [32] = { type = "spell", spellId = 6789, name = "死亡缠绕" },
-        [33] = { type = "spell", spellId = 20707, name = "灵魂石" },
-        [34] = { type = "spell", spellId = 30283, name = "暗影之怒" },
-        [35] = { type = "spell", spellId = 333889, name = "邪能统御" },
-        [36] = { type = "spell", spellId = 108416, name = "黑暗契约" },
-        [37] = { type = "spell", spellId = 111771, name = "恶魔传送门" },
-        [38] = { type = "spell", spellId = 127174, name = "虚弱灾厄" },
-        [39] = { type = "spell", spellId = 1271802, name = "语言灾厄" },
-        [40] = { type = "spell", spellId = 48018, name = "恶魔法阵" },
-        [41] = { type = "spell", spellId = 48020, name = "恶魔法阵：传送" },
-        [42] = { type = "spell", spellId = 196277, name = "内爆" },
-        [43] = { type = "spell", spellId = 265187, name = "召唤恶魔暴君" },
-        [44] = { type = "spell", spellId = 1276467, name = "魔典：邪能破坏者" },
-        [45] = { type = "spell", spellId = 105174, name = "古尔丹之手" },
-        [46] = { type = "spell", spellId = 1276672, name = "召唤末日守卫" },
-        [47] = { type = "spell", spellId = 104316, name = "召唤恐惧猎犬" },
-        [48] = { type = "spell", spellId = 264187, name = "恶魔之箭" },
-        [49] = { type = "spell", spellId = 1276452, name = "魔典：小鬼领主" },
-        [50] = { type = "spell", spellId = 388215, name = "吞噬魔法" },
-        [51] = { type = "spell", spellId = 30146, name = "召唤恶魔卫士" },
+        spells = {
+            { spellId = 5782, name = "恐惧" },
+            { spellId = 6789, name = "死亡缠绕" },
+            { spellId = 20707, name = "灵魂石" },
+            { spellId = 30283, name = "暗影之怒" },
+            { spellId = 333889, name = "邪能统御" },
+            { spellId = 108416, name = "黑暗契约" },
+            { spellId = 111771, name = "恶魔传送门" },
+            { spellId = 127174, name = "虚弱灾厄" },
+            { spellId = 1271802, name = "语言灾厄" },
+            { spellId = 48018, name = "恶魔法阵" },
+            { spellId = 48020, name = "恶魔法阵：传送" },
+            { spellId = 196277, name = "内爆", castCount = 20 },
+            { spellId = 265187, name = "召唤恶魔暴君" },
+            { spellId = 1276467, name = "魔典：邪能破坏者" },
+            { spellId = 105174, name = "古尔丹之手" },
+            { spellId = 1276672, name = "召唤末日守卫" },
+            { spellId = 104316, name = "召唤恐惧猎犬" },
+            { spellId = 264187, name = "恶魔之箭" },
+            { spellId = 1276452, name = "魔典：小鬼领主" },
+            { spellId = 388215, name = "吞噬魔法" },
+            { spellId = 30146, name = "召唤恶魔卫士" },
+        },
     },
     [3] = {
-
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "法力值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "目标施法" },
-        [22] = { type = "block", name = "目标施法可打断" },
-        [23] = { type = "block", name = "焦点施法" },
-        [24] = { type = "block", name = "焦点施法可打断" },
-        [25] = { type = "block", name = "目标引导" },
-        [26] = { type = "block", name = "目标引导可打断" },
-        [27] = { type = "block", name = "焦点引导" },
-        [28] = { type = "block", name = "焦点引导可打断" },
-
-        [29] = { type = "block", name = "灵魂碎片" },
-        [30] = { type = "block", name = "施法技能" },
-        [31] = { type = "spell", spellId = 5782, name = "恐惧" },
-        [32] = { type = "spell", spellId = 6789, name = "死亡缠绕" },
-        [33] = { type = "spell", spellId = 20707, name = "灵魂石" },
-        [34] = { type = "spell", spellId = 30283, name = "暗影之怒" },
-        [35] = { type = "spell", spellId = 333889, name = "邪能统御" },
-        [36] = { type = "spell", spellId = 108416, name = "黑暗契约" },
-        [37] = { type = "spell", spellId = 111771, name = "恶魔传送门" },
-        [38] = { type = "spell", spellId = 127174, name = "虚弱灾厄" },
-        [39] = { type = "spell", spellId = 1271802, name = "语言灾厄" },
-        [40] = { type = "spell", spellId = 48018, name = "恶魔法阵" },
-        [41] = { type = "spell", spellId = 48020, name = "恶魔法阵：传送" },
-        [42] = { type = "spell", spellId = 1122, name = "召唤地狱火" },
-        [43] = { type = "spell", spellId = 6353, name = "灵魂之火" },
-        [44] = { type = "spell", spellId = 17962, name = "燃烧" },
-        [45] = { type = "spell", spellId = 17962, name = "燃烧", charge = true },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "法力值",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "灵魂碎片",
+                "施法技能",
+            },
+            ["目标"] = {
+                "类型",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        spells = {
+            { spellId = 5782, name = "恐惧" },
+            { spellId = 6789, name = "死亡缠绕" },
+            { spellId = 20707, name = "灵魂石" },
+            { spellId = 30283, name = "暗影之怒" },
+            { spellId = 333889, name = "邪能统御" },
+            { spellId = 108416, name = "黑暗契约" },
+            { spellId = 111771, name = "恶魔传送门" },
+            { spellId = 127174, name = "虚弱灾厄" },
+            { spellId = 1271802, name = "语言灾厄" },
+            { spellId = 48018, name = "恶魔法阵" },
+            { spellId = 48020, name = "恶魔法阵：传送" },
+            { spellId = 1122, name = "召唤地狱火" },
+            { spellId = 6353, name = "灵魂之火" },
+            { spellId = 17962, name = "燃烧" },
+            { spellId = 17962, name = "燃烧", charge = true },
+        },
     },
 }
-Fuyutsui.MacrosList = {
-    dynamicSpells = {},
-    specialSpells = {},
-    staticSpells = {
-        [1] = "恐惧",
-        [2] = "死亡缠绕",
-        [3] = "[@cursor]暗影之怒",
-        [4] = "内爆",
-        [5] = "召唤恶魔暴君",
-        [6] = "魔典：邪能破坏者",
-        [7] = "召唤末日守卫",
-        [8] = "古尔丹之手",
-        [9] = "召唤恐惧猎犬",
-        [10] = "召唤恶魔卫士",
-        [11] = "恶魔之箭",
-        [12] = "暗影箭",
-        [13] = "召唤地狱猎犬",
-        [14] = "召唤小鬼",
-        [15] = "虚弱灾厄",
-        [16] = "语言灾厄",
-        [17] = "陨灭",
-        [18] = "狱火箭",
-        [19] = "灵魂石",
-        [20] = "邪能统御",
-        [21] = "黑暗契约",
-        [22] = "恶魔之箭",
-        [23] = "魔典：小鬼领主",
-        [24] = "法术封锁",
-        [25] = "吞噬魔法",
-        [26] = "爆燃冲刺",
-        [27] = "放逐术",
-        [28] = "疲劳诅咒",
-        [29] = "语言诅咒",
-        [30] = "恶魔传送门",
-        [31] = "灵魂燃烧",
-        [32] = "恐惧嚎叫",
-        [33] = "恶魔法阵",
-        [34] = "恶魔法阵：传送",
-        [35] = "制造灵魂之井",
-        [36] = "召唤仪式",
-        [37] = "腐蚀术",
-        [38] = "吸取生命",
-        [39] = "召唤黑眼",
-        [40] = "痛苦无常",
-        [41] = "幽冥收割",
-        [42] = "腐蚀之种",
-        [43] = "痛楚",
-        [44] = "鬼影缠身",
-        [45] = "枯萎",
-        [46] = "怨毒",
-        [47] = "召唤地狱火",
-        [48] = "暗影灼烧",
-        [49] = "混乱之箭",
-        [50] = "火焰之雨",
-        [51] = "灵魂之火",
-        [52] = "烧尽",
-        [53] = "燃烧",
-        [54] = "献祭",
-        [55] = "引导恶魔之火",
-        [56] = "浩劫",
-        [57] = "火焰之雨",
-        [58] = "大灾变",
-        [59] = "吸取灵魂",
-        [60] = "召唤虚空行者",
-        [61] = "召唤萨亚德",
-    },
+
+Fuyutsui.spellsList = {
+
+    [384255]  = { index = 151, },              -- 切换天赋
+    [200749]  = { index = 152, },              -- 切换专精
+    -- 种族
+    [59547]   = { index = 122, },              -- 纳鲁的赐福
+    [28730]   = { index = 101, },              -- 奥术洪流(法师)
+    [232633]  = { index = 101, },              -- 奥术洪流(牧师)
+    [129597]  = { index = 101, },              -- 奥术洪流(武僧)
+    -- 术士
+    [5782]    = { index = 1, failed = true },  -- 恐惧
+    [6789]    = { index = 2, failed = true },  -- 死亡缠绕
+    [30283]   = { index = 3, failed = true },  -- 暗影之怒
+    [196277]  = { index = 4, failed = true },  -- 内爆
+    [265187]  = { index = 5, failed = true },  -- 召唤恶魔暴君
+    [1276467] = { index = 6, failed = true },  -- 魔典：邪能破坏者
+    [1276672] = { index = 7, },                -- 召唤末日守卫
+    [105174]  = { index = 8, },                -- 古尔丹之手
+    [104316]  = { index = 9, },                -- 召唤恐惧猎犬
+    [30146]   = { index = 10, },               -- 召唤恶魔卫士
+    [264178]  = { index = 11, },               -- 恶魔之箭
+    [686]     = { index = 12, },               -- 暗影箭
+    [691]     = { index = 13, },               -- 召唤地狱猎犬
+    [688]     = { index = 14, },               -- 召唤小鬼
+    [1271748] = { index = 15, },               -- 虚弱灾厄
+    [1271802] = { index = 16, },               -- 语言灾厄
+    [434635]  = { index = 17, },               -- 陨灭(古尔丹之手)
+    [434506]  = { index = 18, },               -- 狱火箭(暗影箭)
+    [20707]   = { index = 19, },               -- 灵魂石
+    [333889]  = { index = 20, },               -- 邪能统御
+    [108416]  = { index = 21, },               -- 黑暗契约
+    [264187]  = { index = 22, },               -- 恶魔之箭
+    [1276452] = { index = 23, },               -- 魔典：小鬼领主
+    [132409]  = { index = 24, },               -- 法术封锁
+    [388215]  = { index = 25, },               -- 吞噬魔法
+    [111440]  = { index = 26, },               -- 爆燃冲刺
+    [710]     = { index = 27, },               -- 放逐术
+    [334275]  = { index = 28, },               -- 疲劳诅咒
+    [1714]    = { index = 29, },               -- 语言诅咒
+    [111771]  = { index = 30, },               -- 恶魔传送门
+    [385899]  = { index = 31, },               -- 灵魂燃烧
+    [5484]    = { index = 32, },               -- 恐惧嚎叫
+    [48018]   = { index = 33, },               -- 恶魔法阵
+    [48020]   = { index = 34, },               -- 恶魔法阵：传送
+    [29893]   = { index = 35, },               -- 制造灵魂之井
+    [698]     = { index = 36, },               -- 召唤仪式
+    [172]     = { index = 37, },               -- 腐蚀术
+    [234153]  = { index = 38, },               -- 吸取生命
+    [205180]  = { index = 39, },               -- 召唤黑眼
+    [1259790] = { index = 40, },               -- 痛苦无常
+    [1257052] = { index = 41, },               -- 幽冥收割
+    [27243]   = { index = 42, },               -- 腐蚀之种
+    [980]     = { index = 43, },               -- 痛楚
+    [48181]   = { index = 44, },               -- 鬼影缠身
+    [445468]  = { index = 45, },               -- 枯萎(腐蚀术)
+    [442726]  = { index = 46, },               -- 怨毒
+    [1122]    = { index = 47, },               -- 召唤地狱火
+    [17877]   = { index = 48, },               -- 暗影灼烧
+    [116858]  = { index = 49, },               -- 混乱之箭
+    [5740]    = { index = 50, },               -- 火焰之雨
+    [6353]    = { index = 51, },               -- 灵魂之火
+    [29722]   = { index = 52, },               -- 烧尽
+    [17962]   = { index = 53, },               -- 燃烧
+    [348]     = { index = 54, },               -- 献祭
+    [196447]  = { index = 55, },               -- 引导恶魔之火
+    [80240]   = { index = 56, },               -- 浩劫
+    [1214467] = { index = 57, },               -- 火焰之雨(目标)
+    [152108]  = { index = 58, },               -- 大灾变
+    [198590]  = { index = 59, },               -- 吸取灵魂
+    [697]     = { index = 60, },               -- 召唤虚空行者
+    [366222]  = { index = 61, },               -- 召唤萨亚德
 }

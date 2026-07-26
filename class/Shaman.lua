@@ -2,207 +2,271 @@ if UnitClassBase("player") ~= "SHAMAN" then return end
 local addon, ns = ...
 Fuyutsui.ClassBlocks = {
     [1] = {
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "漩涡值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "目标生命值" },
-        [22] = { type = "block", name = "敌人人数" },
-        [23] = { type = "block", name = "目标施法" },
-        [24] = { type = "block", name = "目标施法可打断" },
-        [25] = { type = "block", name = "焦点施法" },
-        [26] = { type = "block", name = "焦点施法可打断" },
-        [27] = { type = "block", name = "目标引导" },
-        [28] = { type = "block", name = "目标引导可打断" },
-        [29] = { type = "block", name = "焦点引导" },
-        [30] = { type = "block", name = "焦点引导可打断" },
-        [31] = { type = "spell", spellId = 57994, name = "风剪" },
-        [32] = { type = "spell", spellId = 198103, name = "土元素" },
-        [33] = { type = "spell", spellId = 192058, name = "电能图腾" },
-        [34] = { type = "spell", spellId = 378081, name = "自然迅捷" },
-        [35] = { type = "spell", spellId = 108287, name = "图腾投射" },
-        [36] = { type = "spell", spellId = 51514, name = "妖术" },
-        [37] = { type = "spell", spellId = 378773, name = "强化净化术" },
-        [38] = { type = "spell", spellId = 8143, name = "战栗图腾" },
-        [39] = { type = "spell", spellId = 383013, name = "清毒图腾" },
-        [40] = { type = "spell", spellId = 192063, name = "阵风" },
-        [41] = { type = "spell", spellId = 58875, name = "幽魂步" },
-
-        [42] = { type = "block", name = "大红冷却" },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "漩涡值",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "敌人人数",
+                "大红冷却",
+            },
+            ["目标"] = {
+                "类型",
+                "生命值",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        spells = {
+            { spellId = 57994, name = "风剪" },
+            { spellId = 198103, name = "土元素" },
+            { spellId = 192058, name = "电能图腾" },
+            { spellId = 378081, name = "自然迅捷" },
+            { spellId = 108287, name = "图腾投射" },
+            { spellId = 51514, name = "妖术" },
+            { spellId = 378773, name = "强化净化术" },
+            { spellId = 8143, name = "战栗图腾" },
+            { spellId = 383013, name = "清毒图腾" },
+            { spellId = 192063, name = "阵风" },
+            { spellId = 58875, name = "幽魂步" },
+        },
     },
     [2] = {
-        ["countBars"] = {
-            { valueType = "castCount", name = "溢流漩涡", minValue = 0, maxValue = 20, spellId = 8004 },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "法力值",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "敌人人数",
+                "漩涡武器层数",
+                "爆发开关",
+                "输出模式",
+                "AOE开关",
+                "爆发药水开关",
+                "延迟",
+            },
+            ["目标"] = {
+                "类型",
+                "生命值",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+                "距离",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
         },
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "法力值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "目标生命值" },
-        [22] = { type = "block", name = "敌人人数" },
-        [23] = { type = "block", name = "目标施法" },
-        [24] = { type = "block", name = "目标施法可打断" },
-        [25] = { type = "block", name = "焦点施法" },
-        [26] = { type = "block", name = "焦点施法可打断" },
-        [27] = { type = "block", name = "目标引导" },
-        [28] = { type = "block", name = "目标引导可打断" },
-        [29] = { type = "block", name = "焦点引导" },
-        [30] = { type = "block", name = "焦点引导可打断" },
-        [31] = { type = "spell", spellId = 57994, name = "风剪" },
-        [32] = { type = "spell", spellId = 198103, name = "土元素" },
-        [33] = { type = "spell", spellId = 192058, name = "电能图腾" },
-        [34] = { type = "spell", spellId = 378081, name = "自然迅捷" },
-        [35] = { type = "spell", spellId = 108287, name = "图腾投射" },
-        [36] = { type = "spell", spellId = 51514, name = "妖术" },
-        [37] = { type = "spell", spellId = 378773, name = "强化净化术" },
-        [38] = { type = "spell", spellId = 8143, name = "战栗图腾" },
-        [39] = { type = "spell", spellId = 383013, name = "清毒图腾" },
-        [40] = { type = "spell", spellId = 192063, name = "阵风" },
-        [41] = { type = "spell", spellId = 58875, name = "幽魂步" },
-        [42] = { type = "block", name = "漩涡武器层数" },
-        [43] = { type = "spell", spellId = 187874, name = "毁灭闪电" },
-        [44] = { type = "spell", spellId = 60103, name = "熔岩猛击" },
-        [45] = { type = "spell", spellId = 17364, name = "风暴打击" },
-        [46] = { type = "spell", spellId = 470057, name = "流电炽焰" },
-        [47] = { type = "spell", spellId = 196884, name = "狂野扑击" },
-        [48] = { type = "spell", spellId = 108271, name = "星界转移" },
-        [49] = { type = "block", name = "爆发开关" },
-        [50] = { type = "block", name = "输出模式" },
-        [51] = { type = "block", name = "AOE开关" },
-        [52] = { type = "block", name = "爆发药水开关" },
-        [53] = { type = "block", name = "目标距离" },
-        [54] = { type = "block", name = "延迟" },
+        spells = {
+            { spellId = 57994, name = "风剪" },
+            { spellId = 198103, name = "土元素" },
+            { spellId = 192058, name = "电能图腾" },
+            { spellId = 378081, name = "自然迅捷" },
+            { spellId = 108287, name = "图腾投射" },
+            { spellId = 51514, name = "妖术" },
+            { spellId = 378773, name = "强化净化术" },
+            { spellId = 8143, name = "战栗图腾" },
+            { spellId = 383013, name = "清毒图腾" },
+            { spellId = 192063, name = "阵风" },
+            { spellId = 58875, name = "幽魂步" },
+            { spellId = 187874, name = "毁灭闪电" },
+            { spellId = 60103, name = "熔岩猛击" },
+            { spellId = 17364, name = "风暴打击" },
+            { spellId = 470057, name = "流电炽焰" },
+            { spellId = 196884, name = "狂野扑击" },
+            { spellId = 108271, name = "星界转移" },
+            { spellId = 8004, name = "溢流漩涡", castCount = 20 },
+        },
     },
     [3] = {
-        ["countBars"] = {
-            { valueType = "charge", name = "激流", minValue = 0, maxValue = 2, spellId = 61295 },
-            { valueType = "charge", name = "治疗之泉图腾", minValue = 0, maxValue = 4, spellId = 5394 }
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "法力值",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "延迟",
+                "施法技能",
+                "施法目标",
+            },
+            ["目标"] = {
+                "类型",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
         },
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "法力值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "延迟" },
-        [22] = { type = "block", name = "施法技能" },
-        [23] = { type = "block", name = "施法目标" },
-        [58] = { type = "block", name = "目标施法" },
-        [59] = { type = "block", name = "目标施法可打断" },
-        [60] = { type = "block", name = "焦点施法" },
-        [61] = { type = "block", name = "焦点施法可打断" },
-        [62] = { type = "block", name = "目标引导" },
-        [63] = { type = "block", name = "目标引导可打断" },
-        [64] = { type = "block", name = "焦点引导" },
-        [65] = { type = "block", name = "焦点引导可打断" },
-        [24] = { type = "aura", name = "飞旋之土", auraName = "飞旋之土", showKey = "remaining" },
-        [25] = { type = "aura", name = "潮汐奔涌", auraName = "潮汐奔涌", showKey = "remaining" },
-        [26] = { type = "aura", name = "风暴涌流图腾", auraName = "风暴涌流图腾", showKey = "remaining" },
-        [27] = { type = "aura", name = "风暴涌流图腾层数", auraName = "风暴涌流图腾", showKey = "count" },
-        [28] = { type = "aura", name = "生命释放", auraName = "生命释放", showKey = "remaining" },
-        [29] = { type = "aura", name = "升腾", auraName = "升腾", showKey = "remaining" },
-        [30] = { type = "aura", name = "风暴涌流图腾-持续时间", auraName = "风暴涌流图腾-持续时间", showKey = "remaining" },
-        [56] = { type = "aura", name = "倾盆大雨", auraName = "倾盆大雨", showKey = "remaining" },
-        [57] = { type = "aura", name = "倾盆大雨层数", auraName = "倾盆大雨", showKey = "count" },
-        [31] = { type = "spell", spellId = 57994, name = "风剪" },
-        [32] = { type = "spell", spellId = 198103, name = "土元素" },
-        [33] = { type = "spell", spellId = 192058, name = "电能图腾" },
-        [34] = { type = "spell", spellId = 378081, name = "自然迅捷" },
-        [35] = { type = "spell", spellId = 108287, name = "图腾投射" },
-        [36] = { type = "spell", spellId = 51514, name = "妖术" },
-        [37] = { type = "spell", spellId = 378773, name = "强化净化术" },
-        [38] = { type = "spell", spellId = 8143, name = "战栗图腾" },
-        [39] = { type = "spell", spellId = 383013, name = "清毒图腾" },
-        [40] = { type = "spell", spellId = 192063, name = "阵风" },
-        [41] = { type = "spell", spellId = 58875, name = "幽魂步" },
-        [42] = { type = "spell", spellId = 51505, name = "熔岩爆裂" },
-        [43] = { type = "spell", spellId = 51505, name = "熔岩爆裂", charge = true },
-        [44] = { type = "spell", spellId = 61295, name = "激流" },
-        [45] = { type = "spell", spellId = 61295, name = "激流", charge = true },
-        [46] = { type = "spell", spellId = 5394, name = "治疗之泉图腾" },
-        [47] = { type = "spell", spellId = 5394, name = "治疗之泉图腾", charge = true },
-        [48] = { type = "spell", spellId = 470411, name = "烈焰震击" },
-        [49] = { type = "spell", spellId = 77130, name = "净化灵魂" },
-        [50] = { type = "spell", spellId = 73685, name = "生命释放" },
-        [51] = { type = "spell", spellId = 443454, name = "先祖迅捷" },
-        [52] = { type = "spell", spellId = 444995, name = "涌动图腾", inSpellBook = true },
-        [53] = { type = "spell", spellId = 98008, name = "灵魂链接图腾" },
-        [54] = { type = "spell", spellId = 114052, name = "升腾" },
-        [55] = { type = "spell", spellId = 108280, name = "治疗之潮图腾" },
-        [256] = {
-            type = "group",
+        -- TODO spellId: 飞旋之土
+        -- TODO spellId: 潮汐奔涌
+        -- TODO spellId: 风暴涌流图腾
+        -- TODO spellId: 风暴涌流图腾层数
+        -- TODO spellId: 生命释放
+        -- TODO spellId: 升腾
+        -- TODO spellId: 风暴涌流图腾-持续时间
+        -- TODO spellId: 倾盆大雨
+        -- TODO spellId: 倾盆大雨层数
+        spells = {
+            { spellId = 57994, name = "风剪" },
+            { spellId = 198103, name = "土元素" },
+            { spellId = 192058, name = "电能图腾" },
+            { spellId = 378081, name = "自然迅捷" },
+            { spellId = 108287, name = "图腾投射" },
+            { spellId = 51514, name = "妖术" },
+            { spellId = 378773, name = "强化净化术" },
+            { spellId = 8143, name = "战栗图腾" },
+            { spellId = 383013, name = "清毒图腾" },
+            { spellId = 192063, name = "阵风" },
+            { spellId = 58875, name = "幽魂步" },
+            { spellId = 51505, name = "熔岩爆裂" },
+            { spellId = 51505, name = "熔岩爆裂", charge = true },
+            { spellId = 61295, name = "激流" },
+            { spellId = 61295, name = "激流", charge = true, maxCharge = 2 },
+            { spellId = 5394, name = "治疗之泉图腾" },
+            { spellId = 5394, name = "治疗之泉图腾", charge = true, maxCharge = 4 },
+            { spellId = 470411, name = "烈焰震击" },
+            { spellId = 77130, name = "净化灵魂" },
+            { spellId = 73685, name = "生命释放" },
+            { spellId = 443454, name = "先祖迅捷" },
+            { spellId = 444995, name = "涌动图腾", inSpellBook = true },
+            { spellId = 98008, name = "灵魂链接图腾" },
+            { spellId = 114052, name = "升腾" },
+            { spellId = 108280, name = "治疗之潮图腾" },
+        },
+        group = {
             num = 6,
             healthPercent = 1,
             role = 2,
         },
     },
 }
-Fuyutsui.MacrosList = {
-    dynamicSpells = { "治疗波", "治疗链", "激流", "大地之盾", "净化灵魂", "生命释放" },
-    specialSpells = {},
-    staticSpells = {
-        [1] = "唤潮者的护卫",
-        [2] = "大地生命武器",
-        [3] = "天怒",
-        [4] = "水之护盾",
-        [5] = "烈焰震击",
-        [6] = "熔岩爆裂",
-        [7] = "闪电箭",
-        [8] = "闪电链",
-        [9] = "治疗之泉图腾",
-        [10] = "风剪",
-        [11] = "先祖迅捷",
-        [12] = "自然迅捷",
-        [13] = "[@cursor]治疗之雨",
-        [14] = "[@cursor]电能图腾",
-        [15] = "阵风",
-        [16] = "[@cursor]灵魂链接图腾",
-        [17] = "土元素",
-        [18] = "战栗图腾",
-        [19] = "清毒图腾",
-        [20] = "图腾投射",
-        [21] = "升腾",
-        [22] = "治疗之潮图腾",
-        [23] = "毁灭闪电",
-        [24] = "流电炽焰",
-        [25] = "火舌武器",
-        [26] = "熔岩猛击",
-        [27] = "裂地术",
-        [28] = "始源风暴",
-        [29] = "风切",
-        [30] = "风怒武器",
-        [31] = "风暴打击",
-        [32] = "狂风怒号",
-        [33] = "元素冲击",
-        [34] = "地震术",
-        [35] = "大地震击",
-        [36] = "风暴守护者",
-        [37] = "闪电之盾",
-        [38] = "[@cursor]治疗之雨",
-        [39] = "[@cursor]狂风图腾",
-        [40] = "[@target]净化灵魂",
-        [41] = "[@focus]风剪",
-    },
+
+Fuyutsui.spellsList = {
+
+    [384255]  = { index = 151, },              -- 切换天赋
+    [200749]  = { index = 152, },              -- 切换专精
+    -- 种族
+    [59547]   = { index = 122, },              -- 纳鲁的赐福
+    [28730]   = { index = 101, },              -- 奥术洪流(法师)
+    [232633]  = { index = 101, },              -- 奥术洪流(牧师)
+    [129597]  = { index = 101, },              -- 奥术洪流(武僧)
+    -- 萨满
+    [457481]  = { index = 1, },                -- 唤潮者的护卫
+    [382021]  = { index = 2, },                -- 大地生命武器
+    [462854]  = { index = 3, },                -- 天怒
+    [52127]   = { index = 4, },                -- 水之护盾
+    [470411]  = { index = 5, },                -- 烈焰震击
+    [51505]   = { index = 6, },                -- 熔岩爆裂
+    [188196]  = { index = 7, },                -- 闪电箭
+    [188443]  = { index = 8, },                -- 闪电链
+    [5394]    = { index = 9, },                -- 治疗之泉图腾
+    [57994]   = { index = 10, },               -- 风剪
+    [443454]  = { index = 11, },               -- 先祖迅捷
+    [378081]  = { index = 12, },               -- 自然迅捷
+    [444995]  = { index = 13, failed = true }, -- 涌动图腾
+    [192058]  = { index = 14, failed = true }, -- 电能图腾
+    [192063]  = { index = 15, failed = true }, -- 阵风
+    [98008]   = { index = 16, failed = true }, -- 灵魂链接图腾
+    [198103]  = { index = 17, failed = true }, -- 土元素
+    [8143]    = { index = 18, failed = true }, -- 战栗图腾
+    [383013]  = { index = 19, failed = true }, -- 清毒图腾
+    [108287]  = { index = 20, failed = true }, -- 图腾投射
+    [114052]  = { index = 21, failed = true }, -- 升腾
+    [108280]  = { index = 22, failed = true }, -- 治疗之潮图腾
+    [187874]  = { index = 23, },               -- 毁灭闪电
+    [470057]  = { index = 24, },               -- 流电炽焰
+    [318038]  = { index = 25, },               -- 火舌武器
+    [60103]   = { index = 26, },               -- 熔岩猛击
+    [197214]  = { index = 27, },               -- 裂地术
+    [1218090] = { index = 28, },               -- 始源风暴
+    [115356]  = { index = 29, },               -- 风切
+    [33757]   = { index = 30, },               -- 风怒武器
+    [17364]   = { index = 31, },               -- 风暴打击
+    [452201]  = { index = 32, },               -- 狂风怒号
+    [117014]  = { index = 33, },               -- 元素冲击
+    [462620]  = { index = 34, },               -- 地震术
+    [8042]    = { index = 35, },               -- 大地震击
+    [191634]  = { index = 36, },               -- 风暴守护者
+    [192106]  = { index = 37, },               -- 闪电之盾
+    [77472]   = { index = 38, },               -- 治疗波
+    [1064]    = { index = 39, },               -- 治疗链
+    [61295]   = { index = 40, },               -- 激流
+    [974]     = { index = 41, },               -- 大地之盾
+    [77130]   = { index = 42, },               -- 净化灵魂
+    [73685]   = { index = 43, },               -- 生命释放
+    [1267068] = { index = 44, },               -- 风暴涌流图腾
+    [73920]   = { index = 45, failed = true }, -- 治疗之雨
+    [462603]  = { index = 46 },                -- 倾盆大雨
+    [192077]  = { index = 47, failed = true }, -- 狂风图腾
+    [456366]  = { index = 48, },               -- 治疗之雨
+    [79206]   = { index = 49, },               -- 灵魂行者的恩赐
+    [108271]  = { index = 50, },               -- 星界转移
+    [2645]    = { index = 51, },               -- 幽魂之狼
+    [370]     = { index = 50, },               -- 净化术
+    [378773]  = { index = 51, },               -- 强效净化术
 }

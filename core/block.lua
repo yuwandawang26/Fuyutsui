@@ -5,22 +5,22 @@ local screenWidth = GetScreenWidth()
     可修改配置（置顶）
 ============================================================================]]
 
--- 主色条（FuyutsuiColorBars / CreatTexture）
+-- 主色条（FuyutsuiColorBars / CreateTexture）
 local BLOCK_FIX_COUNT = 510        -- 总色块数量
 local BLOCK_FIRST_SCHEME_MAX = 255 -- 第一套索引方案上限（其后用 r=1/255）
-local BLOCK_HEIGHT = 5             -- 色块高度
+local BLOCK_HEIGHT = 1             -- 色块高度
 local BLOCK_SPACING = 0            -- 色块间距
 local COLOR_BARS_STRATA = "BACKGROUND"
 local COLOR_BARS_LEVEL = 5001
 
 -- 横向条（FuyutsuiCountBars：计数条 + 光环层数条，BAR_END_COLOR 收尾）
 local BAR_UNIT_COUNT = 500  -- 横向单元数
-local BAR_HEIGHT = 5        -- 条高度
+local BAR_HEIGHT = 1        -- 条高度
 local BAR_FRAME_HEIGHT = 20 -- 容器高度
 local BAR_START_INDEX = 2   -- 首条占用起始单元
 local BAR_STRATA = "BACKGROUND"
 local BAR_LEVEL = 1
-local BAR_STATUS_LEVEL = 4999 -- StatusBar 层级
+local BAR_STATUS_LEVEL = 4999                                -- StatusBar 层级
 local BAR_END_COLOR = { 200 / 255, 200 / 255, 200 / 255, 1 } -- 全部条之后的终点色块
 
 -- AuraContainer 计时色块（█）
@@ -86,7 +86,7 @@ colorBars:SetFrameLevel(COLOR_BARS_LEVEL)
 
 local pixelTextures = {}
 
-local function creatTextureByIndex(i)
+local function createTextureByIndex(i)
     if i <= 0 or i > BLOCK_FIX_CONFIG.blockCount then return nil end
     if pixelTextures[i] == nil then
         local tex = colorBars:CreateTexture(nil, "OVERLAY")
@@ -99,22 +99,22 @@ local function creatTextureByIndex(i)
 end
 
 -- 索引 1..255: (0, i/255, b, 1)；索引 256..510: (1/255, (i-255)/255, b, 1)
-function Fuyutsui:CreatTexture(i, b)
-    local tex = creatTextureByIndex(i)
+function Fuyutsui:CreateTexture(i, b)
+    local tex = createTextureByIndex(i)
     if tex then
         local r, g = EncodeBlockChannels(i)
         tex:SetColorTexture(r, g, b, 1)
     end
 end
 
-function Fuyutsui:clearAllTextures()
+function Fuyutsui:ClearAllTextures()
     for i = 1, BLOCK_FIX_CONFIG.blockCount do
-        self:CreatTexture(i, 0)
+        self:CreateTexture(i, 0)
     end
 end
 
 for i = 1, BLOCK_FIX_CONFIG.blockCount do
-    Fuyutsui:CreatTexture(i, 0)
+    Fuyutsui:CreateTexture(i, 0)
 end
 
 --[[============================================================================
@@ -333,7 +333,7 @@ local function ConfigureAuraButtonMouse(button)
     end
 end
 
---- 对齐 CreatTexture(i, b)：绿通道编码索引，蓝通道随剩余秒数 0..255 从 0→1
+--- 对齐 CreateTexture(i, b)：绿通道编码索引，蓝通道随剩余秒数 0..255 从 0→1
 local function MakeDurationColorCurve(index)
     local curve = C_CurveUtil.CreateColorCurve()
     curve:SetType(Enum.LuaCurveType.Linear)
@@ -374,6 +374,51 @@ end
 local function MakeDurationSlotInitializer(index)
     return function(button)
         SetupClippedDuration(button, index)
+    end
+end
+
+-- 防御驱散类型 -> 蓝通道编码（与 main.lua DEFENSIVE_DISPEL_TYPE_NAMES / dispelCapabilities 一致）
+local DISPEL_TYPE_COLOR_IDS = {
+    Magic = 1,
+    Curse = 2,
+    Disease = 3,
+    Poison = 4,
+    Bleed = 11,
+}
+
+--- 驱散像素：固定纹理 + 按驱散类型写死颜色（非剩余时间）
+local function MakeDispelColorMap(index)
+    local r, g = EncodeBlockChannels(index)
+    local map = {}
+    for name, id in pairs(DISPEL_TYPE_COLOR_IDS) do
+        map[name] = CreateColor(r, g, id / 255, 1)
+    end
+    return map
+end
+
+local function SetupDispelTypePixel(button, index)
+    button:SetSize(AURA_BLOCK_W, AURA_BLOCK_H)
+    button:SetClipsChildren(true)
+    ConfigureAuraButtonMouse(button)
+    button:SetPoint("TOPLEFT", UIParent, "TOPLEFT", AuraBlockXOffset(index), 0)
+
+    local tex = button:CreateTexture(nil, "ARTWORK")
+    tex:SetAllPoints(button)
+    tex:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
+    tex:SetVertexColor(1, 1, 1, 1)
+
+    button:AddDispelTypeTexture(tex, {
+        showWhenHarmful = true,
+        showWhenHelpful = false,
+        showWithoutDispelType = false,
+        style = Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
+        customDispelColorMap = MakeDispelColorMap(index),
+    })
+end
+
+local function MakeDispelSlotInitializer(index)
+    return function(button)
+        SetupDispelTypePixel(button, index)
     end
 end
 
@@ -510,9 +555,10 @@ end
 --[[============================================================================
     队伍成员 AuraContainer
     配置：
-      groups.aura[offset] = { name, spellId/spellIds }  -- HELPFUL|PLAYER
-      groups.dispel = offset                            -- HARMFUL，按玩家可驱散类型过滤
+      groups.aura[offset] = { name, spellId/spellIds }  -- HELPFUL|PLAYER，剩余时间色块
+      groups.dispel = offset                            -- HARMFUL，按可驱散类型过滤；固定纹理按类型着色
     像素：start + (memberIndex-1)*num + offset
+    驱散蓝通道：Magic=1 Curse=2 Disease=3 Poison=4 Bleed=11（/255）
 ============================================================================]]
 
 local groupAuraContainers = {} -- [memberIndex] = AuraContainer
@@ -596,7 +642,7 @@ local function CreateGroupMemberAuraContainer(memberIndex, groups, auraDefs, inc
         end
     end
 
-    -- 可驱散减益：仅包含玩家当前会的驱散类型
+    -- 可驱散减益：仅包含玩家当前会的驱散类型；像素显示类型固定色，非剩余时间
     if groups.dispel and includeDispelTypes then
         local pixelIndex = GroupAuraPixelIndex(groups, memberIndex, groups.dispel)
         if pixelIndex > 0 and pixelIndex <= BLOCK_FIX_COUNT then
@@ -609,7 +655,7 @@ local function CreateGroupMemberAuraContainer(memberIndex, groups, auraDefs, inc
                     },
                     sortMethod = AuraContainerSortMethod.Expiration,
                     sortDirection = AuraContainerSortDirection.Normal,
-                    initializeFrame = MakeDurationSlotInitializer(pixelIndex),
+                    initializeFrame = MakeDispelSlotInitializer(pixelIndex),
                 }
             )
         end

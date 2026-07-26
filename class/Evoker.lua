@@ -2,131 +2,182 @@ if UnitClassBase("player") ~= "EVOKER" then return end
 local addon, ns = ...
 Fuyutsui.ClassBlocks = {
     [1] = {
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "能量值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "施法技能" },
-        [22] = { type = "block", name = "目标施法" },
-        [23] = { type = "block", name = "目标施法可打断" },
-        [24] = { type = "block", name = "焦点施法" },
-        [25] = { type = "block", name = "焦点施法可打断" },
-        [26] = { type = "block", name = "目标引导" },
-        [27] = { type = "block", name = "目标引导可打断" },
-        [28] = { type = "block", name = "焦点引导" },
-        [29] = { type = "block", name = "焦点引导可打断" },
-        [31] = { type = "spell", spellId = 365585, name = "净除" },
-        [32] = { type = "spell", spellId = 363916, name = "黑曜鳞片" },
-        [33] = { type = "spell", spellId = 363916, name = "黑曜鳞片", charge = true },
-        [34] = { type = "spell", spellId = 358385, name = "山崩" },
-        [35] = { type = "spell", spellId = 360995, name = "青翠之拥" },
-        [36] = { type = "spell", spellId = 357210, name = "深呼吸" },
-        [37] = { type = "spell", spellId = 374227, name = "微风" },
-        [38] = { type = "spell", spellId = 358267, name = "悬空" },
-        [39] = { type = "spell", spellId = 358267, name = "悬空", charge = true },
-        [40] = { type = "spell", spellId = 368970, name = "扫尾" },
-        [41] = { type = "spell", spellId = 370553, name = "扭转天平" },
-        [42] = { type = "spell", spellId = 370665, name = "营救" },
-        [43] = { type = "spell", spellId = 374968, name = "时间螺旋" },
-        [44] = { type = "spell", spellId = 406732, name = "空间悖论" },
-        [45] = { type = "spell", spellId = 359073, name = "永恒之涌" },
-        [46] = { type = "spell", spellId = 351338, name = "镇压" },
-        [47] = { type = "spell", spellId = 375087, name = "狂龙之怒" },
-        [48] = { type = "spell", spellId = 357208, name = "火焰吐息" },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "能量值",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "施法技能",
+            },
+            ["目标"] = {
+                "类型",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        spells = {
+            { spellId = 365585, name = "净除" },
+            { spellId = 363916, name = "黑曜鳞片" },
+            { spellId = 363916, name = "黑曜鳞片", charge = true },
+            { spellId = 358385, name = "山崩" },
+            { spellId = 360995, name = "青翠之拥" },
+            { spellId = 357210, name = "深呼吸" },
+            { spellId = 374227, name = "微风" },
+            { spellId = 358267, name = "悬空" },
+            { spellId = 358267, name = "悬空", charge = true },
+            { spellId = 368970, name = "扫尾" },
+            { spellId = 370553, name = "扭转天平" },
+            { spellId = 370665, name = "营救" },
+            { spellId = 374968, name = "时间螺旋" },
+            { spellId = 406732, name = "空间悖论" },
+            { spellId = 359073, name = "永恒之涌" },
+            { spellId = 351338, name = "镇压" },
+            { spellId = 375087, name = "狂龙之怒" },
+            { spellId = 357208, name = "火焰吐息" },
+        },
     },
-    [2] = {},
+    [2] = {
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+            },
+        },
+    },
     [3] = {
-
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "能量值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "施法技能" },
-        [22] = { type = "block", name = "精华能量" },
-        [23] = { type = "block", name = "目标施法" },
-        [24] = { type = "block", name = "目标施法可打断" },
-        [25] = { type = "block", name = "焦点施法" },
-        [26] = { type = "block", name = "焦点施法可打断" },
-        [27] = { type = "block", name = "目标引导" },
-        [28] = { type = "block", name = "目标引导可打断" },
-        [29] = { type = "block", name = "焦点引导" },
-        [30] = { type = "block", name = "焦点引导可打断" },
-        [31] = { type = "spell", spellId = 365585, name = "净除" },
-        [32] = { type = "spell", spellId = 363916, name = "黑曜鳞片" },
-        [33] = { type = "spell", spellId = 363916, name = "黑曜鳞片", charge = true },
-        [34] = { type = "spell", spellId = 358385, name = "山崩" },
-        [35] = { type = "spell", spellId = 360995, name = "青翠之拥" },
-        [36] = { type = "spell", spellId = 357210, name = "深呼吸" },
-        [37] = { type = "spell", spellId = 374227, name = "微风" },
-        [38] = { type = "spell", spellId = 358267, name = "悬空" },
-        [39] = { type = "spell", spellId = 358267, name = "悬空", charge = true },
-        [40] = { type = "spell", spellId = 368970, name = "扫尾" },
-        [41] = { type = "spell", spellId = 370553, name = "扭转天平" },
-        [42] = { type = "spell", spellId = 370665, name = "营救" },
-        [43] = { type = "spell", spellId = 374968, name = "时间螺旋" },
-        [44] = { type = "spell", spellId = 406732, name = "空间悖论" },
-        [45] = { type = "spell", spellId = 357208, name = "火焰吐息" },
-        [46] = { type = "spell", spellId = 396286, name = "地壳激变" },
-        [47] = { type = "spell", spellId = 409311, name = "先知先觉" },
-        [48] = { type = "spell", spellId = 395152, name = "黑檀之力" },
-        [49] = { type = "spell", spellId = 442204, name = "亘古吐息" },
-        [50] = { type = "spell", spellId = 409311, name = "先知先觉", charge = true },
-        [70] = {
-            type = "group",
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "能量值",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "施法技能",
+                "精华能量",
+            },
+            ["目标"] = {
+                "类型",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        spells = {
+            { spellId = 365585, name = "净除" },
+            { spellId = 363916, name = "黑曜鳞片" },
+            { spellId = 363916, name = "黑曜鳞片", charge = true },
+            { spellId = 358385, name = "山崩" },
+            { spellId = 360995, name = "青翠之拥" },
+            { spellId = 357210, name = "深呼吸" },
+            { spellId = 374227, name = "微风" },
+            { spellId = 358267, name = "悬空" },
+            { spellId = 358267, name = "悬空", charge = true },
+            { spellId = 368970, name = "扫尾" },
+            { spellId = 370553, name = "扭转天平" },
+            { spellId = 370665, name = "营救" },
+            { spellId = 374968, name = "时间螺旋" },
+            { spellId = 406732, name = "空间悖论" },
+            { spellId = 357208, name = "火焰吐息" },
+            { spellId = 396286, name = "地壳激变" },
+            { spellId = 409311, name = "先知先觉" },
+            { spellId = 395152, name = "黑檀之力" },
+            { spellId = 442204, name = "亘古吐息" },
+            { spellId = 409311, name = "先知先觉", charge = true },
+        },
+        group = {
             num = 5,
             healthPercent = 1,
             role = 2,
-        }
+        },
     },
 }
-Fuyutsui.MacrosList = {
-    dynamicSpells = { "活化烈焰", "青翠之拥", "回响", "逆转", "净除", "翡翠之花", "先知先觉" },
-    specialSpells = {},
-    staticSpells = {
-        [1] = "净除",
-        [2] = "火焰吐息",
-        [3] = "青铜龙的祝福",
-        [4] = "灼烧之焰",
-        [5] = "黑曜鳞片",
-        [6] = "山崩",
-        [7] = "悬空",
-        [8] = "碧蓝打击",
-        [9] = "扫尾",
-        [10] = "翡翠之花",
-        [11] = "扭转天平",
-        [12] = "活化烈焰",
-        [13] = "裂解",
-        [14] = "深呼吸",
-        [15] = "青翠之拥",
-        [16] = "永恒之涌",
-        [17] = "葬火",
-        [18] = "狂龙之怒",
-        [19] = "镇压",
-        [20] = "梦游",
-        [21] = "微风",
-        [22] = "时间螺旋",
-        [23] = "空间悖论",
-        [24] = "营救",
-        [25] = "喷发",
-        [26] = "地壳激变",
-        [27] = "先知先觉",
-        [28] = "黑檀之力",
-        [29] = "亘古吐息",
-    },
+
+Fuyutsui.spellsList = {
+
+    [384255]  = { index = 151, },              -- 切换天赋
+    [200749]  = { index = 152, },              -- 切换专精
+    -- 种族
+    [59547]   = { index = 122, },              -- 纳鲁的赐福
+    [28730]   = { index = 101, },              -- 奥术洪流(法师)
+    [232633]  = { index = 101, },              -- 奥术洪流(牧师)
+    [129597]  = { index = 101, },              -- 奥术洪流(武僧)
+    -- 唤魔师
+    [365585]  = { index = 1, },                -- 净除
+    [382266]  = { index = 2, },                -- 火焰吐息
+    [364342]  = { index = 3, },                -- 青铜龙的祝福
+    [374251]  = { index = 4, },                -- 灼烧之焰
+    [363916]  = { index = 5, },                -- 黑曜鳞片
+    [358385]  = { index = 6, },                -- 山崩
+    [358267]  = { index = 7, },                -- 悬空
+    [362969]  = { index = 8, },                -- 碧蓝打击
+    [368970]  = { index = 9, },                -- 扫尾
+    [355913]  = { index = 10, },               -- 翡翠之花
+    [370553]  = { index = 11, },               -- 扭转天平
+    [361469]  = { index = 12, },               -- 活化烈焰
+    [356995]  = { index = 13, },               -- 裂解
+    [357210]  = { index = 14, },               -- 深呼吸
+    [360995]  = { index = 15, },               -- 青翠之拥
+    [382411]  = { index = 16, },               -- 永恒之涌
+    [357211]  = { index = 17, },               -- 葬火
+    [375087]  = { index = 18, },               -- 狂龙之怒
+    [351338]  = { index = 19, },               -- 镇压
+    [360806]  = { index = 20, },               -- 梦游
+    [374227]  = { index = 21, },               -- 微风
+    [374968]  = { index = 22, },               -- 时间螺旋
+    [406732]  = { index = 23, },               -- 空间悖论
+    [370665]  = { index = 24, },               -- 营救
+    [1265872] = { index = 25, },               -- 碧蓝横扫(碧蓝打击)
+    [357208]  = { index = 26, },               -- 火焰吐息
+    [359073]  = { index = 27, },               -- 永恒之涌
 }

@@ -2,168 +2,232 @@ if UnitClassBase("player") ~= "HUNTER" then return end
 local addon, ns = ...
 Fuyutsui.ClassBlocks = {
     [1] = {
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "集中值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "敌人人数" },
-        [22] = { type = "block", name = "爆发开关" },
-        [23] = { type = "block", name = "输出模式" },
-        [24] = { type = "block", name = "AOE开关" },
-        [30] = { type = "spell", spellId = 53480, name = "牺牲咆哮" },
-        [31] = { type = "spell", spellId = 109304, name = "意气风发" },
-        [32] = { type = "spell", spellId = 19577, name = "胁迫" },
-        [33] = { type = "spell", spellId = 5116, name = "震荡射击" },
-        [34] = { type = "spell", spellId = 19801, name = "宁神射击" },
-        [35] = { type = "spell", spellId = 187698, name = "焦油陷进" },
-        [36] = { type = "spell", spellId = 1513, name = "恐吓野兽" },
-        [37] = { type = "spell", spellId = 109248, name = "束缚射击" },
-        [38] = { type = "spell", spellId = 195645, name = "摔绊" },
-        [39] = { type = "spell", spellId = 34026, name = "杀戮命令" },
-        [40] = { type = "spell", spellId = 34026, name = "杀戮命令", charge = true },
-        [41] = { type = "spell", spellId = 217200, name = "倒刺射击" },
-        [42] = { type = "spell", spellId = 217200, name = "倒刺射击", charge = true },
-        [43] = { type = "spell", spellId = 147362, name = "反制射击" },
-        [44] = { type = "spell", spellId = 19574, name = "狂野怒火" },
-        [45] = { type = "spell", spellId = 1264359, name = "狂野鞭笞" },
-        [46] = { type = "aura", name = "自然之友", auraName = "自然之友", showKey = "remaining" },
-        [47] = { type = "aura", name = "猎人印记", auraName = "猎人印记", showKey = "remaining" },
-        [48] = { type = "aura", name = "狂野怒火光环", auraName = "狂野怒火", showKey = "remaining" },
-        [49] = { type = "block", name = "目标施法" },
-        [50] = { type = "block", name = "目标施法可打断" },
-        [51] = { type = "block", name = "焦点施法" },
-        [52] = { type = "block", name = "焦点施法可打断" },
-        [53] = { type = "block", name = "目标引导" },
-        [54] = { type = "block", name = "目标引导可打断" },
-        [55] = { type = "block", name = "焦点引导" },
-        [56] = { type = "block", name = "焦点引导可打断" },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "集中值",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "敌人人数",
+                "爆发开关",
+                "输出模式",
+                "AOE开关",
+            },
+            ["目标"] = {
+                "类型",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        -- TODO spellId: 自然之友
+        -- TODO spellId: 猎人印记
+        -- TODO spellId: 狂野怒火光环
+        spells = {
+            { spellId = 53480, name = "牺牲咆哮" },
+            { spellId = 109304, name = "意气风发" },
+            { spellId = 19577, name = "胁迫" },
+            { spellId = 5116, name = "震荡射击" },
+            { spellId = 19801, name = "宁神射击" },
+            { spellId = 187698, name = "焦油陷进" },
+            { spellId = 1513, name = "恐吓野兽" },
+            { spellId = 109248, name = "束缚射击" },
+            { spellId = 195645, name = "摔绊" },
+            { spellId = 34026, name = "杀戮命令" },
+            { spellId = 34026, name = "杀戮命令", charge = true },
+            { spellId = 217200, name = "倒刺射击" },
+            { spellId = 217200, name = "倒刺射击", charge = true },
+            { spellId = 147362, name = "反制射击" },
+            { spellId = 19574, name = "狂野怒火" },
+            { spellId = 1264359, name = "狂野鞭笞" },
+        },
     },
     [2] = {
-
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "集中值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "目标施法" },
-        [22] = { type = "block", name = "目标施法可打断" },
-        [23] = { type = "block", name = "焦点施法" },
-        [24] = { type = "block", name = "焦点施法可打断" },
-        [25] = { type = "block", name = "目标引导" },
-        [26] = { type = "block", name = "目标引导可打断" },
-        [27] = { type = "block", name = "焦点引导" },
-        [28] = { type = "block", name = "焦点引导可打断" },
-        [30] = { type = "spell", spellId = 53480, name = "牺牲咆哮" },
-        [31] = { type = "spell", spellId = 109304, name = "意气风发" },
-        [32] = { type = "spell", spellId = 19577, name = "胁迫" },
-        [33] = { type = "spell", spellId = 5116, name = "震荡射击" },
-        [34] = { type = "spell", spellId = 19801, name = "宁神射击" },
-        [35] = { type = "spell", spellId = 187698, name = "焦油陷进" },
-        [36] = { type = "spell", spellId = 1513, name = "恐吓野兽" },
-        [37] = { type = "spell", spellId = 109248, name = "束缚射击" },
-        [38] = { type = "spell", spellId = 195645, name = "摔绊" },
-        [39] = { type = "spell", spellId = 147362, name = "反制射击" },
-        [40] = { type = "spell", spellId = 19434, name = "瞄准射击" },
-        [41] = { type = "spell", spellId = 19434, name = "瞄准射击", charge = true },
-        [42] = { type = "spell", spellId = 257044, name = "急速射击" },
-        [43] = { type = "spell", spellId = 288613, name = "百发百中" },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "集中值",
+                "队伍人数",
+                "首领战",
+                "难度",
+            },
+            ["目标"] = {
+                "类型",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        spells = {
+            { spellId = 53480, name = "牺牲咆哮" },
+            { spellId = 109304, name = "意气风发" },
+            { spellId = 19577, name = "胁迫" },
+            { spellId = 5116, name = "震荡射击" },
+            { spellId = 19801, name = "宁神射击" },
+            { spellId = 187698, name = "焦油陷进" },
+            { spellId = 1513, name = "恐吓野兽" },
+            { spellId = 109248, name = "束缚射击" },
+            { spellId = 195645, name = "摔绊" },
+            { spellId = 147362, name = "反制射击" },
+            { spellId = 19434, name = "瞄准射击" },
+            { spellId = 19434, name = "瞄准射击", charge = true },
+            { spellId = 257044, name = "急速射击" },
+            { spellId = 288613, name = "百发百中" },
+        },
     },
     [3] = {
-
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "集中值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "目标施法" },
-        [22] = { type = "block", name = "目标施法可打断" },
-        [23] = { type = "block", name = "焦点施法" },
-        [24] = { type = "block", name = "焦点施法可打断" },
-        [25] = { type = "block", name = "目标引导" },
-        [26] = { type = "block", name = "目标引导可打断" },
-        [27] = { type = "block", name = "焦点引导" },
-        [28] = { type = "block", name = "焦点引导可打断" },
-
-        [30] = { type = "spell", spellId = 53480, name = "牺牲咆哮" },
-        [31] = { type = "spell", spellId = 109304, name = "意气风发" },
-        [32] = { type = "spell", spellId = 19577, name = "胁迫" },
-        [33] = { type = "spell", spellId = 5116, name = "震荡射击" },
-        [34] = { type = "spell", spellId = 19801, name = "宁神射击" },
-        [35] = { type = "spell", spellId = 187698, name = "焦油陷进" },
-        [36] = { type = "spell", spellId = 1513, name = "恐吓野兽" },
-        [37] = { type = "spell", spellId = 109248, name = "束缚射击" },
-        [38] = { type = "spell", spellId = 195645, name = "摔绊" },
-        [39] = { type = "spell", spellId = 1261193, name = "爆裂火铳" },
-        [40] = { type = "spell", spellId = 1250646, name = "狩魂一击" },
-        [41] = { type = "spell", spellId = 190925, name = "鱼叉猛刺" },
-        [42] = { type = "spell", spellId = 186270, name = "猛禽一击" },
-        [43] = { type = "spell", spellId = 259495, name = "野火炸弹" },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "集中值",
+                "队伍人数",
+                "首领战",
+                "难度",
+            },
+            ["目标"] = {
+                "类型",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        spells = {
+            { spellId = 53480, name = "牺牲咆哮" },
+            { spellId = 109304, name = "意气风发" },
+            { spellId = 19577, name = "胁迫" },
+            { spellId = 5116, name = "震荡射击" },
+            { spellId = 19801, name = "宁神射击" },
+            { spellId = 187698, name = "焦油陷进" },
+            { spellId = 1513, name = "恐吓野兽" },
+            { spellId = 109248, name = "束缚射击" },
+            { spellId = 195645, name = "摔绊" },
+            { spellId = 1261193, name = "爆裂火铳" },
+            { spellId = 1250646, name = "狩魂一击" },
+            { spellId = 190925, name = "鱼叉猛刺" },
+            { spellId = 186270, name = "猛禽一击" },
+            { spellId = 259495, name = "野火炸弹" },
+        },
     },
 }
-Fuyutsui.MacrosList = {
-    dynamicSpells = {},
-    specialSpells = {},
-    staticSpells = {
-        [1] = "意气风发",
-        [2] = "灵龟守护",
-        [3] = "反制射击",
-        [4] = "多重射击",
-        [5] = "狂野怒火",
-        [6] = "夺命射击",
-        [7] = "百发百中",
-        [8] = "爆炸射击",
-        [9] = "荒野呼唤",
-        [10] = "血溅十方",
-        [11] = "治疗宠物",
-        [12] = "倒刺射击",
-        [13] = "杀戮命令",
-        [14] = "眼镜蛇射击",
-        [15] = "瞄准射击",
-        [16] = "急速射击",
-        [17] = "稳固射击",
-        [18] = "哀恸箭",
-        [19] = "猎人印记",
-        [20] = "奥术射击",
-        [21] = "奇美拉射击",
-        [22] = "夺命黑鸦",
-        [23] = "弹幕射击",
-        [24] = "召唤宠物 1",
-        [25] = "召唤宠物 2",
-        [26] = "召唤宠物 3",
-        [27] = "召唤宠物 4",
-        [28] = "召唤宠物 5",
-        [29] = "狂野鞭笞",
-        [30] = "黑蚀箭",
-        [31] = "[@cursor]乱射",
-        [32] = "投掷手斧",
-        [33] = "燎焰沥青",
-        [34] = "爆裂火铳",
-        [35] = "狩魂一击",
-        [36] = "鱼叉猛刺",
-        [37] = "猛禽一击",
-        [38] = "野火炸弹",
-        [39] = "牺牲咆哮",
-    },
+
+Fuyutsui.spellsList = {
+
+    [384255]  = { index = 151, },              -- 切换天赋
+    [200749]  = { index = 152, },              -- 切换专精
+    -- 种族
+    [59547]   = { index = 122, },              -- 纳鲁的赐福
+    [28730]   = { index = 101, },              -- 奥术洪流(法师)
+    [232633]  = { index = 101, },              -- 奥术洪流(牧师)
+    [129597]  = { index = 101, },              -- 奥术洪流(武僧)
+    -- 猎人
+    [217200]  = { index = 1, },                -- 倒刺射击
+    [34026]   = { index = 2, },                -- 杀戮命令
+    [193455]  = { index = 3, },                -- 眼镜蛇射击
+    [19574]   = { index = 4, },                -- 狂野怒火
+    [201430]  = { index = 5, },                -- 荒野呼唤
+    [131894]  = { index = 6, },                -- 夺命黑鸦
+    [120360]  = { index = 7, },                -- 弹幕射击
+    [321530]  = { index = 8, },                -- 血溅十方
+    [19434]   = { index = 9, },                -- 瞄准射击
+    [257044]  = { index = 10, },               -- 急速射击
+    [56641]   = { index = 11, },               -- 稳固射击
+    [2643]    = { index = 12, },               -- 多重射击
+    [288613]  = { index = 13, },               -- 百发百中
+    [53351]   = { index = 14, },               -- 夺命射击
+    [212431]  = { index = 15, },               -- 爆炸射击
+    [389831]  = { index = 16, },               -- 哀恸箭
+    [257284]  = { index = 17, },               -- 猎人印记
+    [185358]  = { index = 18, },               -- 奥术射击
+    [342049]  = { index = 19, },               -- 奇美拉射击
+    [883]     = { index = 20, },               -- 召唤宠物1
+    [1264359] = { index = 21, },               -- 狂野鞭笞
+    [109304]  = { index = 22, failed = true }, -- 意气风发
+    [186265]  = { index = 23, },               -- 灵龟守护
+    [147362]  = { index = 24, },               -- 反制射击
+    [392060]  = { index = 25, },               -- 哀恸箭
+    [466930]  = { index = 26, },               -- 黑蚀箭
+    [19577]   = { index = 27, failed = true }, -- 胁迫
+    [260243]  = { index = 28, },               -- 乱射
+    [257620]  = { index = 29, },               -- 多重射击
+    [259489]  = { index = 30, },               -- 杀戮命令
+    [193265]  = { index = 31, },               -- 投掷手斧
+    [1251592] = { index = 32, },               -- 燎焰沥青
+    [1261193] = { index = 33, },               -- 爆裂火铳
+    [1250646] = { index = 34, },               -- 狩魂一击
+    [190925]  = { index = 35, },               -- 鱼叉猛刺
+    [186270]  = { index = 36, },               -- 猛禽一击
+    [259495]  = { index = 37, },               -- 野火炸弹
+    [53480]   = { index = 38, },               -- 牺牲咆哮
+    [5116]    = { index = 39, failed = true }, -- 震荡射击
+    [19801]   = { index = 40, failed = true }, -- 宁神射击
+    [187698]  = { index = 41, failed = true }, -- 焦油陷进
+    [1513]    = { index = 42, failed = true }, -- 恐吓野兽
+    [109248]  = { index = 43, failed = true }, -- 束缚射击
+    [199483]  = { index = 44, },               -- 伪装
+    [195645]  = { index = 45, failed = true }, -- 摔绊
+    [1262293] = { index = 46, },               -- 猛禽横扫
 }

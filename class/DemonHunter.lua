@@ -2,189 +2,256 @@ if UnitClassBase("player") ~= "DEMONHUNTER" then return end
 local addon, ns = ...
 Fuyutsui.ClassBlocks = {
     [1] = {
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "恶魔之怒" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "敌人人数" },
-        [22] = { type = "block", name = "目标施法" },
-        [23] = { type = "block", name = "目标施法可打断" },
-        [24] = { type = "block", name = "焦点施法" },
-        [25] = { type = "block", name = "焦点施法可打断" },
-        [26] = { type = "block", name = "目标引导" },
-        [27] = { type = "block", name = "目标引导可打断" },
-        [28] = { type = "block", name = "焦点引导" },
-        [29] = { type = "block", name = "焦点引导可打断" },
-        [40] = { type = "spell", spellId = 196718, name = "黑暗" },
-        [41] = { type = "spell", spellId = 198793, name = "复仇回避" },
-        [42] = { type = "spell", spellId = 185123, name = "投掷利刃 " },
-        [43] = { type = "spell", spellId = 185123, name = "投掷利刃", charge = true },
-        [44] = { type = "spell", spellId = 207684, name = "悲苦咒符" },
-        [45] = { type = "spell", spellId = 217832, name = "禁锢" },
-        [46] = { type = "spell", spellId = 258920, name = "献祭光环" },
-        [47] = { type = "spell", spellId = 179057, name = "混乱新星" },
-        [48] = { type = "spell", spellId = 191427, name = "恶魔变形" },
-        [49] = { type = "spell", spellId = 232893, name = "邪能之刃" },
-        [50] = { type = "spell", spellId = 188499, name = "刃舞" },
-        [51] = { type = "spell", spellId = 162794, name = "混乱打击" },
-        [52] = { type = "spell", spellId = 198589, name = "疾影" },
-        [53] = { type = "spell", spellId = 370965, name = "恶魔追击" },
-        [54] = { type = "spell", spellId = 198013, name = "眼棱" },
-        [55] = { type = "spell", spellId = 195072, name = "邪能冲撞" },
-        [56] = { type = "spell", spellId = 258860, name = "精华破碎" },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "恶魔之怒",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "敌人人数",
+            },
+            ["目标"] = {
+                "类型",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        spells = {
+            { spellId = 196718, name = "黑暗" },
+            { spellId = 198793, name = "复仇回避" },
+            { spellId = 185123, name = "投掷利刃 " },
+            { spellId = 185123, name = "投掷利刃", charge = true },
+            { spellId = 207684, name = "悲苦咒符" },
+            { spellId = 217832, name = "禁锢" },
+            { spellId = 258920, name = "献祭光环" },
+            { spellId = 179057, name = "混乱新星" },
+            { spellId = 191427, name = "恶魔变形" },
+            { spellId = 232893, name = "邪能之刃" },
+            { spellId = 188499, name = "刃舞" },
+            { spellId = 162794, name = "混乱打击" },
+            { spellId = 198589, name = "疾影" },
+            { spellId = 370965, name = "恶魔追击" },
+            { spellId = 198013, name = "眼棱" },
+            { spellId = 195072, name = "邪能冲撞" },
+            { spellId = 258860, name = "精华破碎" },
+        },
     },
     [2] = {
-        ["countBars"] = {
-            { valueType = "castCount", name = "灵魂裂劈", minValue = 0, maxValue = 6, spellId = 228477 },
-            { valueType = "charge", name = "投掷利刃", minValue = 0, maxValue = 2, spellId = 185123 },
-            { valueType = "charge", name = "地狱火撞击", minValue = 0, maxValue = 2, spellId = 189110 },
-            { valueType = "charge", name = "烈火烙印", minValue = 0, maxValue = 2, spellId = 204021 },
-            { valueType = "charge", name = "破裂", minValue = 0, maxValue = 2, spellId = 263642 },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "恶魔之怒",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "敌人人数",
+            },
+            ["目标"] = {
+                "类型",
+                "施法",
+                "引导",
+                "施法可打断",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "引导",
+                "施法可打断",
+                "引导可打断",
+            },
         },
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "恶魔之怒" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "敌人人数" },
-        [23] = { type = "block", name = "目标施法" },
-        [24] = { type = "block", name = "目标引导" },
-        [25] = { type = "block", name = "焦点施法" },
-        [26] = { type = "block", name = "焦点引导" },
-        [27] = { type = "block", name = "目标施法可打断" },
-        [28] = { type = "block", name = "目标引导可打断" },
-        [29] = { type = "block", name = "焦点施法可打断" },
-        [30] = { type = "block", name = "焦点引导可打断" },
-        [31] = { type = "aura", name = "无羁邪怒", auraName = "无羁邪怒", showKey = "remaining" },
-        [40] = { type = "spell", spellId = 196718, name = "黑暗" },
-        [41] = { type = "spell", spellId = 198793, name = "复仇回避" },
-        [42] = { type = "spell", spellId = 185123, name = "投掷利刃 " },
-        [43] = { type = "spell", spellId = 185123, name = "投掷利刃", charge = true },
-        [44] = { type = "spell", spellId = 207684, name = "悲苦咒符" },
-        [45] = { type = "spell", spellId = 217832, name = "禁锢" },
-        [46] = { type = "spell", spellId = 258920, name = "献祭光环" },
-        [47] = { type = "spell", spellId = 179057, name = "混乱新星" },
-        [48] = { type = "spell", spellId = 187827, name = "恶魔变形" },
-        [49] = { type = "spell", spellId = 232893, name = "邪能之刃" },
-        [50] = { type = "spell", spellId = 189110, name = "地狱火撞击" },
-        [51] = { type = "spell", spellId = 189110, name = "地狱火撞击", charge = true },
-        [52] = { type = "spell", spellId = 203720, name = "恶魔尖刺" },
-        [53] = { type = "spell", spellId = 204021, name = "烈火烙印" },
-        [54] = { type = "spell", spellId = 204021, name = "烈火烙印", charge = true },
-        [55] = { type = "spell", spellId = 247454, name = "幽魂炸弹" },
-        [56] = { type = "spell", spellId = 207407, name = "灵魂切削" },
-        [57] = { type = "spell", spellId = 204596, name = "烈焰咒符" },
-        [58] = { type = "spell", spellId = 390163, name = "怨念咒符" },
-        [59] = { type = "spell", spellId = 228447, name = "灵魂裂劈" },
-        [60] = { type = "spell", spellId = 263642, name = "破裂" },
-        [61] = { type = "spell", spellId = 263642, name = "破裂", charge = true },
-        [62] = { type = "spell", spellId = 212084, name = "邪能毁灭" },
-        [63] = { type = "spell", spellId = 202137, name = "沉默咒符" },
+        -- TODO spellId: 无羁邪怒
+        spells = {
+            { spellId = 196718, name = "黑暗" },
+            { spellId = 198793, name = "复仇回避" },
+            { spellId = 185123, name = "投掷利刃 " },
+            { spellId = 185123, name = "投掷利刃", charge = true, maxCharge = 2 },
+            { spellId = 207684, name = "悲苦咒符" },
+            { spellId = 217832, name = "禁锢" },
+            { spellId = 258920, name = "献祭光环" },
+            { spellId = 179057, name = "混乱新星" },
+            { spellId = 187827, name = "恶魔变形" },
+            { spellId = 232893, name = "邪能之刃" },
+            { spellId = 189110, name = "地狱火撞击" },
+            { spellId = 189110, name = "地狱火撞击", charge = true, maxCharge = 2 },
+            { spellId = 203720, name = "恶魔尖刺" },
+            { spellId = 204021, name = "烈火烙印" },
+            { spellId = 204021, name = "烈火烙印", charge = true, maxCharge = 2 },
+            { spellId = 247454, name = "幽魂炸弹" },
+            { spellId = 207407, name = "灵魂切削" },
+            { spellId = 204596, name = "烈焰咒符" },
+            { spellId = 390163, name = "怨念咒符" },
+            { spellId = 228447, name = "灵魂裂劈" },
+            { spellId = 263642, name = "破裂" },
+            { spellId = 263642, name = "破裂", charge = true, maxCharge = 2 },
+            { spellId = 212084, name = "邪能毁灭" },
+            { spellId = 202137, name = "沉默咒符" },
+            { spellId = 228477, name = "灵魂裂劈", castCount = 6 },
+        },
     },
     [3] = {
-        ["countBars"] = {
-            { valueType = "castCount", name = "灵魂残片", minValue = 0, maxValue = 50, spellId = 1217605 },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "恶魔之怒",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "敌人人数",
+            },
+            ["目标"] = {
+                "类型",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
         },
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "恶魔之怒" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "敌人人数" },
-        [22] = { type = "block", name = "目标施法" },
-        [23] = { type = "block", name = "目标施法可打断" },
-        [24] = { type = "block", name = "焦点施法" },
-        [25] = { type = "block", name = "焦点施法可打断" },
-        [26] = { type = "block", name = "目标引导" },
-        [27] = { type = "block", name = "目标引导可打断" },
-        [28] = { type = "block", name = "焦点引导" },
-        [29] = { type = "block", name = "焦点引导可打断" },
-        [40] = { type = "spell", spellId = 196718, name = "黑暗" },
-        [41] = { type = "spell", spellId = 198793, name = "复仇回避" },
-        [42] = { type = "spell", spellId = 185123, name = "投掷利刃 " },
-        [43] = { type = "spell", spellId = 185123, name = "投掷利刃", charge = true },
-        [44] = { type = "spell", spellId = 207684, name = "悲苦咒符" },
-        [45] = { type = "spell", spellId = 217832, name = "禁锢" },
-        [46] = { type = "spell", spellId = 258920, name = "献祭光环" },
-        [47] = { type = "spell", spellId = 1234195, name = "虚空新星" },
-        [48] = { type = "spell", spellId = 1217605, name = "虚空变形" },
-        [49] = { type = "spell", spellId = 1245412, name = "虚空之刃" },
-        [50] = { type = "spell", spellId = 1234796, name = "变换 " },
-        [51] = { type = "spell", spellId = 1234796, name = "变换", charge = true },
-        [52] = { type = "spell", spellId = 1226019, name = "收割" },
-        [53] = { type = "spell", spellId = 473662, name = "吞噬" },
-        [54] = { type = "spell", spellId = 198589, name = "疾影" },
-        [55] = { type = "spell", spellId = 473728, name = "虚空射线" },
-        [56] = { type = "spell", spellId = 1246167, name = "恶魔追击" },
-        [57] = { type = "spell", spellId = 1239123, name = "饥渴斩击" },
-        [58] = { type = "spell", spellId = 1245453, name = "剔除" },
+        spells = {
+            { spellId = 196718, name = "黑暗" },
+            { spellId = 198793, name = "复仇回避" },
+            { spellId = 185123, name = "投掷利刃 " },
+            { spellId = 185123, name = "投掷利刃", charge = true },
+            { spellId = 207684, name = "悲苦咒符" },
+            { spellId = 217832, name = "禁锢" },
+            { spellId = 258920, name = "献祭光环" },
+            { spellId = 1234195, name = "虚空新星" },
+            { spellId = 1217605, name = "虚空变形", castCount = 50 },
+            { spellId = 1245412, name = "虚空之刃" },
+            { spellId = 1234796, name = "变换 " },
+            { spellId = 1234796, name = "变换", charge = true },
+            { spellId = 1226019, name = "收割" },
+            { spellId = 473662, name = "吞噬" },
+            { spellId = 198589, name = "疾影" },
+            { spellId = 473728, name = "虚空射线" },
+            { spellId = 1246167, name = "恶魔追击" },
+            { spellId = 1239123, name = "饥渴斩击" },
+            { spellId = 1245453, name = "剔除" },
+        },
     },
 }
-Fuyutsui.MacrosList = {
-    dynamicSpells = {},
-    specialSpells = {
-        [19] = "/castsequence reset=0.5 烈火烙印,x",
-        [16] = "/castsequence reset=0.5 恶魔变形,x",
-    },
-    staticSpells = {
-        [1] = "复仇回避",
-        [2] = "投掷利刃",
-        [3] = "[@cursor]悲苦咒符",
-        [4] = "禁锢",
-        [5] = "献祭光环",
-        [6] = "混乱新星",
-        [7] = "恶魔变形",
-        [8] = "邪能之刃",
-        [9] = "刃舞",
-        [10] = "混乱打击",
-        [11] = "疾影",
-        [12] = "恶魔追击",
-        [13] = "眼棱",
-        [14] = "邪能冲撞",
-        [15] = "精华破碎",
-        -- [16] = "恶魔变形",
-        [17] = "地狱火撞击",
-        [18] = "恶魔尖刺",
-        -- [19] = "烈火烙印",
-        [20] = "幽魂炸弹",
-        [21] = "灵魂切削",
-        [22] = "[@player]烈焰咒符",
-        [23] = "[@player]怨念咒符",
-        [24] = "灵魂裂劈",
-        [25] = "破裂",
-        [26] = "邪能毁灭",
-        [27] = "[@cursor]沉默咒符",
-        [28] = "虚空新星",
-        [29] = "虚空变形",
-        [30] = "虚空之刃",
-        [31] = "变换",
-        [32] = "收割",
-        [33] = "吞噬",
-        [34] = "虚空射线",
-        [35] = "恶魔追击",
-        [36] = "饥渴斩击",
-        [37] = "黑暗",
-    },
+
+Fuyutsui.spellsList = {
+
+    [384255]  = { index = 151, },              -- 切换天赋
+    [200749]  = { index = 152, },              -- 切换专精
+    -- 种族
+    [59547]   = { index = 122, },              -- 纳鲁的赐福
+    [28730]   = { index = 101, },              -- 奥术洪流(法师)
+    [232633]  = { index = 101, },              -- 奥术洪流(牧师)
+    [129597]  = { index = 101, },              -- 奥术洪流(武僧)
+    -- 恶魔猎手
+    [198793]  = { index = 1, },                -- 复仇回避
+    [185123]  = { index = 2, },                -- 投掷利刃
+    [207684]  = { index = 3, failed = true },  -- 悲苦咒符
+    [217832]  = { index = 4 },                 -- 禁锢
+    [258920]  = { index = 5, },                -- 献祭光环
+    [179057]  = { index = 6, failed = true },  -- 混乱新星
+    [191427]  = { index = 7, },                -- 恶魔变形
+    [232893]  = { index = 8, },                -- 邪能之刃
+    [188499]  = { index = 9, },                -- 刃舞
+    [162794]  = { index = 10, },               -- 混乱打击
+    [198589]  = { index = 11, },               -- 疾影
+    [370965]  = { index = 12, },               -- 恶魔追击
+    [198013]  = { index = 13, },               -- 眼棱
+    [195072]  = { index = 14, },               -- 邪能冲撞
+    [258860]  = { index = 15, },               -- 精华破碎
+    [187827]  = { index = 16, failed = true }, -- 恶魔变形
+    [189110]  = { index = 17, },               -- 地狱火撞击
+    [203720]  = { index = 18, },               -- 恶魔尖刺
+    [204021]  = { index = 19 },                -- 烈火烙印
+    [247454]  = { index = 20, },               -- 幽魂炸弹
+    [207407]  = { index = 21, },               -- 灵魂切削
+    [204596]  = { index = 22, },               -- 烈焰咒符
+    [390163]  = { index = 23, },               -- 怨念咒符
+    [228477]  = { index = 24, },               -- 灵魂裂劈
+    [263642]  = { index = 25, },               -- 破裂
+    [212084]  = { index = 26, failed = true }, -- 邪能毁灭
+    [202137]  = { index = 27, failed = true }, -- 沉默咒符
+    [1234195] = { index = 28, failed = true }, -- 虚空新星
+    [1217605] = { index = 29, },               -- 虚空变形
+    [1245412] = { index = 30, },               -- 虚空之刃
+    [1234796] = { index = 31, },               -- 变换
+    [1226019] = { index = 32, },               -- 收割
+    [473662]  = { index = 33, },               -- 吞噬
+    [473728]  = { index = 34, },               -- 虚空射线
+    [1246167] = { index = 35, },               -- 恶魔追击
+    [1239123] = { index = 36, },               -- 饥渴斩击
+    [1245453] = { index = 37, },               -- 剔除
+    [201427]  = { index = 38, },               -- 毁灭(混乱打击)
+    [210152]  = { index = 39, },               -- 死亡横扫(刃舞)
+    [452487]  = { index = 40, },               -- 吞噬之焰(献祭光环)
+    [427917]  = { index = 41, },               -- 献祭光环
+    [204157]  = { index = 42, },               -- 投掷利刃
+    [196718]  = { index = 43, failed = true }, -- 黑暗
+    [1217610] = { index = 44, },               -- 吞噬(虚空变形)
+    [1221150] = { index = 45 },                -- 坍缩之星
+    [1225826] = { index = 46, },               -- 根除
+    [1241937] = { index = 47, },               -- 灵魂献祭
+    [452497]  = { index = 48, },               -- 深渊凝视(眼棱)
+    [213243]  = { index = 49, },               -- 邪能之刃
+    [227518]  = { index = 50, },               -- 毁灭
+    [201428]  = { index = 51, },               -- 毁灭
+    [222031]  = { index = 52, },               -- 混乱打击
+    [199547]  = { index = 53, },               -- 混乱打击
+    [201453]  = { index = 54, },               -- 恶魔变形
+    [200166]  = { index = 55, },               -- 恶魔变形
+    [456640]  = { index = 56, },               -- 吞噬之焰
 }

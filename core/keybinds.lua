@@ -41,7 +41,7 @@ local function ProcessActionSlot(slot)
 end
 
 -- 扫描按键
-function Fuyutsui:readKeybindings()
+function Fuyutsui:ReadKeybindings()
     -- 清理并重新扫描
     table.wipe(keybindings)
     C_Timer.After(0.5, function()

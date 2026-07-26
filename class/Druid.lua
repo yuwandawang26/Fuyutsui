@@ -2,212 +2,299 @@ if UnitClassBase("player") ~= "DRUID" then return end
 local addon, ns = ...
 Fuyutsui.ClassBlocks = {
     [1] = {
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "能量值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "目标生命值" },
-        [22] = { type = "block", name = "敌人人数" },
-        [23] = { type = "block", name = "姿态" },
-        [31] = { type = "spell", spellId = 22812, name = "树皮术" },
-        [32] = { type = "spell", spellId = 132469, name = "台风" },
-        [33] = { type = "spell", spellId = 99, name = "夺魂咆哮" },
-        [34] = { type = "spell", spellId = 29166, name = "激活" },
-        [35] = { type = "spell", spellId = 102793, name = "乌索尔旋风" },
-        [36] = { type = "spell", spellId = 78675, name = "日光术" },
-        [37] = { type = "block", name = "目标施法" },
-        [38] = { type = "block", name = "目标施法可打断" },
-        [39] = { type = "block", name = "焦点施法" },
-        [40] = { type = "block", name = "焦点施法可打断" },
-        [41] = { type = "block", name = "目标引导" },
-        [42] = { type = "block", name = "目标引导可打断" },
-        [43] = { type = "block", name = "焦点引导" },
-        [44] = { type = "block", name = "焦点引导可打断" },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "能量值",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "敌人人数",
+                "姿态",
+            },
+            ["目标"] = {
+                "类型",
+                "生命值",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        spells = {
+            { spellId = 22812, name = "树皮术" },
+            { spellId = 132469, name = "台风" },
+            { spellId = 99, name = "夺魂咆哮" },
+            { spellId = 29166, name = "激活" },
+            { spellId = 102793, name = "乌索尔旋风" },
+            { spellId = 78675, name = "日光术" },
+        },
     },
     [2] = {
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "能量值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "目标生命值" },
-        [22] = { type = "block", name = "敌人人数" },
-        [23] = { type = "block", name = "姿态" },
-        [31] = { type = "spell", spellId = 22812, name = "树皮术" },
-        [32] = { type = "spell", spellId = 132469, name = "台风" },
-        [33] = { type = "spell", spellId = 99, name = "夺魂咆哮" },
-        [34] = { type = "spell", spellId = 29166, name = "激活" },
-        [35] = { type = "spell", spellId = 102793, name = "乌索尔旋风" },
-        [37] = { type = "block", name = "目标施法" },
-        [38] = { type = "block", name = "目标施法可打断" },
-        [39] = { type = "block", name = "焦点施法" },
-        [40] = { type = "block", name = "焦点施法可打断" },
-        [41] = { type = "block", name = "目标引导" },
-        [42] = { type = "block", name = "目标引导可打断" },
-        [43] = { type = "block", name = "焦点引导" },
-        [44] = { type = "block", name = "焦点引导可打断" },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "能量值",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "敌人人数",
+                "姿态",
+            },
+            ["目标"] = {
+                "类型",
+                "生命值",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        spells = {
+            { spellId = 22812, name = "树皮术" },
+            { spellId = 132469, name = "台风" },
+            { spellId = 99, name = "夺魂咆哮" },
+            { spellId = 29166, name = "激活" },
+            { spellId = 102793, name = "乌索尔旋风" },
+        },
     },
     [3] = {
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "能量值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "目标生命值" },
-        [22] = { type = "block", name = "敌人人数" },
-        [23] = { type = "block", name = "姿态" },
-        [24] = { type = "aura", name = "塞纳留斯的梦境", auraName = "塞纳留斯的梦境", showKey = "remaining" },
-        [25] = { type = "aura", name = "塞纳留斯的梦境层数", auraName = "塞纳留斯的梦境", showKey = "count" },
-        [26] = { type = "aura", name = "铁鬃", auraName = "铁鬃", showKey = "remaining" },
-        [27] = { type = "aura", name = "狂暴回复", auraName = "狂暴回复", showKey = "remaining" },
-        [28] = { type = "aura", name = "星河守护者", auraName = "星河守护者", showKey = "remaining" },
-        [29] = { type = "aura", name = "淤血", auraName = "淤血", showKey = "remaining" },
-        [31] = { type = "spell", spellId = 22812, name = "树皮术" },
-        [32] = { type = "spell", spellId = 132469, name = "台风" },
-        [33] = { type = "spell", spellId = 99, name = "夺魂咆哮" },
-        [34] = { type = "spell", spellId = 29166, name = "激活" },
-        [35] = { type = "spell", spellId = 102793, name = "乌索尔旋风" },
-        [36] = { type = "spell", spellId = 22842, name = "狂暴回复" },
-        [37] = { type = "spell", spellId = 22842, name = "狂暴回复", charge = true },
-        [38] = { type = "spell", spellId = 61336, name = "生存本能" },
-        [39] = { type = "spell", spellId = 102558, name = "化身：乌索克的守护者" },
-        [40] = { type = "spell", spellId = 1261867, name = "野性之心" },
-        [41] = { type = "spell", spellId = 1253799, name = "碎甲咆哮" },
-        [42] = { type = "spell", spellId = 1252871, name = "赤红之月" },
-        [43] = { type = "spell", spellId = 6807, name = "重殴" },
-        [44] = { type = "spell", spellId = 77758, name = "痛击" },
-        [45] = { type = "block", name = "目标施法" },
-        [46] = { type = "block", name = "目标施法可打断" },
-        [47] = { type = "block", name = "焦点施法" },
-        [48] = { type = "block", name = "焦点施法可打断" },
-        [49] = { type = "block", name = "目标引导" },
-        [50] = { type = "block", name = "目标引导可打断" },
-        [51] = { type = "block", name = "焦点引导" },
-        [52] = { type = "block", name = "焦点引导可打断" },
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "能量值",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "敌人人数",
+                "姿态",
+            },
+            ["目标"] = {
+                "类型",
+                "生命值",
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+            ["焦点"] = {
+                "施法",
+                "施法可打断",
+                "引导",
+                "引导可打断",
+            },
+        },
+        -- TODO spellId: 塞纳留斯的梦境
+        -- TODO spellId: 塞纳留斯的梦境层数
+        -- TODO spellId: 铁鬃
+        -- TODO spellId: 狂暴回复
+        -- TODO spellId: 星河守护者
+        -- TODO spellId: 淤血
+        spells = {
+            { spellId = 22812, name = "树皮术" },
+            { spellId = 132469, name = "台风" },
+            { spellId = 99, name = "夺魂咆哮" },
+            { spellId = 29166, name = "激活" },
+            { spellId = 102793, name = "乌索尔旋风" },
+            { spellId = 22842, name = "狂暴回复" },
+            { spellId = 22842, name = "狂暴回复", charge = true },
+            { spellId = 61336, name = "生存本能" },
+            { spellId = 102558, name = "化身：乌索克的守护者" },
+            { spellId = 1261867, name = "野性之心" },
+            { spellId = 1253799, name = "碎甲咆哮" },
+            { spellId = 1252871, name = "赤红之月" },
+            { spellId = 6807, name = "重殴" },
+            { spellId = 77758, name = "痛击" },
+        },
     },
     [4] = {
-        [9] = { type = "block", name = "战斗时间" },
-        [10] = { type = "block", name = "移动" },
-        [11] = { type = "block", name = "施法" },
-        [12] = { type = "block", name = "引导" },
-        [13] = { type = "block", name = "蓄力" },
-        [14] = { type = "block", name = "蓄力层数" },
-        [15] = { type = "block", name = "生命值" },
-        [16] = { type = "block", name = "法力值" },
-        [17] = { type = "block", name = "目标类型" },
-        [18] = { type = "block", name = "队伍人数" },
-        [19] = { type = "block", name = "首领战" },
-        [20] = { type = "block", name = "难度" },
-        [21] = { type = "block", name = "姿态" },
-        [22] = { type = "block", name = "目标距离" },
-        [23] = { type = "block", name = "连击点" },
-        [24] = { type = "block", name = "施法技能" },
-        [25] = { type = "block", name = "目标施法" },
-        [26] = { type = "block", name = "目标施法可打断" },
-        [29] = { type = "aura", name = "节能施法", auraName = "节能施法", showKey = "remaining" },
-        [30] = { type = "aura", name = "丛林之魂", auraName = "丛林之魂", showKey = "remaining" },
-        [31] = { type = "spell", spellId = 22812, name = "树皮术" },
-        [32] = { type = "spell", spellId = 132469, name = "台风" },
-        [33] = { type = "spell", spellId = 99, name = "夺魂咆哮" },
-        [34] = { type = "spell", spellId = 29166, name = "激活" },
-        [35] = { type = "spell", spellId = 102793, name = "乌索尔旋风" },
-        [36] = { type = "spell", spellId = 18562, name = "迅捷治愈" },
-        [37] = { type = "spell", spellId = 18562, name = "迅捷治愈", charge = true },
-        [38] = { type = "spell", spellId = 48438, name = "野性成长" },
-        [39] = { type = "spell", spellId = 391528, name = "万灵之召" },
-        [40] = { type = "spell", spellId = 88423, name = "自然之愈" },
-        [41] = { type = "spell", spellId = 102342, name = "铁木树皮" },
-        [42] = { type = "spell", spellId = 132158, name = "自然迅捷" },
-        [43] = { type = "spell", spellId = 1261867, name = "野性之心" },
-        [45] = {
-            type = "group",
+        states = {
+            ["状态"] = {
+                "锚点",
+                "职业",
+                "专精",
+                "队伍类型",
+                "英雄天赋",
+                "有效性",
+                "一键辅助",
+                "法术失败",
+                "战斗时间",
+                "移动",
+                "施法",
+                "引导",
+                "蓄力",
+                "蓄力层数",
+                "生命值",
+                "法力值",
+                "队伍人数",
+                "首领战",
+                "难度",
+                "姿态",
+                "连击点",
+                "施法技能",
+            },
+            ["目标"] = {
+                "类型",
+                "距离",
+                "施法",
+                "施法可打断",
+            },
+        },
+        -- TODO spellId: 节能施法
+        -- TODO spellId: 丛林之魂
+        spells = {
+            { spellId = 22812, name = "树皮术" },
+            { spellId = 132469, name = "台风" },
+            { spellId = 99, name = "夺魂咆哮" },
+            { spellId = 29166, name = "激活" },
+            { spellId = 102793, name = "乌索尔旋风" },
+            { spellId = 18562, name = "迅捷治愈" },
+            { spellId = 18562, name = "迅捷治愈", charge = true },
+            { spellId = 48438, name = "野性成长" },
+            { spellId = 391528, name = "万灵之召" },
+            { spellId = 88423, name = "自然之愈" },
+            { spellId = 102342, name = "铁木树皮" },
+            { spellId = 132158, name = "自然迅捷" },
+            { spellId = 1261867, name = "野性之心" },
+        },
+        group = {
             num = 7,
             healthPercent = 1,
             role = 2,
         },
     },
 }
-Fuyutsui.MacrosList = {
-    dynamicSpells = { "回春术", "愈合", "生命绽放", "迅捷治愈", "自然之愈" },
-    specialSpells = {
-        [17] = "/cancelaura [spec:4]猎豹形态\n/cast 万灵之召",
-        [22] = "/castsequence reset=0.5 铁鬃,x"
-    },
-    staticSpells = {
-        [1]  = "[nostance:2]猎豹形态(变形)",
-        [2]  = "[nostance:1]熊形态(变形)",
-        [3]  = "[nostance:4]枭兽形态",
-        [4]  = "月火术",
-        [5]  = "树皮术",
-        [6]  = "横扫",
-        [7]  = "潜行",
-        [8]  = "凶猛撕咬",
-        [9]  = "愤怒",
-        [10] = "割裂",
-        [11] = "撕碎",
-        [12] = "斜掠",
-        [13] = "痛击",
-        [14] = "野性印记",
-        [15] = "裂伤",
-        [16] = "野性成长",
-        [18] = "自然迅捷",
-        [19] = "[@player]激活",
-        [20] = "野性之心",
-        [21] = "野性冲锋",
-        -- [22] = "铁鬃",
-        [23] = "摧折",
-        [24] = "明月普照",
-        [25] = "狂暴回复",
-        [26] = "台风",
-        [27] = "夺魂咆哮",
-        [28] = "[@cursor]乌索尔旋风",
-        [29] = "日光术",
-        [30] = "星涌术",
-        [31] = "星火术",
-        [32] = "星辰坠落",
-        [33] = "自然之力",
-        [34] = "日蚀",
-        [35] = "超凡之盟",
-        [36] = "化身：艾露恩之眷",
-        [37] = "艾露恩之怒",
-        [38] = "野性蘑菇",
-        [39] = "新月",
-        [40] = "阳炎术",
-        [41] = "月蚀",
-        [42] = "化身：阿莎曼之灵",
-        [43] = "原始之怒",
-        [44] = "迎头痛击",
-        [45] = "怒意狂乱",
-        [46] = "猛虎之怒",
-        [47] = "生存本能",
-        [48] = "野性冲锋",
-        [49] = "群体缠绕",
-        [50] = "狂暴",
-        [51] = "啃噬",
-        [52] = "野性狂乱",
-        [53] = "碎甲咆哮",
-        [54] = "重殴",
-    },
+
+Fuyutsui.spellsList = {
+
+    [384255]  = { index = 151, },              -- 切换天赋
+    [200749]  = { index = 152, },              -- 切换专精
+    -- 种族
+    [59547]   = { index = 122, },              -- 纳鲁的赐福
+    [28730]   = { index = 101, },              -- 奥术洪流(法师)
+    [232633]  = { index = 101, },              -- 奥术洪流(牧师)
+    [129597]  = { index = 101, },              -- 奥术洪流(武僧)
+    -- 德鲁伊
+    [132469]  = { index = 1, failed = true },  -- 台风
+    [99]      = { index = 2, failed = true },  -- 夺魂咆哮
+    [102793]  = { index = 3, failed = true },  -- 乌索尔旋风
+    [132158]  = { index = 4 },                 -- 自然迅捷
+    [8921]    = { index = 5, },                -- 月火术
+    [1126]    = { index = 6, },                -- 野性印记
+    [400254]  = { index = 7, },                -- 摧折
+    [204066]  = { index = 8, },                -- 明月普照
+    [213771]  = { index = 9, },                -- 横扫
+    [5487]    = { index = 10, },               -- 熊形态
+    [77758]   = { index = 11, },               -- 痛击
+    [33917]   = { index = 12, },               -- 裂伤
+    [1252871] = { index = 13, },               -- 赤红之月
+    [441605]  = { index = 14, },               -- 毁灭
+    [22568]   = { index = 15, },               -- 凶猛撕咬
+    [1079]    = { index = 16, },               -- 割裂
+    [5221]    = { index = 17, },               -- 撕碎
+    [1822]    = { index = 18, },               -- 斜掠
+    [5176]    = { index = 19, },               -- 愤怒
+    [8936]    = { index = 20, },               -- 愈合
+    [48438]   = { index = 21, },               -- 野性生长
+    [740]     = { index = 22, },               -- 宁静
+    [190984]  = { index = 23, },               -- 愤怒
+    [78674]   = { index = 24, },               -- 星涌术
+    [194153]  = { index = 25, },               -- 星火术
+    [391528]  = { index = 26, },               -- 万灵之召
+    [191034]  = { index = 27, },               -- 星辰坠落
+    [205636]  = { index = 28, },               -- 自然之力
+    [1233346] = { index = 29, },               -- 日蚀
+    [194223]  = { index = 30, },               -- 超凡之盟
+    [78675]   = { index = 31, failed = true }, -- 日光术
+    [102560]  = { index = 32, },               -- 化身：艾露恩之眷
+    [202770]  = { index = 33, },               -- 艾露恩之怒
+    [274281]  = { index = 34, },               -- 新月
+    [24858]   = { index = 35, },               -- 枭兽形态
+    [93402]   = { index = 36, },               -- 阳炎术
+    [1233272] = { index = 37, },               -- 月蚀
+    [768]     = { index = 38, },               -- 猎豹形态
+    [102543]  = { index = 39, },               -- 化身：阿莎曼之灵
+    [285381]  = { index = 40, },               -- 原始之怒
+    [106839]  = { index = 41, },               -- 迎头痛击
+    [1243807] = { index = 42, },               -- 怒意狂乱
+    [5217]    = { index = 43, },               -- 猛虎之怒
+    [61336]   = { index = 44, },               -- 生存本能
+    [102401]  = { index = 45, },               -- 野性冲锋
+    [102359]  = { index = 46, },               -- 群体缠绕
+    [106951]  = { index = 47, },               -- 狂暴
+    [1244258] = { index = 48, },               -- 啃噬
+    [274837]  = { index = 49, },               -- 野性狂乱
+    [106785]  = { index = 50, },               -- 横扫
+    [441591]  = { index = 51, },               -- 毁灭
+    [1253799] = { index = 52, },               -- 碎甲咆哮
+    [6807]    = { index = 53, },               -- 重殴
+    [1261867] = { index = 54, },               -- 野性之心
+    [93985]   = { index = 55, },               -- 迎头痛击
+    [314330]  = { index = 56, },               -- 迎头痛击
+    [192081]  = { index = 57, },               -- 铁鬃
+    [1270292] = { index = 58, },               -- 明月普照
+    [22812]   = { index = 59, },               -- 树皮术
+    [2908]    = { index = 60, },               -- 安抚
+    [1850]    = { index = 61, },               -- 急奔
+    [339]     = { index = 62, },               -- 纠缠根须
+    [2782]    = { index = 63, },               -- 清除腐蚀
+    [6795]    = { index = 64, },               -- 低吼
+    [77761]   = { index = 65, },               -- 狂奔怒吼
+    [783]     = { index = 66, },               -- 旅行形态
+    [102558]  = { index = 67, },               -- 化身：乌索克的守护者
+    [77764]   = { index = 68, },               -- 狂奔怒吼
 }
