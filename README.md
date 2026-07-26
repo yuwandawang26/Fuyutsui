@@ -1,9 +1,18 @@
-# Fuyutsui（“冬月修补匠3型”）
+# Fuyutsui
 
-Fuyutsui Tinkerer 是由日本大众消费电子巨头冬月电子（Fuyutsuki Electronics）研发的一块网络接入仓（Cyberdeck），能够提升你使用枪械时的准确度、命中率和速度。
+World of Warcraft Retail Lua AddOn。在屏幕顶部绘制 **510** 个极窄色块，把玩家、目标、队伍、光环、法术冷却、配置开关等游戏状态编码成像素颜色，供外部程序（如 [Shigure](https://github.com/waynebian01/Shigure)）读取。
 
-### Fuyutsui 需要配合 荒坂公司（Arasaka Corporation）的 [Shigure](https://github.com/waynebian01/Shigure) 使用。
+| 项目 | 说明 |
+| --- | --- |
+| 版本 | 见 `Fuyutsui.toc`（当前 `1.2.2.4`） |
+| 接口 | Retail（`Interface` 120000+） |
+| 作者 | Wayne Bian |
+| 存档 | `FuyutsuiADB`（SavedVariables） |
+| 命令 | `/fu`、`/fuyutsui` |
 
+> 旁白：Fuyutsui Tinkerer——冬月电子出品的网络接入仓。别让荒坂发现。
+
+---
 
 # 免责声明 (Disclaimer)
 
@@ -31,84 +40,181 @@ Fuyutsui Tinkerer 是由日本大众消费电子巨头冬月电子（Fuyutsuki E
 
 ---
 
-## 它支持谁?
+## 它做什么
 
-- **版本**: 听说它只支持 _Relic_
-   ### 职业与专精支持
-   #### 天赋
-   脚本使用的天赋均来自于 [WOWHEAD](https://www.wowhead.com/guides/classes) 推荐的天赋
-   #### 图标含义:
+- 在屏幕最顶端生成主色块条（510 格）+ 下方横向计数条（充能 / `castCount` / 光环层数）。
+- 按当前职业与专精加载 `ClassBlocks`，把状态、光环、法术冷却、队伍信息映射到固定像素索引。
+- 通过 SecureActionButton 创建宏并绑定预设键位；扫描动作条，建立 `spellId → key/keycode` 映射。
+- 提供斜杠命令与游戏内快捷按钮，切换爆发、AOE/单体、输出模式、药水等角色级开关。
 
-   ✅: 手写逻辑      🔄: 官方一键辅助        ❌: 不支持
-
-   | 职业 | 专精 |专精  |专精  |专精  |
-   | --- | --- | --- | --- | --- |
-   | 战士 | 武器 🔄 | 狂怒 🔄 | 防护 ✅🔄 |  |
-   | 圣骑士 | 神圣 ✅ | 防护✅🔄 | 惩戒 🔄 |  |
-   | 猎人 | 野兽 🔄 | 射击 🔄 | 生存 🔄 |  |
-   | 盗贼 | 奇袭 🔄 | 狂徒 🔄 | 敏锐 🔄 |  |
-   | 牧师 | 戒律 ✅ | 神圣 ✅ | 暗影 ✅🔄 |  |
-   | 死亡骑士 | 鲜血 🔄 | 冰霜 🔄 | 邪恶 🔄✅ |  |
-   | 萨满 | 元素 🔄 | 增强 🔄 | 恢复 ✅ |  |
-   | 法师 | 奥术 🔄 | 火焰 🔄 | 冰霜 ✅🔄 |  |
-   | 术士 | 痛苦 🔄 | 恶魔 ✅🔄 | 毁灭 🔄 |  |
-   | 武僧 | 酒仙 ✅🔄 | 织雾 ✅ | 踏风 ✅🔄 |  |
-   | 德鲁伊 | 平衡 🔄 | 野性 🔄 | 守护 ✅🔄 | 恢复 ✅ |
-   | 恶魔猎手 | 浩劫 🔄 | 复仇 🔄 | 噬灭 🔄 |  |
-   | 唤魔师 | 湮灭 🔄 | 恩护 ❌ | 增辉 ❌ |  |
-
-- **感觉支持的职业非常少**
-
-## 它到底做了什么？
-
-本插件为 **WoW 游戏内 Lua AddOn**，主要功能如下：
-
-- 在屏幕顶部生成一条「色块 / 色条」，将队伍成员、光环、技能冷却、当前决策等游戏状态编码为像素颜色。
-- 按当前职业与专精加载对应逻辑模块，判断「下一步该做什么」，并将结果写入色条供外部程序读取（若你自行搭配桌面端工具）。
-- 提供游戏内配置界面与快捷按钮，可切换爆发、AOE/单体、输出模式等选项。
+本插件**只负责游戏内状态编码与宏绑定**；热键触发、决策执行由外部读取端完成。
 
 ---
 
-## 如何安装与使用
+## 系统拓扑
 
-### 1. 安装插件
+```mermaid
+flowchart TB
+  subgraph Game["WoW 客户端"]
+    TOC["Fuyutsui.toc"] --> Core["core/*"]
+    TOC --> Class["class/*.lua"]
+    TOC --> Main["main.lua"]
+    Core --> Main
+    Class --> Main
 
-将仓库中的 `Fuyutsui` 文件夹整体复制到魔兽世界安装目录下的 `Interface/AddOns/` 中。
+    Events["events / OnUpdate"] --> State["Fuyutsui.state<br/>target / focus / group"]
+    State --> Blocks["Fuyutsui.blocks"]
+    Main --> Blocks
+    Blocks --> Pixel["顶部色块条<br/>CreateTexture"]
+    Blocks --> Count["横向计数条<br/>CreateAutoLayoutBar"]
+    Aura["AuraContainer"] --> Pixel
+    Aura --> Count
+    Macro["SecureActionButton 宏"] --> Keys["OverrideBinding"]
+    QB["快捷按钮 /fu 命令"] --> DB["FuyutsuiADB.char"]
+    DB --> Pixel
+  end
 
-路径示例：
+  Pixel --> External["外部程序 Shigure 等<br/>屏幕取色"]
+  External --> Input["按键 / 决策"]
+```
+
+### 数据流（运行时）
+
+```mermaid
+flowchart LR
+  A["WoW 事件 / OnUpdate"] --> B["领域模块<br/>player / spells / target / group"]
+  B --> C["更新 state 缓存"]
+  C --> D{"写像素?"}
+  D -->|状态| E["UpdateStateBlock"]
+  D -->|冷却| F["UpdateSpellCooldown"]
+  D -->|光环| G["AuraContainer 事件驱动"]
+  E --> H["CreateTexture i,b"]
+  F --> H
+  G --> H
+  H --> I["屏幕顶部像素"]
+```
+
+### 主色块索引分配
+
+同一专精内从索引 **1** 起连续占位，顺序固定：
+
+```mermaid
+flowchart LR
+  S["states"] --> A["auras"]
+  A --> P["spells"]
+  P --> G["group"]
+```
+
+| 区域 | 容器 | 用途 |
+| --- | --- | --- |
+| 主色块条 | `FuyutsuiColorBars`（屏幕最顶端） | 状态、光环剩余、法术冷却、队伍等，按整数索引从左到右 |
+| 横向计数条 | `FuyutsuiCountBars`（紧贴下方） | 充能、`castCount`、光环 `maxApps`；**不占用**主色块索引 |
+
+像素编码约定：
+
+- 索引 `1..255`：`r=0`，`g=index/255`，业务值在 `b`
+- 索引 `256..510`：`r=1/255`，`g=(index-255)/255`，业务值在 `b`
+
+不同职业/专精声明的条目数量不同，**同一语义的绝对索引可能不同**。详细布局见 [TEXTURE_LAYOUT_zh-CN.md](TEXTURE_LAYOUT_zh-CN.md)。
+
+---
+
+## 仓库结构
+
+```text
+Fuyutsui/
+├── Fuyutsui.toc          # 入口与加载顺序
+├── embeds.xml / libs/    # LibStub、LibRangeCheck-3.0
+├── main.lua              # LoadPlayerBlocks / LoadPlayerMacros 编排
+├── auracontainer.lua     # 中央 buff 演示 UI（与像素协议无关）
+├── Keymap.md             # 键位编码对照
+├── core/
+│   ├── core.lua          # 全局 Fuyutsui、事件框架、SavedVariables
+│   ├── config.lua        # 静态配置：法术、难度、键位、动作条…
+│   ├── curves.lua        # 颜色 / 能量曲线
+│   ├── block.lua         # 色块条 + CreateTexture / 计数条
+│   ├── stateblocks.lua   # 状态块 getter → UpdateStateBlock
+│   ├── commands.lua      # /fu 斜杠命令
+│   ├── quickbutton.lua   # 游戏内快捷切换按钮
+│   ├── macro.lua         # SecureActionButton 宏绑定
+│   ├── classmacros.lua   # 全职业宏表
+│   ├── keybinds.lua      # 动作条 spellId → 键位扫描
+│   ├── player.lua        # 玩家状态
+│   ├── spells.lua        # 法术冷却
+│   ├── target.lua        # 目标 / 焦点
+│   ├── group.lua         # 队伍
+│   └── events.lua        # 事件与 OnUpdate 刷新节奏
+└── class/*.lua           # 各职业 ClassBlocks（仅当前职业生效）
+```
+
+### 加载顺序
+
+```mermaid
+flowchart TD
+  L1["1. embeds.xml + libs"] --> L2["2. core/core.lua"]
+  L2 --> L3["3. config → curves → block → stateblocks<br/>→ commands → quickbutton → macro<br/>→ classmacros → keybinds"]
+  L3 --> L4["4. auracontainer.lua"]
+  L4 --> L5["5. class/*.lua（仅当前职业写入 ClassBlocks）"]
+  L5 --> L6["6. player → spells → target → group → events"]
+  L6 --> L7["7. main.lua"]
+```
+
+新增 Lua 文件时必须同步 `Fuyutsui.toc`。
+
+---
+
+## 刷新节奏
+
+| 频率 | 内容 |
+| --- | --- |
+| 每帧 | 玩家施法/引导/蓄力、目标/焦点施法、队伍血量范围 |
+| 每 0.2 秒 | 法术冷却、玩家辅助、符文、目标距离、敌人数、物品冷却 |
+| 每 1 秒 | 战斗时间、天启骑士数量等 |
+| 事件驱动 | 玩家/队伍光环像素（AuraContainer，不在 OnUpdate 轮询） |
+
+---
+
+## 安装
+
+将本仓库文件夹放到：
 
 ```text
 ...\World of Warcraft\_retail_\Interface\AddOns\Fuyutsui\
 ```
 
-### 2. 启用插件
-
-1. 启动魔兽世界，进入角色选择界面或游戏中。
-2. 打开插件列表（Esc → 插件），勾选 **Fuyutsui**。
-3. 若更新了文件，可在聊天框输入 `/reload` 重载界面。
-
-### 3. 游戏内命令
-
-| 命令 | 说明 |
-| --- | --- |
-| `/fu` 或 `/fuyutsui` | 主命令 |
-| `/fu options` 或 `/fu config` | 打开配置界面 |
-| `/fu cd` / `/fu cd on` / `/fu cd off` | 切换爆发开关 |
-| `/fu aoemode` / `/fu aoemode auto` / `/fu aoemode aoe` | 切换 AOE / 单体模式 |
-| `/fu dpsmode` / `/fu dpsmode manual` / `/fu dpsmode assistant` | 切换输出模式（手写逻辑 / 官方一键辅助） |
-| `/fu potion` | 切换爆发药水开关 |
-
-配置项按角色保存在 `FuyutsuiADB` 中；界面内亦可拖动快捷按钮调整爆发、AOE、输出模式等。
-
-### 4. 键位映射
-
-插件逻辑会通过色条指示建议按键。完整键位对照表见项目根目录下的 [Keymap.md](Keymap.md)。
+1. 启动游戏 → Esc → 插件 → 勾选 **Fuyutsui**
+2. 更新文件后在聊天框输入 `/reload`
+3. 完整键位编码见 [Keymap.md](Keymap.md)
 
 ---
 
-## 免责声明
+## 游戏内命令
 
-本项目偏「个人工具 / 实验性质」，通过读取游戏画面像素并触发热键来实现辅助决策。
-请你自行判断是否符合你的需求，别让它被荒坂发现。
+| 命令 | 说明 |
+| --- | --- |
+| `/fu` / `/fu help` | 命令帮助 |
+| `/fu cd` / `on` / `off` | 爆发开关 |
+| `/fu aoemode` / `auto` / `aoe` | AOE / 单体模式 |
+| `/fu dpsmode` / `manual` / `assistant` | 手写逻辑 / 官方一键辅助 |
+| `/fu potion` / `on` / `off` | 爆发药水开关 |
+| `/fu delay [秒]` | 临时 delay 标志（默认 1 秒） |
 
-[icon]: https://wow.zamimg.com/images/wow/icons/large/ui_spellbook_onebutton.jpg
+配置按角色保存在 `FuyutsuiADB`；亦可用屏幕上的快捷按钮切换爆发、AOE、输出模式、药水。
+
+---
+
+
+## 相关文档
+
+| 文档 | 内容 |
+| --- | --- |
+| [TEXTURE_LAYOUT_zh-CN.md](TEXTURE_LAYOUT_zh-CN.md) | 色块索引排序与像素协议 |
+| [Keymap.md](Keymap.md) | 热键 ID ↔ 按键对照 |
+| [AGENTS.md](AGENTS.md) | 给 AI / 贡献者的代码库约定 |
+| [AuraContainer_AI_Reference_zh-CN.md](AuraContainer_AI_Reference_zh-CN.md) | AuraContainer 参考 |
+
+---
+
+## License
+
+MIT。使用前请完整阅读上方免责声明。
