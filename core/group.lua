@@ -7,13 +7,14 @@ local roleMap = Fuyutsui.roleMap
 local ColorValue0 = CreateColor(0, 0, 0, 1)
 local updateIndex = 1
 
+-- 施法治疗预估偏移（近似秒数/权重，写入生命曲线）
 local helpfulSpells = {
     [2061] = 15,
     [1262763] = 15,
     [82326] = 40,
     [19750] = 15,
     [8936] = 15,
-    [186263] = 60,
+    [186263] = 40,
     [77472] = 15,
 }
 
@@ -39,7 +40,7 @@ function Fuyutsui:UpdateUnitHealthInfo(unit)
     local obj = group[unit]
     if not blocks or not blocks.groups or not obj then return end
     local index = blocks.groups.start + (obj.index - 1) * blocks.groups.num + blocks.groups.healthPercent
-    obj.curve = self:CreateColorCurveScaling(100 + obj.inComingHeals - obj.healAbsorb)
+    obj.curve = self:CreateColorCurveScaling(100 + (obj.inComingHeals or 0))
     local healthPercent = UnitHealthPercent(unit, false, obj.curve)
     ---@diagnostic disable-next-line: param-type-mismatch
     local _, _, b = healthPercent:GetRGB()
@@ -120,21 +121,6 @@ function Fuyutsui:UpdateUnitInSight(unit)
     self:UpdateUnitValid(unit)
 end
 
-function Fuyutsui:UpdateUnitHealAbsorbCurve(unit)
-    local obj = self.group[unit]
-    if not obj then return end
-    obj.healAbsorb = 15
-    if obj.curveTimer then
-        obj.curveTimer:Cancel()
-    end
-    obj.curveTimer = C_Timer.NewTimer(1, function()
-        if self.group[unit] and self.group[unit] == obj then
-            obj.healAbsorb = 0
-            obj.curveTimer = nil
-        end
-    end)
-end
-
 function Fuyutsui:ApplyIncomingHealsCurve(spellID)
     local unit = state.castTargetUnit
     if not unit then return end
@@ -186,9 +172,7 @@ function Fuyutsui:UpdateGroup()
             inSight = true,
             inSightTimer = nil,
             curve = self.curve100,
-            healAbsorb = 0,
             inComingHeals = 0,
-            curveTimer = nil,
         }
         self:UpdateUnitValid(unit)
         self:UpdateUnitHealthInfo(unit)
@@ -196,5 +180,8 @@ function Fuyutsui:UpdateGroup()
     end
     if self.RefreshGroupAuraContainers then
         self:RefreshGroupAuraContainers()
+    end
+    if self.RefreshGroupHealAbsorbBars then
+        self:RefreshGroupHealAbsorbBars()
     end
 end

@@ -36,7 +36,6 @@ core/quickbutton.lua
 core/macro.lua
 core/classmacros.lua
 core/keybinds.lua
-auracontainer.lua
 
 class/Warrior.lua
 class/Paladin.lua

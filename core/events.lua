@@ -235,7 +235,6 @@ function Fuyutsui:UNIT_HEAL_ABSORB_AMOUNT_CHANGED(_, unit)
         self:UpdatePlayerHealth()
     end
     if self.group[unit] then
-        self:UpdateUnitHealAbsorbCurve(unit)
         self:UpdateUnitDeath(unit, "health")
     end
 end

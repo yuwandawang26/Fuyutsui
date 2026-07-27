@@ -15,7 +15,7 @@ local COLOR_BARS_LEVEL = 5001
 
 -- 横向条（FuyutsuiCountBars：计数条 + 光环层数条，BAR_END_COLOR 收尾）
 local BAR_UNIT_COUNT = 500  -- 横向单元数
-local BAR_HEIGHT = 1        -- 条高度
+local BAR_HEIGHT = 2        -- 条高度
 local BAR_FRAME_HEIGHT = 20 -- 容器高度
 local BAR_START_INDEX = 2   -- 首条占用起始单元
 local BAR_STRATA = "BACKGROUND"
@@ -33,6 +33,11 @@ local AURA_DURATION_LEVEL = 5003
 -- AuraContainer 层数条
 local AURA_BAR_STRATA = "TOOLTIP"
 local AURA_BAR_LEVEL = 5004
+
+-- 队伍治疗吸收条（FuyutsuiHealAbsorbBars）
+local HEAL_ABSORB_MAX_SLOTS = 30 -- 最大槽位数
+local HEAL_ABSORB_COLS = 5       -- 每行列数
+local HEAL_ABSORB_BAR_UNITS = 100 -- 单条条身单元数
 
 --[[============================================================================
     派生尺寸（一般不用改）
@@ -52,6 +57,9 @@ local BAR_CONFIG = {
     height = BAR_HEIGHT,
     point = "TOPLEFT",
 }
+
+local HEAL_ABSORB_SLOT_UNITS = 1 + HEAL_ABSORB_BAR_UNITS + 1 -- 前锚点 + 条身 + 终点
+local HEAL_ABSORB_ROWS = HEAL_ABSORB_MAX_SLOTS / HEAL_ABSORB_COLS
 
 local AURA_BLOCK_W = BLOCK_FIX_CONFIG.blockWidth
 local AURA_BLOCK_H = AURA_BLOCK_HEIGHT
@@ -266,7 +274,183 @@ function Fuyutsui:ClearAllFuyutsuiBars()
     if Fuyutsui.ReleaseGroupAuraContainers then
         Fuyutsui:ReleaseGroupAuraContainers()
     end
+    if Fuyutsui.ClearGroupHealAbsorbBars then
+        Fuyutsui:ClearGroupHealAbsorbBars()
+    end
 end
+
+--[[============================================================================
+    队伍治疗吸收条（FuyutsuiHealAbsorbBars）
+    布局：主色块 + 计数条下方；每行 5 条、最多 30 条
+    单槽：前锚点 1 + 条身 100 + 终点色块 1（列宽 102）
+    编码：
+      行 r：第 1 行=0 … 第 6 行=5（同行条身背景 r 统一）
+      前锚点：(r=行号/255, g=单位编号/255, b=0)
+        player=1, party1..4=2..5, raidN=N
+      条身背景：(r=行号/255, g=相对索引1..100/255, b=单位编号/255)
+      终点色块：BAR_END_COLOR（与 CountBars 相同）
+    秘密值直通：UnitGetDetailedHealPrediction → GetHealAbsorbs → SetValue
+============================================================================]]
+
+local healAbsorbBars = CreateFrame("Frame", "FuyutsuiHealAbsorbBars", UIParent)
+healAbsorbBars:SetSize(screenWidth, HEAL_ABSORB_ROWS * BAR_CONFIG.height)
+healAbsorbBars:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 0, -(BLOCK_HEIGHT + BAR_HEIGHT))
+healAbsorbBars:SetFrameStrata(BAR_STRATA)
+healAbsorbBars:SetFrameLevel(BAR_LEVEL)
+
+local healAbsorbSlots = {} -- [slot] = { frame, bar, anchor, bodyTex, endTex, calculator, row, unit }
+local healAbsorbUnitToSlot = {} -- [unit] = slot
+
+--- player=1, party1..4=2..5, raidN=N
+local function GetHealAbsorbUnitValue(unit)
+    if unit == "player" then
+        return 1
+    end
+    local partyIndex = string.match(unit, "^party(%d+)$")
+    if partyIndex then
+        return tonumber(partyIndex) + 1
+    end
+    local raidIndex = string.match(unit, "^raid(%d+)$")
+    if raidIndex then
+        return tonumber(raidIndex)
+    end
+    return 0
+end
+
+local function PaintHealAbsorbSlotColors(entry, unitValue)
+    local rowR = entry.row / 255
+    local unitB = unitValue / 255
+    -- 前锚点：(r=行号, g=单位编号, b=0)
+    entry.anchor:SetColorTexture(rowR, unitValue / 255, 0, 1)
+    -- 条身：(r=行号, g=相对索引, b=单位编号)
+    for i, tex in ipairs(entry.bodyTex) do
+        tex:SetColorTexture(rowR, i / 255, unitB, 1)
+    end
+end
+
+local function CreateHealAbsorbSlot(slot)
+    local row = math.floor((slot - 1) / HEAL_ABSORB_COLS)
+    local col = (slot - 1) % HEAL_ABSORB_COLS
+    local originX = col * HEAL_ABSORB_SLOT_UNITS * BAR_CONFIG.width
+    local originY = -row * BAR_CONFIG.height
+    local rowR = row / 255
+
+    local slotFrame = CreateFrame("Frame", nil, healAbsorbBars)
+    slotFrame:SetSize(HEAL_ABSORB_SLOT_UNITS * BAR_CONFIG.width, BAR_CONFIG.height)
+    slotFrame:SetPoint("TOPLEFT", healAbsorbBars, "TOPLEFT", originX, originY)
+    slotFrame:Hide()
+
+    -- 条前锚点：r=行号，g=单位编号（绑定时写入），b=0
+    local anchor = slotFrame:CreateTexture(nil, "BACKGROUND")
+    anchor:SetSize(BAR_CONFIG.width, BAR_CONFIG.height)
+    anchor:SetPoint("TOPLEFT", slotFrame, "TOPLEFT", 0, 0)
+    anchor:SetColorTexture(rowR, 0, 0, 1)
+
+    -- 条身背景：r=行号，g=相对索引 1..100，b=单位编号（绑定时写入）
+    local bodyTex = {}
+    for i = 1, HEAL_ABSORB_BAR_UNITS do
+        local tex = slotFrame:CreateTexture(nil, "BACKGROUND")
+        tex:SetSize(BAR_CONFIG.width, BAR_CONFIG.height)
+        tex:SetPoint("TOPLEFT", slotFrame, "TOPLEFT", i * BAR_CONFIG.width, 0)
+        tex:SetColorTexture(rowR, i / 255, 0, 1)
+        bodyTex[i] = tex
+    end
+
+    -- 条右侧终点色块（与 CountBars BAR_END_COLOR 相同）
+    local endTex = slotFrame:CreateTexture(nil, "BACKGROUND")
+    endTex:SetSize(BAR_CONFIG.width, BAR_CONFIG.height)
+    endTex:SetPoint("TOPLEFT", slotFrame, "TOPLEFT", (1 + HEAL_ABSORB_BAR_UNITS) * BAR_CONFIG.width, 0)
+    endTex:SetColorTexture(BAR_END_COLOR[1], BAR_END_COLOR[2], BAR_END_COLOR[3], BAR_END_COLOR[4])
+
+    local bar = CreateFrame("StatusBar", nil, slotFrame)
+    bar:SetSize(HEAL_ABSORB_BAR_UNITS * BAR_CONFIG.width + 1, BAR_CONFIG.height)
+    bar:SetPoint("TOPLEFT", slotFrame, "TOPLEFT", BAR_CONFIG.width, 0)
+    StyleHorizontalStatusBar(bar)
+    bar:SetFrameLevel(BAR_STATUS_LEVEL)
+    bar:SetMinMaxValues(0, 1)
+    bar:SetValue(0)
+
+    return {
+        frame = slotFrame,
+        bar = bar,
+        anchor = anchor,
+        bodyTex = bodyTex,
+        endTex = endTex,
+        calculator = CreateUnitHealPredictionCalculator(),
+        row = row,
+        unit = nil,
+    }
+end
+
+for slot = 1, HEAL_ABSORB_MAX_SLOTS do
+    healAbsorbSlots[slot] = CreateHealAbsorbSlot(slot)
+end
+
+function Fuyutsui:UpdateGroupHealAbsorbBar(unit)
+    local slot = healAbsorbUnitToSlot[unit]
+    if not slot then
+        return
+    end
+    local entry = healAbsorbSlots[slot]
+    if not entry or not entry.unit then
+        return
+    end
+    if not UnitExists(unit) then
+        entry.bar:SetMinMaxValues(0, 1)
+        entry.bar:SetValue(0)
+        return
+    end
+    UnitGetDetailedHealPrediction(unit, nil, entry.calculator)
+    local amount = entry.calculator:GetHealAbsorbs()
+    entry.bar:SetMinMaxValues(0, entry.calculator:GetMaximumHealth())
+    entry.bar:SetValue(amount)
+end
+
+function Fuyutsui:ClearGroupHealAbsorbBars()
+    wipe(healAbsorbUnitToSlot)
+    for slot = 1, HEAL_ABSORB_MAX_SLOTS do
+        local entry = healAbsorbSlots[slot]
+        entry.unit = nil
+        PaintHealAbsorbSlotColors(entry, 0)
+        entry.bar:SetMinMaxValues(0, 1)
+        entry.bar:SetValue(0)
+        entry.frame:Hide()
+    end
+end
+
+function Fuyutsui:RefreshGroupHealAbsorbBars()
+    wipe(healAbsorbUnitToSlot)
+    local groupList = self.groupList or {}
+    local bound = math.min(#groupList, HEAL_ABSORB_MAX_SLOTS)
+
+    for slot = 1, HEAL_ABSORB_MAX_SLOTS do
+        local entry = healAbsorbSlots[slot]
+        if slot <= bound then
+            local unit = groupList[slot]
+            entry.unit = unit
+            healAbsorbUnitToSlot[unit] = slot
+            PaintHealAbsorbSlotColors(entry, GetHealAbsorbUnitValue(unit))
+            entry.frame:Show()
+            self:UpdateGroupHealAbsorbBar(unit)
+        else
+            entry.unit = nil
+            PaintHealAbsorbSlotColors(entry, 0)
+            entry.bar:SetMinMaxValues(0, 1)
+            entry.bar:SetValue(0)
+            entry.frame:Hide()
+        end
+    end
+end
+
+healAbsorbBars:RegisterEvent("UNIT_HEALTH")
+healAbsorbBars:RegisterEvent("UNIT_MAXHEALTH")
+healAbsorbBars:RegisterEvent("UNIT_HEAL_PREDICTION")
+healAbsorbBars:RegisterEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED")
+healAbsorbBars:SetScript("OnEvent", function(_, _, unit)
+    if unit and healAbsorbUnitToSlot[unit] then
+        Fuyutsui:UpdateGroupHealAbsorbBar(unit)
+    end
+end)
 
 --[[============================================================================
     AuraContainer（列表来自 ClassBlocks auras + spellId/spellIds）
