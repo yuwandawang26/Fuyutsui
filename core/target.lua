@@ -4,54 +4,12 @@ local rc = LibStub("LibRangeCheck-3.0")
 
 local state = Fuyutsui.state
 local target = Fuyutsui.target
+local focus = Fuyutsui.focus
 local nameplate = Fuyutsui.nameplate
 
 function Fuyutsui:GetUnitRange(unit)
     local minRange, maxRange = rc:GetRange(unit)
     return minRange, maxRange
-end
-
-local function GetTargetDispelType()
-    if not UnitExists("target") then return 0 end
-    if target.canAttack then
-        return 1 / 255
-    elseif target.canAssist then
-        return 11 / 255
-    end
-    return 0
-end
-
-function Fuyutsui:UpdateTargetType()
-    local targetType = 0
-    if not target.isDead then
-        targetType = GetTargetDispelType()
-    end
-    target.type = targetType
-    self:UpdateStateBlock("目标", "类型")
-end
-
-function Fuyutsui:UpdateTargetCanAttack()
-    target.canAttack = UnitCanAttack("player", "target")
-    target.canAssist = UnitCanAssist("player", "target")
-    self:UpdateTargetType()
-end
-
-function Fuyutsui:UpdateTargetRangeBlock()
-    local minRange, maxRange = self:GetUnitRange("target")
-    target.minRange = minRange
-    target.maxRange = maxRange
-    if target.canAttack then
-        if target.maxRange and self.state.specRange then
-            target.inRange = target.maxRange <= self.state.specRange
-            self:UpdateTargetType()
-        end
-    elseif target.canAssist then
-        if target.maxRange then
-            target.inRange = target.maxRange <= 40
-            self:UpdateTargetType()
-        end
-    end
-    self:UpdateStateBlock("目标", "距离")
 end
 
 local unitZHMap = {
@@ -64,6 +22,62 @@ local unitZHMap = {
     ["boss5"] = "首领5",
 }
 
+local function GetUnitCache(unit)
+    if unit == "target" then return target end
+    if unit == "focus" then return focus end
+end
+
+local function GetUnitDispelType(unit, cache)
+    if not UnitExists(unit) then return 0 end
+    if cache.canAttack then
+        return 1 / 255
+    elseif cache.canAssist then
+        return 11 / 255
+    end
+    return 0
+end
+
+function Fuyutsui:UpdateUnitType(unit)
+    local cache = GetUnitCache(unit)
+    local category = unitZHMap[unit]
+    if not cache or not category then return end
+    local unitType = 0
+    if not cache.isDead then
+        unitType = GetUnitDispelType(unit, cache)
+    end
+    cache.type = unitType
+    self:UpdateStateBlock(category, "类型")
+end
+
+function Fuyutsui:UpdateUnitCanAttack(unit)
+    local cache = GetUnitCache(unit)
+    if not cache then return end
+    cache.canAttack = UnitCanAttack("player", unit)
+    cache.canAssist = UnitCanAssist("player", unit)
+    self:UpdateUnitType(unit)
+end
+
+function Fuyutsui:UpdateUnitRangeBlock(unit)
+    local cache = GetUnitCache(unit)
+    local category = unitZHMap[unit]
+    if not cache or not category then return end
+    local minRange, maxRange = self:GetUnitRange(unit)
+    cache.minRange = minRange
+    cache.maxRange = maxRange
+    if cache.canAttack then
+        if cache.maxRange and self.state.specRange then
+            cache.inRange = cache.maxRange <= self.state.specRange
+            self:UpdateUnitType(unit)
+        end
+    elseif cache.canAssist then
+        if cache.maxRange then
+            cache.inRange = cache.maxRange <= 40
+            self:UpdateUnitType(unit)
+        end
+    end
+    self:UpdateStateBlock(category, "距离")
+end
+
 function Fuyutsui:UpdateUnitCastingOrChannelingInfo(unit)
     if not UnitExists(unit) then return end
     local obj = unitZHMap[unit]
@@ -75,23 +89,78 @@ function Fuyutsui:UpdateUnitCastingOrChannelingInfo(unit)
     self:UpdateStateBlock(obj, "引导可打断")
 end
 
+function Fuyutsui:UpdateUnitDeathStatus(unit)
+    local cache = GetUnitCache(unit)
+    if not cache then return end
+    cache.isDead = UnitIsDeadOrGhost(unit)
+    self:UpdateUnitType(unit)
+end
+
+function Fuyutsui:UpdateUnitHealthBlock(unit)
+    local cache = GetUnitCache(unit)
+    local category = unitZHMap[unit]
+    if not cache or not category then return end
+    local healthPercent = UnitHealthPercent(unit, false, self.curve100)
+    ---@diagnostic disable-next-line: param-type-mismatch
+    local _, _, b = healthPercent:GetRGB()
+    cache.healthPercent = b or 0
+    self:UpdateStateBlock(category, "生命值")
+end
+
+function Fuyutsui:UpdateUnitFullInfo(unit)
+    self:UpdateUnitCanAttack(unit)
+    self:UpdateUnitDeathStatus(unit)
+    self:UpdateUnitHealthBlock(unit)
+end
+
+-- 目标兼容包装
+function Fuyutsui:UpdateTargetType()
+    self:UpdateUnitType("target")
+end
+
+function Fuyutsui:UpdateTargetCanAttack()
+    self:UpdateUnitCanAttack("target")
+end
+
+function Fuyutsui:UpdateTargetRangeBlock()
+    self:UpdateUnitRangeBlock("target")
+end
+
 function Fuyutsui:UpdateTargetDeath()
-    target.isDead = UnitIsDeadOrGhost("target")
-    self:UpdateTargetType()
+    self:UpdateUnitDeathStatus("target")
 end
 
 function Fuyutsui:UpdateTargetHealth()
-    local healthPercent = UnitHealthPercent("target", false, self.curve100)
-    ---@diagnostic disable-next-line: param-type-mismatch
-    local _, _, b = healthPercent:GetRGB()
-    target.healthPercent = b or 0
-    self:UpdateStateBlock("目标", "生命值")
+    self:UpdateUnitHealthBlock("target")
 end
 
 function Fuyutsui:UpdateTargetFullInfo()
-    self:UpdateTargetCanAttack()
-    self:UpdateTargetDeath()
-    self:UpdateTargetHealth()
+    self:UpdateUnitFullInfo("target")
+end
+
+-- 焦点包装
+function Fuyutsui:UpdateFocusType()
+    self:UpdateUnitType("focus")
+end
+
+function Fuyutsui:UpdateFocusCanAttack()
+    self:UpdateUnitCanAttack("focus")
+end
+
+function Fuyutsui:UpdateFocusRangeBlock()
+    self:UpdateUnitRangeBlock("focus")
+end
+
+function Fuyutsui:UpdateFocusDeath()
+    self:UpdateUnitDeathStatus("focus")
+end
+
+function Fuyutsui:UpdateFocusHealth()
+    self:UpdateUnitHealthBlock("focus")
+end
+
+function Fuyutsui:UpdateFocusFullInfo()
+    self:UpdateUnitFullInfo("focus")
 end
 
 function Fuyutsui:AddNameplate(unit)

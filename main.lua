@@ -13,6 +13,7 @@ function Fuyutsui:UpdatePlayerBlocks()
     self:UpdatePlayerPowerType()
     self:UpdatePlayerAssistant()
     self:UpdateTargetType()
+    self:UpdateFocusType()
     self:UpdateGroupType()
     self:UpdateGroupCount()
     self:UpdateHeroTalent()
@@ -21,7 +22,9 @@ function Fuyutsui:UpdatePlayerBlocks()
     self:UpdatePlayerStagger()
     self:UpdateRune()
     self:UpdateTargetRangeBlock()
+    self:UpdateFocusRangeBlock()
     self:UpdateTargetHealth()
+    self:UpdateFocusHealth()
     self:UpdateEnemyCount()
     self:UpdateGroup()
     self:GetItemCount()
@@ -47,18 +50,25 @@ function Fuyutsui:LoadPlayerBlocks(specIndex)
 
     local index = 1
 
-    -- states 支持分类表：{ ["状态"]={...}, ["目标"]={...}, ["焦点"]={...} }
-    -- blocks.state 键：状态用名称本身；目标/焦点用 分类..名称（如 目标+生命值 -> 目标生命值）
+    -- states 支持分类表：状态/能量/物品/配置开关/目标/焦点
+    -- blocks.state 键：除目标/焦点外用名称本身；目标/焦点用 分类..名称（如 目标生命值）
     if type(t.states) == "table" then
-        local stateCategoryOrder = { "状态", "目标", "焦点" }
-        local nested = t.states["状态"] or t.states["目标"] or t.states["焦点"]
+        local stateCategoryOrder = { "状态", "能量", "物品", "配置开关", "目标", "焦点" }
+        local bareKeyCategories = {
+            ["状态"] = true,
+            ["能量"] = true,
+            ["物品"] = true,
+            ["配置开关"] = true,
+        }
+        local nested = t.states["状态"] or t.states["能量"] or t.states["物品"]
+            or t.states["配置开关"] or t.states["目标"] or t.states["焦点"]
         if nested then
             for _, category in ipairs(stateCategoryOrder) do
                 local list = t.states[category]
                 if type(list) == "table" then
                     for _, name in ipairs(list) do
                         if name then
-                            local key = (category == "状态") and name or (category .. name)
+                            local key = bareKeyCategories[category] and name or (category .. name)
                             blocks.state[key] = index
                             index = index + 1
                         end

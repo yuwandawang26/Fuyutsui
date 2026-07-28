@@ -19,15 +19,22 @@ Fuyutsui.ClassBlocks = {
                 "蓄力",
                 "蓄力层数",
                 "生命值",
-                "法力值",
                 "队伍人数",
                 "首领战",
                 "难度",
                 "施法技能",
                 "施法目标",
-                "延迟",
-                "大红冷却",
                 "敌人人数",
+            },
+            ["能量"] = {
+                "法力值",
+            },
+            ["物品"] = {
+                "魔法药水",
+                "治疗药水",
+            },
+            ["配置开关"] = {
+                "延迟",
             },
             ["目标"] = {
                 "类型",
@@ -38,28 +45,28 @@ Fuyutsui.ClassBlocks = {
         },
         auras = {
             player = {
-                { name = "黑暗主宰", spellId = 1253591 },
-                { name = "圣光涌动", spellId = 114255, maxApps = 2 },
-                { name = "福音", spellId = 472433, maxApps = 2 },
-                { name = "祸福相依", spellId = 390787, maxApps = 10 },
-                { name = "熵能裂隙", spellId = 447444 },
+                { name = "黑暗主宰", spellId = 1253591, },
+                { name = "圣光涌动", spellId = 114255, maxApps = 2, },
+                { name = "福音", spellId = 472433, maxApps = 2, },
+                { name = "祸福相依", spellId = 390787, maxApps = 10, },
+                { name = "熵能裂隙", spellId = 447444, },
             },
             target = {
                 harmful = {
-                    { name = "暗言术：痛", spellId = 589 },
+                    { name = "暗言术：痛", spellId = 589, },
                 },
                 helpful = {
-                    { name = "救赎", spellId = 194384 },
-                    { name = "真言术：盾", spellIds = { 17, 1253593 } },
+                    { name = "救赎", spellId = 194384, },
+                    { name = "真言术：盾", spellIds = { 17, 1253593 }, },
                 },
             },
             focus = {
                 harmful = {
-                    { name = "暗言术：痛", spellId = 589 },
+                    { name = "暗言术：痛", spellId = 589, },
                 },
                 helpful = {
-                    { name = "救赎", spellId = 194384 },
-                    { name = "真言术：盾", spellIds = { 17, 1253593 } },
+                    { name = "救赎", spellId = 194384, },
+                    { name = "真言术：盾", spellIds = { 17, 1253593 }, },
                 },
             },
         },
@@ -89,8 +96,8 @@ Fuyutsui.ClassBlocks = {
             role = 2,
             dispel = 3,
             aura = {
-                [4] = { name = "救赎", spellId = 194384 },
-                [5] = { name = "真言术：盾", spellIds = { 17, 1253593 } }
+                [4] = { name = "救赎", spellId = 194384, },
+                [5] = { name = "真言术：盾", spellIds = { 17, 1253593 }, },
             },
         },
     },
@@ -112,12 +119,14 @@ Fuyutsui.ClassBlocks = {
                 "蓄力",
                 "蓄力层数",
                 "生命值",
-                "法力值",
                 "队伍人数",
                 "首领战",
                 "难度",
                 "施法技能",
                 "施法目标",
+            },
+            ["能量"] = {
+                "法力值",
             },
             ["目标"] = {
                 "类型",
@@ -125,10 +134,6 @@ Fuyutsui.ClassBlocks = {
                 "施法可打断",
             },
         },
-        -- TODO spellId: 织光者
-        -- TODO spellId: 织光者层数
-        -- TODO spellId: 圣光涌动
-        -- TODO spellId: 祈福
         spells = {
             { spellId = 8122, name = "心灵尖啸" },
             { spellId = 32375, name = "群体驱散" },
@@ -169,15 +174,19 @@ Fuyutsui.ClassBlocks = {
                 "蓄力",
                 "蓄力层数",
                 "生命值",
-                "法力值",
                 "队伍人数",
                 "首领战",
                 "难度",
+                "敌人人数",
+                "施法技能",
+            },
+            ["能量"] = {
+                "法力值",
+            },
+            ["配置开关"] = {
                 "爆发开关",
                 "输出模式",
                 "AOE开关",
-                "敌人人数",
-                "施法技能",
             },
             ["目标"] = {
                 "类型",

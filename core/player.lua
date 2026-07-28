@@ -7,7 +7,6 @@ local state = Fuyutsui.state
 local EnumPowerType = Fuyutsui.EnumPowerType
 local spellsList = Fuyutsui.spellsList
 
-local diseaseJudgeTimer = nil
 local drinkStatusTimer = nil
 
 function Fuyutsui:GetCharacterInfo()
@@ -118,7 +117,7 @@ function Fuyutsui:UpdatePlayerPower(powerType)
     ---@diagnostic disable-next-line: param-type-mismatch
     local _, _, b = powerPercent:GetRGB()
     state.power[powerType] = b
-    self:UpdateStateBlock("状态", powerName)
+    self:UpdateBareStateBlock(powerName, { "能量", "状态" })
 end
 
 function Fuyutsui:UpdatePlayerPowerType()
@@ -211,10 +210,10 @@ end
 
 function Fuyutsui:UpdatePlayerConfig()
     if not (self.db and self.db.char) then return end
-    self:UpdateStateBlock("状态", "爆发开关")
-    self:UpdateStateBlock("状态", "AOE开关")
-    self:UpdateStateBlock("状态", "输出模式")
-    self:UpdateStateBlock("状态", "爆发药水开关")
+    local names = { "爆发开关", "AOE开关", "输出模式", "爆发药水开关" }
+    for i = 1, #names do
+        self:UpdateBareStateBlock(names[i], { "配置开关", "状态" })
+    end
 end
 
 function Fuyutsui:UpdatePlayerStagger()
@@ -235,29 +234,13 @@ function Fuyutsui:UpdateRune()
         end
     end
     state.runeCount = total / 255 or 0
-    self:UpdateStateBlock("状态", "符文")
+    self:UpdateBareStateBlock("符文", { "能量", "状态" })
 end
 
 function Fuyutsui:UpdateShapeshiftForm()
     local shapeshiftFormID = GetShapeshiftFormID() or 0
     state.shapeshiftFormID = shapeshiftFormID / 255
     self:UpdateStateBlock("状态", "姿态")
-end
-
-function Fuyutsui:UpdateDiseaseJudge()
-    local b = self.blocks
-    if not (b and b.state and b.state["疾病判断"]) then return end
-    state.diseaseJudge = 1 / 255 or 0
-    self:UpdateStateBlock("状态", "疾病判断")
-    if diseaseJudgeTimer then
-        diseaseJudgeTimer:Cancel()
-        diseaseJudgeTimer = nil
-    end
-    diseaseJudgeTimer = C_Timer.NewTimer(1, function()
-        state.diseaseJudge = 0
-        self:UpdateStateBlock("状态", "疾病判断")
-        diseaseJudgeTimer = nil
-    end)
 end
 
 function Fuyutsui:UpdateDrinkStatus(spellID)

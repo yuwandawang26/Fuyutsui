@@ -216,6 +216,9 @@ function Fuyutsui:UNIT_HEALTH(_, unit)
     if unit == "target" then
         self:UpdateTargetHealth()
     end
+    if unit == "focus" then
+        self:UpdateFocusHealth()
+    end
     if self.group[unit] then
         self:UpdateUnitDeath(unit, "health")
     end
@@ -285,8 +288,6 @@ end
 function Fuyutsui:UI_ERROR_MESSAGE(_, errorType, message)
     if message == "目标不在视野中" then
         self:UpdateUnitInSight(state.castTargetUnit)
-    elseif message == "射程范围内无有效目标。" then
-        self:UpdateDiseaseJudge()
     end
 end
 
@@ -312,6 +313,7 @@ function Fuyutsui:PLAYER_TARGET_CHANGED()
 end
 
 function Fuyutsui:PLAYER_FOCUS_CHANGED()
+    self:UpdateFocusFullInfo()
     self:UpdateUnitAuraContainer("focus")
 end
 
@@ -381,6 +383,7 @@ function Fuyutsui:OnUpdate(elapsed)
         self:UpdatePlayerAssistant()
         self:UpdateRune()
         self:UpdateTargetRangeBlock()
+        self:UpdateFocusRangeBlock()
         self:UpdateEnemyCount()
         self:UpdateItemCooldown()
         self.timeElapsed = 0

@@ -25,8 +25,8 @@ function Fuyutsui:SwitchCharFlag(key, offMsg, onMsg, blockName)
     else
         print(onMsg)
     end
-    if blockName and self.UpdateStateBlock then
-        self:UpdateStateBlock("状态", blockName)
+    if blockName and self.UpdateBareStateBlock then
+        self:UpdateBareStateBlock(blockName, { "配置开关", "状态" })
     end
     self:NormalizeCharConfig()
     if self.RefreshQuickToggleAppearance then
@@ -73,8 +73,8 @@ end
 function Fuyutsui:SwitchDelay()
     local c = self:GetCharConfig()
     if not c then return end
-    if self.UpdateStateBlock then
-        self:UpdateStateBlock("状态", "延迟")
+    if self.UpdateBareStateBlock then
+        self:UpdateBareStateBlock("延迟", { "配置开关", "状态" })
     end
     self:NormalizeCharConfig()
 end
