@@ -147,7 +147,7 @@ function Fuyutsui:UNIT_SPELLCAST_EMPOWER_START(_, unitTarget, castGUID, spellID,
 end
 
 function Fuyutsui:UNIT_SPELLCAST_EMPOWER_STOP(_, unitTarget, castGUID, spellID, complete, interruptedBy, castBarID)
-    if unitTarget ~= "player" then
+    if unitTarget == "player" then
         state.empowering = false
         state.castTargetUnit = nil
         state.castTargetName = nil

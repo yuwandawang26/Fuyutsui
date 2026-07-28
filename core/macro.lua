@@ -45,22 +45,47 @@ local function createMacro(name, key, macro)
     -- print(name, key, macro)
 end
 
+-- 解析法术名/宏体：优先查 MacroBodies；以 / 开头则原样使用；否则加 /cast
+local function resolveMacroBody(spell)
+    if not spell or spell == "" then
+        return nil
+    end
+    local bodies = Fuyutsui.MacroBodies
+    local body = bodies and bodies[spell]
+    if body then
+        if body:sub(1, 1) == "/" then
+            return body
+        end
+        return "/cast " .. body
+    end
+    if spell:sub(1, 1) == "/" then
+        return spell
+    end
+    return "/cast " .. spell
+end
+
 function Fuyutsui:CreateMacro(dynamicData, staticData, specialData)
     dynamicData = dynamicData or {}
     staticData = staticData or {}
     specialData = specialData or {}
 
-    local dynamicSlots = #dynamicData * 30
-
-    for i = 1, #macroKind do
+    local i = 1
+    local function nextSlot(macroBody)
         local keyBinding = macroKind[i]
-        local macroBody
-        if i <= dynamicSlots then
-            local groupIndex = math.floor((i - 1) / 30) + 1
-            local spell = dynamicData[groupIndex]
+        if not keyBinding then
+            return
+        end
+        if macroBody then
+            createMacro("s" .. i, keyBinding, macroBody)
+        end
+        i = i + 1
+    end
 
-            if spell then
-                local raidIdx = ((i - 1) % 30) + 1
+    -- 1. dynamicSpells：每组占 30 个键（raid/party 展开）
+    for _, spell in ipairs(dynamicData) do
+        for raidIdx = 1, 30 do
+            local macroBody
+            if spell and spell ~= "" then
                 if raidIdx == 1 then
                     macroBody = format("/cast [group:raid,@raid1]%s;[group:party,@player]%s;[nogroup,@player]%s", spell,
                         spell,
@@ -72,18 +97,17 @@ function Fuyutsui:CreateMacro(dynamicData, staticData, specialData)
                     macroBody = format("/cast [group:raid,@raid%d]%s", raidIdx, spell)
                 end
             end
-        else
-            local index = i - dynamicSlots
-            macroBody = specialData[index]
-            if not macroBody then
-                local spell = staticData[index]
-                if spell then
-                    macroBody = "/cast " .. spell
-                end
-            end
+            nextSlot(macroBody)
         end
-        if macroBody then
-            createMacro("s" .. i, keyBinding, macroBody)
-        end
+    end
+
+    -- 2. staticSpells：依次占键；空字符串保留占位但不创建
+    for _, spell in ipairs(staticData) do
+        nextSlot(resolveMacroBody(spell))
+    end
+
+    -- 3. specialSpells：完整宏文本，接在 static 之后依次占键
+    for _, spell in ipairs(specialData) do
+        nextSlot(resolveMacroBody(spell))
     end
 end

@@ -76,11 +76,15 @@ local function UpdateCooldownSpellKnown()
             if info.inSpellBook then
                 isKnown = IsSpellInSpellBook(spellID)
             end
-            local index = info.index
             if isKnown or info.forcedKnown then
                 spells[spellID] = info
             else
-                Fuyutsui:CreateTexture(index, 1)
+                if info.index then
+                    Fuyutsui:CreateTexture(info.index, 1)
+                end
+                if info.charge then
+                    Fuyutsui:CreateTexture(info.charge, 1)
+                end
             end
         end
     end)
@@ -200,19 +204,22 @@ function Fuyutsui:UpdateSpellCooldown()
     local curve255 = self.curve255
     for spellID, info in pairs(spells) do
         local index = info.index
-        local cdDurationObj = GetSpellCooldownDuration(spellID)
-        local cdInfo = GetSpellCooldown(spellID)
-        if cdDurationObj and cdInfo then
-            local result = cdDurationObj:EvaluateRemainingDuration(curve255, 1)
-            ColorValue255:SetRGBA(0, index, 254 / 255)
-            ---@diagnostic disable-next-line: param-type-mismatch
-            local value = EvaluateColorFromBoolean(cdInfo.isEnabled, result, ColorValue255)
-            local _, _, b = value:GetRGB()
-            ---@diagnostic disable-next-line: undefined-field
-            if cdInfo.isOnGCD then b = 0 end
-            self:CreateTexture(index, b)
-        else
-            self:CreateTexture(index, 1)
+        -- charge-only 条目只有 .charge，没有冷却像素索引
+        if index then
+            local cdDurationObj = GetSpellCooldownDuration(spellID)
+            local cdInfo = GetSpellCooldown(spellID)
+            if cdDurationObj and cdInfo then
+                local result = cdDurationObj:EvaluateRemainingDuration(curve255, 1)
+                ColorValue255:SetRGBA(0, index / 255, 254 / 255)
+                ---@diagnostic disable-next-line: param-type-mismatch
+                local value = EvaluateColorFromBoolean(cdInfo.isEnabled, result, ColorValue255)
+                local _, _, b = value:GetRGB()
+                ---@diagnostic disable-next-line: undefined-field
+                if cdInfo.isOnGCD then b = 0 end
+                self:CreateTexture(index, b)
+            else
+                self:CreateTexture(index, 1)
+            end
         end
         local chargeIndex = info.charge
         if chargeIndex then

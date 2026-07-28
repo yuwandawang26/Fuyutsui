@@ -181,7 +181,8 @@ local stateBlockGetters = {
                 state.empowerDuration = b
                 return b
             end
-            return state.empowerDuration or 0
+            state.empowerDuration = 0
+            return 0
         end,
         ["蓄力层数"] = function(self)
             if not state.empowering then
@@ -201,7 +202,8 @@ local stateBlockGetters = {
                 end
                 return state.empowerStage or 0
             end
-            return state.empowerStage or 0
+            state.empowerStage = 0
+            return 0
         end,
     },
     ["能量"] = {

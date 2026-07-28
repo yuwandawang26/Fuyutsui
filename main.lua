@@ -134,9 +134,12 @@ function Fuyutsui:LoadPlayerBlocks(specIndex)
                     blocks.spells[spellId] = {}
                 end
                 if spell.charge then
-                    blocks.spells[spellId].charge = index
+                    blocks.spells[spellId].index = index
+                    blocks.spells[spellId].charge = index + 1
+                    index = index + 2
                 else
                     blocks.spells[spellId].index = index
+                    index = index + 1
                 end
                 if spell.forcedKnown then
                     blocks.spells[spellId].forcedKnown = spell.forcedKnown
@@ -160,7 +163,6 @@ function Fuyutsui:LoadPlayerBlocks(specIndex)
                         spellId = spellId,
                     })
                 end
-                index = index + 1
             end
         end
     end

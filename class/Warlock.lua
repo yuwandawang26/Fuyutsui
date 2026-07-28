@@ -184,7 +184,6 @@ Fuyutsui.ClassBlocks = {
             { spellId = 48020, name = "恶魔法阵：传送" },
             { spellId = 1122, name = "召唤地狱火" },
             { spellId = 6353, name = "灵魂之火" },
-            { spellId = 17962, name = "燃烧" },
             { spellId = 17962, name = "燃烧", charge = true },
         },
     },

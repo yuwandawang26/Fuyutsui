@@ -32,6 +32,8 @@ Fuyutsui.ClassBlocks = {
             ["物品"] = {
                 "魔法药水",
                 "治疗药水",
+                "治疗石",
+                "鲁莽药水",
             },
             ["配置开关"] = {
                 "延迟",
@@ -76,9 +78,7 @@ Fuyutsui.ClassBlocks = {
             { spellId = 527, name = "纯净术" },
             { spellId = 19236, name = "绝望祷言" },
             { spellId = 232633, name = "奥术洪流" },
-            { spellId = 47540, name = "苦修" },
             { spellId = 47540, name = "苦修", charge = true, maxCharge = 2 },
-            { spellId = 194509, name = "真言术：耀" },
             { spellId = 194509, name = "真言术：耀", charge = true, maxCharge = 2 },
             { spellId = 17, name = "真言术：盾" },
             { spellId = 62618, name = "真言术：障" },
@@ -140,9 +140,7 @@ Fuyutsui.ClassBlocks = {
             { spellId = 527, name = "纯净术" },
             { spellId = 19236, name = "绝望祷言" },
             { spellId = 232633, name = "奥术洪流" },
-            { spellId = 33076, name = "愈合祷言" },
             { spellId = 33076, name = "愈合祷言", charge = true, maxCharge = 2 },
-            { spellId = 2050, name = "圣言术：静" },
             { spellId = 2050, name = "圣言术：静", charge = true, maxCharge = 2 },
             { spellId = 88625, name = "圣言术：罚" },
             { spellId = 200183, name = "神圣化身" },

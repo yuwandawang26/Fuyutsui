@@ -152,25 +152,26 @@ auras = {
 
 ```lua
 spells = {
-    { spellId = 47540, name = "苦修" },
     { spellId = 47540, name = "苦修", charge = true, maxCharge = 2 },
 }
 ```
 
-每条有效 `spells` 条目（含 `spellId`）占主色块 **1** 格，按数组顺序排列；缺少 `spellId` 的条目跳过并警告。
+按数组顺序排列；缺少 `spellId` 的条目跳过并警告。占位规则：
 
-| 条目字段 | 主色块含义 | 刷新来源 |
+| 条目字段 | 主色块 | 刷新来源 |
 | --- | --- | --- |
-| 默认（无 `charge`） | 技能冷却 | `GetSpellCooldown` → `blocks.spells[id].index` |
-| `charge = true` | 充能回充冷却 | `GetSpellChargeDuration` → `blocks.spells[id].charge` |
-| `maxCharge = N` | **不占**主色块；创建横向充能层数条 `0..N` | `GetSpellCharges().currentCharges` |
-| `castCount = N` | **不占**额外主色块（该条本身仍占 1 格）；创建横向 `castCount` 条 | `GetSpellCastCount` |
+| 默认（无 `charge`） | **1** 格：技能冷却 → `blocks.spells[id].index` | `GetSpellCooldown` / `GetSpellCooldownDuration` |
+| `charge = true` | **2** 格：冷却 → `.index`，充能回充 → `.charge` | 冷却同上；充能用 `GetSpellChargeDuration` |
+| 另有 `maxCharge = N` | **不另占**主色块；创建横向充能层数条 `0..N` | `GetSpellCharges().currentCharges` |
+| `castCount = N` | **不另占**主色块（该条本身仍按上表占 1 或 2 格）；创建横向 `castCount` 条 | `GetSpellCastCount` |
 
-以苦修为例，在 `spells` 段内的相对顺序为：
+以苦修为例，一条 `charge = true, maxCharge = 2` 同时产出：
 
-1. 第 1 条 → **冷却**像素
-2. 第 2 条（`charge = true`）→ **充能冷却**像素
-3. 同条 `maxCharge = 2` → 横向条 **充能层数**（CountBars 行）
+1. `.index` → **冷却**像素
+2. `.charge` → **充能冷却**像素
+3. `maxCharge = 2` → 横向条 **充能层数**（CountBars 行）
+
+不要再为同一 `spellId` 写「无 charge + charge」双条目；一条带 `charge` 的即可。
 
 可选透传：`forcedKnown`、`inSpellBook`（影响是否视为已学会，不改变占位）。
 

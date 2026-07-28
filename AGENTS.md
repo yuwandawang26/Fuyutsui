@@ -69,13 +69,15 @@ Fuyutsui.ClassBlocks = {
             target = { harmful = { ... }, helpful = { ... } },
             focus = { harmful = { ... }, helpful = { ... } },
         },
-        spells = { { spellId = 20473, name = "神圣震击" }, ... },
+        spells = { { spellId = 20473, name = "神圣震击" }, { spellId = 47540, name = "苦修", charge = true, maxCharge = 2 }, ... },
         group = { num = 6, healthPercent = 1, role = 2, dispel = 3, aura = 4 },
     },
 }
 ```
 
 `main.lua:Fuyutsui:LoadPlayerBlocks(specIndex)` 会解析 `states` / `auras` / `spells` / `group`，写入 `blocks.*`。
+
+`spells` 占位：默认 1 格冷却；`charge = true` 占 2 格（冷却 + 充能回充）；`maxCharge = N` 另建横向层数条。不要为同一 spellId 写双条目。
 
 新增状态名称时，要确认 `core/stateblocks.lua` 的 `stateBlockGetters` 中有对应 getter；否则它只会存在映射，不会自动写像素。
 

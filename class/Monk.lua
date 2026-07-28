@@ -47,13 +47,9 @@ Fuyutsui.ClassBlocks = {
         -- TODO spellId: 活力苏醒
         -- TODO spellId: 清空地窖
         spells = {
-            { spellId = 121253, name = "醉酿投" },
             { spellId = 121253, name = "醉酿投", charge = true },
-            { spellId = 119582, name = "活血酒" },
             { spellId = 119582, name = "活血酒", charge = true },
-            { spellId = 322507, name = "天神酒" },
             { spellId = 322507, name = "天神酒", charge = true },
-            { spellId = 1241059, name = "天神灌注" },
             { spellId = 1241059, name = "天神灌注", charge = true },
             { spellId = 322109, name = "轮回之触" },
             { spellId = 119381, name = "扫堂腿" },
@@ -117,9 +113,7 @@ Fuyutsui.ClassBlocks = {
         -- TODO spellId: 青龙之心
         -- TODO spellId: 活力苏醒
         spells = {
-            { spellId = 116680, name = "雷光聚神茶" },
             { spellId = 116680, name = "雷光聚神茶", charge = true },
-            { spellId = 115151, name = "复苏之雾" },
             { spellId = 115151, name = "复苏之雾", charge = true },
             { spellId = 115310, name = "还魂术" },
             { spellId = 116849, name = "作茧缚命" },
@@ -188,7 +182,6 @@ Fuyutsui.ClassBlocks = {
         spells = {
             { spellId = 122470, name = "业报之触" },
             { spellId = 107428, name = "旭日东升踢" },
-            { spellId = 1249625, name = "乾元之巅" },
             { spellId = 1249625, name = "乾元之巅", charge = true, maxCharge = 2 },
             { spellId = 218164, name = "清创生血" },
             { spellId = 152175, name = "升龙霸" },

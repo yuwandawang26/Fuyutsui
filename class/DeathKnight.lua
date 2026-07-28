@@ -43,6 +43,11 @@ Fuyutsui.ClassBlocks = {
                 "引导可打断",
             },
         },
+        auras = {
+            player = {
+                { name = "白骨之盾", spellId = 195181, maxApps = 12, },
+            },
+        },
         spells = {
             { spellId = 49576, name = "死亡之握" },
             { spellId = 51052, name = "反魔法领域" },
@@ -54,7 +59,8 @@ Fuyutsui.ClassBlocks = {
             { spellId = 49039, name = "巫妖之躯" },
             { spellId = 108199, name = "血魔之握" },
             { spellId = 1263569, name = "憎恶附肢" },
-            { spellId = 50, name = "吞噬" },
+            { spellId = 1263824, name = "吞噬" },
+            { spellId = 50842, name = "血沸", charge = true, maxCharge = 2 },
         },
     },
     [2] = {
@@ -108,14 +114,6 @@ Fuyutsui.ClassBlocks = {
                 "引导可打断",
             },
         },
-        -- TODO spellId: 黑暗援助
-        -- TODO spellId: 杀戮机器
-        -- TODO spellId: 白霜
-        -- TODO spellId: 冰霜灾祸
-        -- TODO spellId: 锋锐之霜
-        -- TODO spellId: 冰霜之柱
-        -- TODO spellId: 霜巢之眷
-        -- TODO spellId: 霜巢之眷-冰霜巨龙之怒
         spells = {
             { spellId = 49576, name = "死亡之握" },
             { spellId = 51052, name = "反魔法领域" },
@@ -124,7 +122,6 @@ Fuyutsui.ClassBlocks = {
             { spellId = 51271, name = "冰霜之柱" },
             { spellId = 279302, name = "冰霜巨龙之怒" },
             { spellId = 439843, name = "死神印记" },
-            { spellId = 47568, name = "符文武器增效" },
             { spellId = 47568, name = "符文武器增效", charge = true, maxCharge = 2 },
             { spellId = 1249658, name = "冰龙吐息" },
         },
@@ -187,19 +184,6 @@ Fuyutsui.ClassBlocks = {
                 "引导可打断",
             },
         },
-        -- TODO spellId: 次级食尸鬼
-        -- TODO spellId: 割魂索命
-        -- TODO spellId: 末日突降
-        -- TODO spellId: 末日突降层数
-        -- TODO spellId: 黑暗援助
-        -- TODO spellId: 禁断知识
-        -- TODO spellId: 脓疮毒镰
-        -- TODO spellId: 脓疮毒镰2
-        -- TODO spellId: 枯萎凋零
-        -- TODO spellId: 亡者指挥官
-        -- TODO spellId: 寒冰锁链
-        -- TODO spellId: 暗影之爪层数
-        -- TODO spellId: 凋萎
         spells = {
             { spellId = 49576, name = "死亡之握" },
             { spellId = 51052, name = "反魔法领域" },
@@ -207,11 +191,9 @@ Fuyutsui.ClassBlocks = {
             { spellId = 207167, name = "致盲冰雨" },
             { spellId = 46584, name = "亡者复生" },
             { spellId = 42650, name = "亡者大军" },
-            { spellId = 1247378, name = "腐化" },
             { spellId = 1247378, name = "腐化", charge = true, maxCharge = 3 },
             { spellId = 1233448, name = "黑暗突变" },
             { spellId = 343294, name = "灵魂收割" },
-            { spellId = 43265, name = "枯萎凋零" },
             { spellId = 43265, name = "枯萎凋零", charge = true, maxCharge = 2 },
             { spellId = 55090, name = "天灾打击", castCount = 20 },
         },

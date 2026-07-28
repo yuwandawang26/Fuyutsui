@@ -404,26 +404,22 @@ BAR_START_INDEX = 2
 }
 ```
 
-法术冷却：
+法术冷却（单格）：
 
 ```lua
-[38] = {
-    type = "spell",
-    spellId = 20473,
-    name = "神圣震击",
-}
+{ spellId = 20473, name = "神圣震击" }
 ```
 
-法术充能冷却可使用同一 spellId 的第二格：
+充能法术写一条即可，同时占冷却格 + 充能回充格；可选 `maxCharge` 再建层数条：
 
 ```lua
-[39] = {
-    type = "spell",
-    spellId = 20473,
-    name = "神圣震击",
-    charge = true,
-}
+{ spellId = 47540, name = "苦修", charge = true, maxCharge = 2 }
+-- → blocks.spells[47540].index（冷却）
+-- → blocks.spells[47540].charge（充能回充）
+-- → blocks.bars 横向层数条 0..2
 ```
+
+不要再为同一 `spellId` 写「无 charge + charge」双条目。
 
 可选法术字段：
 
@@ -530,7 +526,7 @@ dispelPixel = memberBase + blocks.groups.dispel
 2. 用 `curve255` 计算剩余时间颜色。
 3. `cdInfo.isEnabled` 为假时选择特殊颜色。
 4. 如果 `cdInfo.isOnGCD`，强制写 0，避免把公共 GCD 当作技能冷却。
-5. 若配置了 `charge` 格，再用 `GetSpellChargeDuration()` 写充能恢复时间。
+5. 若条目带 `charge = true`，再用 `GetSpellChargeDuration()` 写 `.charge` 充能恢复时间。
 
 职业文件中的 `name` 主要供人阅读；运行时按 `spellId` 工作。
 
@@ -818,8 +814,8 @@ Fuyutsui.keybindings[spellId] = {
 
 ### 17.2 添加法术冷却格
 
-1. 在职业表添加 `type = "spell"` 与数值 `spellId`。
-2. 如需充能恢复时间，增加同 spellId、`charge = true` 的第二格。
+1. 在职业表 `spells` 添加带数值 `spellId` 的条目。
+2. 充能技能写一条 `charge = true`：自动占冷却格 + 充能回充格；需要层数条时再加 `maxCharge = N`。
 3. 临时/未正常出现在已知法术 API 的技能按需使用 `forcedKnown` 或 `inSpellBook`。
 4. 如果官方一键辅助或施法技能编码也要识别它，在 `Fuyutsui.spellsList` 添加正确索引。
 
