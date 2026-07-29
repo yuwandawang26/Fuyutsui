@@ -5,6 +5,7 @@ function Fuyutsui:UpdatePlayerBlocks()
     self.state.isDead = UnitIsDeadOrGhost("player")
     self.state.isChatOpen = false
     self.state.drinkStatus = false
+    self.state.mountCasting = false
     self:UpdatePlayerMounted()
     self:UpdatePlayerCombat()
     self:UpdatePlayerMoving(IsPlayerMoving())

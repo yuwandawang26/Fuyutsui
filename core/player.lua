@@ -27,6 +27,7 @@ function Fuyutsui:GetCharacterSpecInfo()
     self.state.isChatOpen = false
     self.state.casting = false
     self.state.channeling = false
+    self.state.mountCasting = false
     self:LoadPlayerBlocks(self.state.specIndex)
     self:UpdateSpellKnown()
     self:UpdatePlayerMounted()
@@ -53,7 +54,7 @@ function Fuyutsui:UpdatePlayerSpecInfo()
 end
 
 function Fuyutsui:UpdatePlayerValid()
-    local valid = not state.isDead and not state.mounted and not state.isChatOpen and not state.drinkStatus
+    local valid = not state.isDead and not state.mounted and not state.isChatOpen and not state.drinkStatus and not state.mountCasting
     state.valid = valid and 1 / 255 or 0
     self:UpdateStateBlock("状态", "有效性")
 end
@@ -358,5 +359,41 @@ function Fuyutsui:HookChatFrameEditBox()
                 self:UpdatePlayerValid()
             end)
         end
+    end
+end
+
+local mounts = {}
+local mountCastingTimer = nil
+
+function Fuyutsui:GetMountsInfo()
+    wipe(mounts)
+    local mountIDs = C_MountJournal.GetMountIDs()
+    for i = 1, #mountIDs do
+        local _, spellID, _, _, _, _, _, _, _, _, isCollected = C_MountJournal.GetMountInfoByID(mountIDs[i])
+        if isCollected and spellID then
+            mounts[spellID] = true
+        end
+    end
+end
+
+function Fuyutsui:UpdateMountCasting(spellID, casting)
+    if casting then
+        if spellID and not issecretvalue(spellID) and mounts[spellID] then
+            if mountCastingTimer then
+                mountCastingTimer:Cancel()
+                mountCastingTimer = nil
+            end
+            state.mountCasting = true
+            self:UpdatePlayerValid()
+        end
+    elseif state.mountCasting then
+        if mountCastingTimer then
+            mountCastingTimer:Cancel()
+        end
+        mountCastingTimer = C_Timer.NewTimer(0.1, function()
+            state.mountCasting = false
+            self:UpdatePlayerValid()
+            mountCastingTimer = nil
+        end)
     end
 end

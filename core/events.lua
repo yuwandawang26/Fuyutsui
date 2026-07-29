@@ -26,6 +26,7 @@ end
 function Fuyutsui:PLAYER_ENTERING_WORLD()
     state.mapID = C_Map.GetBestMapForUnit("player") or 0
     self:UpdateHeroTalent()
+    self:GetMountsInfo()
     C_Timer.After(5, function()
         self:UpdateGroup()
     end)
@@ -95,6 +96,7 @@ function Fuyutsui:UNIT_SPELLCAST_START(_, unitTarget, castGUID, spellID, castBar
         state.casting = true
         self:ApplyIncomingHealsCurve(spellID)
         self:UpdatePlayerCasting(spellID)
+        self:UpdateMountCasting(spellID, true)
     end
     if unitTarget == "target" then
         target.casting = true
@@ -109,8 +111,15 @@ function Fuyutsui:UNIT_SPELLCAST_STOP(_, unitTarget, castGUID, spellID, castBarI
         state.castTargetName = nil
         state.castTargetIndex = 0
         self:UpdatePlayerCasting(0)
+        self:UpdateMountCasting(spellID, false)
     elseif unitTarget == "target" then
         target.casting = false
+    end
+end
+
+function Fuyutsui:UNIT_SPELLCAST_INTERRUPTED(_, unitTarget, castGUID, spellID, castBarID)
+    if unitTarget == "player" then
+        self:UpdateMountCasting(spellID, false)
     end
 end
 
@@ -177,8 +186,16 @@ function Fuyutsui:UNIT_SPELLCAST_SUCCEEDED(_, unitTarget, castGUID, spellID, cas
     end
 end
 
+local test = {}
 function Fuyutsui:SPELL_UPDATE_COOLDOWN(_, spellID)
     if issecretvalue(spellID) then return end
+    if spellID and not test[spellID] then
+        test[spellID] = true
+        local spellLink = C_Spell.GetSpellLink(spellID)
+        if spellLink then
+            print(spellID, spellLink)
+        end
+    end
     self:UpdateKnightStatus(spellID)
 end
 
