@@ -8,7 +8,7 @@
 .claude/
 
 # 忽略 Python 的缓存文件
-请将我放到其他文件夹并重命名/__pycache__/
+__pycache__/
 *.pyc
 
 # 忽略 macOS 或 Windows 的系统文件
@@ -17,3 +17,6 @@ Thumbs.db
 
 # 忽略 test 文件
 test/
+
+# 本地文档（AI / 内部参考，不入库）
+docs/

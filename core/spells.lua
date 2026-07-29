@@ -9,12 +9,11 @@ local EvaluateColorFromBoolean = C_CurveUtil.EvaluateColorFromBoolean
 local IsSpellKnown = C_SpellBook.IsSpellKnown
 local IsSpellInSpellBook = C_SpellBook.IsSpellInSpellBook
 
-local state = Fuyutsui.state
 local target = Fuyutsui.target
-local spellsList = Fuyutsui.spellsList
+local state = Fuyutsui.state
 
 local spells = {}
-local failedSpell, failedSpellId, failedSpellTimer = nil, nil, nil
+local insertSpellTimer, insertSpellIndex = nil, nil
 
 local ColorValue255 = CreateColor(0, 0, 1, 1)
 
@@ -42,6 +41,45 @@ end
 
 Fuyutsui.DebugPrintNewSpellEntry = DebugPrintNewSpellEntry
 Fuyutsui.DebugPrintSpellBlockLine = DebugPrintSpellBlockLine
+
+function Fuyutsui:ClearInsertSpell()
+    if insertSpellTimer then
+        insertSpellTimer:Cancel()
+        insertSpellTimer = nil
+    end
+    insertSpellIndex = nil
+    state.insertSpell = 0
+    self:UpdateStateBlock("状态", "插入法术")
+end
+
+--- index: spellsList 中的宏序号；spellName/unit 仅用于提示
+function Fuyutsui:SetInsertSpell(index, spellName, unit)
+    if insertSpellTimer then
+        insertSpellTimer:Cancel()
+        insertSpellTimer = nil
+    end
+    insertSpellIndex = index
+    state.insertSpell = index / 255
+    self:UpdateStateBlock("状态", "插入法术")
+    local msg = "|cff00ff00[Fuyutsui]|r 插入法术: |cff00ff00" .. (spellName or "?") .. "|r"
+    if unit and unit ~= "" then
+        msg = msg .. " @" .. unit
+    end
+    print(msg)
+    insertSpellTimer = C_Timer.NewTimer(1.5, function()
+        insertSpellTimer = nil
+        insertSpellIndex = nil
+        state.insertSpell = 0
+        Fuyutsui:UpdateStateBlock("状态", "插入法术")
+    end)
+end
+
+function Fuyutsui:UpdateInsertSpellBySuccess(spellID)
+    if not insertSpellIndex then return end
+    local info = self.spellsList and self.spellsList[spellID]
+    if not info or info.index ~= insertSpellIndex then return end
+    self:ClearInsertSpell()
+end
 
 local dispelAbilities = {
     [1] = { 527, 360823, 4987, 115450, 88423, 77130 },
@@ -158,45 +196,6 @@ function Fuyutsui:UpdateSpellKnown()
             target.enemyCurve:AddPoint(i, CreateColor(0, 0, 1 / 255, 1))
         end
     end
-end
-
-function Fuyutsui:UpdateSpellFailed(spellID)
-    local isUsable = C_Spell.IsSpellUsable(spellID)
-
-    if spellsList[spellID] and spellsList[spellID].failed then
-        failedSpell = spellsList[spellID].index
-        state.failedSpell = failedSpell / 255 or 0
-    else
-        failedSpell = nil
-        state.failedSpell = 0
-    end
-
-    if not isUsable or not failedSpell then return end
-
-    failedSpellId = spellID
-
-    if failedSpellTimer then
-        failedSpellTimer:Cancel()
-        failedSpellTimer = nil
-    end
-
-    failedSpellTimer = C_Timer.NewTimer(1.5, function()
-        state.failedSpell = 0
-        self:UpdateStateBlock("状态", "法术失败")
-        failedSpellTimer = nil
-        failedSpell = nil
-        failedSpellId = nil
-    end)
-    self:UpdateStateBlock("状态", "法术失败")
-end
-
-function Fuyutsui:UpdateFailedSpellBySuccess(spellID)
-    if spellID ~= failedSpellId then return end
-    failedSpell = nil
-    failedSpellId = nil
-    print("|cff00ff00插入技能: |r", GetSpellName(spellID))
-    state.failedSpell = 0
-    self:UpdateStateBlock("状态", "法术失败")
 end
 
 function Fuyutsui:UpdateSpellCooldown()

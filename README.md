@@ -115,7 +115,7 @@ flowchart LR
 - 索引 `1..255`：`r=0`，`g=index/255`，业务值在 `b`
 - 索引 `256..510`：`r=1/255`，`g=(index-255)/255`，业务值在 `b`
 
-不同职业/专精声明的条目数量不同，**同一语义的绝对索引可能不同**。详细布局见 [TEXTURE_LAYOUT_zh-CN.md](TEXTURE_LAYOUT_zh-CN.md)。
+不同职业/专精声明的条目数量不同，**同一语义的绝对索引可能不同**。
 
 ---
 
@@ -208,10 +208,7 @@ flowchart TD
 
 | 文档 | 内容 |
 | --- | --- |
-| [TEXTURE_LAYOUT_zh-CN.md](TEXTURE_LAYOUT_zh-CN.md) | 色块索引排序与像素协议 |
 | [Keymap.md](Keymap.md) | 热键 ID ↔ 按键对照 |
-| [AGENTS.md](AGENTS.md) | 给 AI / 贡献者的代码库约定 |
-| [AuraContainer_AI_Reference_zh-CN.md](AuraContainer_AI_Reference_zh-CN.md) | AuraContainer 参考 |
 
 ---
 

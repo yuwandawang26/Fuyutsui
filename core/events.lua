@@ -161,7 +161,7 @@ end
 function Fuyutsui:UNIT_SPELLCAST_SUCCEEDED(_, unitTarget, castGUID, spellID, castBarID)
     if unitTarget ~= "player" or isSec(spellID) then return end
     self:UpdateDrinkStatus(spellID)
-    self:UpdateFailedSpellBySuccess(spellID)
+    self:UpdateInsertSpellBySuccess(spellID)
     if spellID == 384255 then
         self:ClearAllFuyutsuiBars()
         print("切换天赋")
@@ -174,13 +174,6 @@ function Fuyutsui:UNIT_SPELLCAST_SUCCEEDED(_, unitTarget, castGUID, spellID, cas
         C_Timer.After(1, function()
             self:UpdatePlayerSpecInfo()
         end)
-    end
-end
-
-function Fuyutsui:UNIT_SPELLCAST_FAILED(_, unitTarget, castGUID, spellID, castBarID)
-    if unitTarget ~= "player" then return end
-    if not isSec(spellID) then
-        self:UpdateSpellFailed(spellID)
     end
 end
 
