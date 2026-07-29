@@ -136,6 +136,7 @@ Fuyutsui.ClassBlocks = {
             { spellId = 439843, name = "死神印记" },
             { spellId = 47568, name = "符文武器增效", charge = true, maxCharge = 2 },
             { spellId = 1249658, name = "冰龙吐息" },
+            { spellId = 47528, name = "心灵冰冻" },
         },
     },
     [3] = {

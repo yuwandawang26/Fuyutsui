@@ -57,6 +57,7 @@ Fuyutsui.ClassBlocks = {
             { spellId = 383013, name = "清毒图腾" },
             { spellId = 192063, name = "阵风" },
             { spellId = 58875, name = "幽魂步" },
+            { spellId = 73920, name = "治疗之雨" },
         },
     },
     [2] = {
@@ -174,15 +175,24 @@ Fuyutsui.ClassBlocks = {
                 "引导可打断",
             },
         },
-        -- TODO spellId: 飞旋之土
-        -- TODO spellId: 潮汐奔涌
-        -- TODO spellId: 风暴涌流图腾
-        -- TODO spellId: 风暴涌流图腾层数
-        -- TODO spellId: 生命释放
-        -- TODO spellId: 升腾
-        -- TODO spellId: 风暴涌流图腾-持续时间
-        -- TODO spellId: 倾盆大雨
-        -- TODO spellId: 倾盆大雨层数
+        auras = {
+            player = {
+                { name = "大地之盾", spellId = 383648, },
+                { name = "水之护盾", spellId = 52127, },
+                { name = "治疗之雨", spellId = 1307888, },
+                { name = "飞旋之土", spellId = 453406, },
+                { name = "飞旋之水", spellId = 453407, },
+                { name = "飞旋之风", spellId = 453409, },
+                { name = "潮汐奔涌", spellId = 53390, maxApps = 2, },
+                { name = "激流", spellId = 61295, },
+                { name = "聚合水流", spellId = 470077, },
+                { name = "升腾", spellId = 114052, },
+                { name = "生命释放", spellId = 73685, },
+                { name = "风暴涌流图腾", spellId = 1267068, maxApps = 2, },
+                { name = "倾盆大雨", spellId = 462603, },
+                { name = "自然迅捷", spellId = 378081, },
+            },
+        },
         spells = {
             { spellId = 57994, name = "风剪" },
             { spellId = 198103, name = "土元素" },
@@ -206,11 +216,17 @@ Fuyutsui.ClassBlocks = {
             { spellId = 98008, name = "灵魂链接图腾" },
             { spellId = 114052, name = "升腾" },
             { spellId = 108280, name = "治疗之潮图腾" },
+            { spellId = 73920, name = "治疗之雨" },
         },
         group = {
             num = 6,
             healthPercent = 1,
             role = 2,
+            dispel = 3,
+            aura = {
+                [4] = { name = "激流", spellId = 61295, },
+                [5] = { name = "大地之盾", spellIds = { 974, 383648 }, },
+            },
         },
     },
 }
