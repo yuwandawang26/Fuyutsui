@@ -140,6 +140,8 @@ function Fuyutsui:OnEnable()
     self:RegisterEvent("ENCOUNTER_TIMELINE_EVENT_REMOVED")
     self:RegisterEvent("ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED")
     self:RegisterEvent("UNIT_AURA")
+    self:RegisterEvent("CINEMATIC_STOP")
+    self:RegisterEvent("STOP_MOVIE")
     if self.StartFrameUpdates then
         self:StartFrameUpdates()
     end

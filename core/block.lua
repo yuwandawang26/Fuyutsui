@@ -513,8 +513,18 @@ local AURA_TIMED_MAX_DURATION = 365 * 24 * 60 * 60
 local AURA_MATCH_NONE_FILTERS = { maxDuration = 0 }
 
 local function AuraSlotFilters(includeSpellIDs, maxDuration)
+    -- 每次新建集合，避免引擎改写原表后 spellId 过滤静默失效
+    local spellIds
+    if type(includeSpellIDs) == "table" then
+        spellIds = {}
+        for id, enabled in pairs(includeSpellIDs) do
+            if enabled then
+                spellIds[id] = true
+            end
+        end
+    end
     local filters = {
-        includeSpellIDs = includeSpellIDs,
+        includeSpellIDs = spellIds,
     }
     if maxDuration ~= nil then
         filters.maxDuration = maxDuration
@@ -528,7 +538,7 @@ local function IsAuraFilterAllowedForUnit(unit, filter)
     if not UnitExists(unit) then
         return false
     end
-    if filter == "HELPFUL" then
+    if filter == "HELPFUL" or filter == "HELPFUL|PLAYER" then
         return UnitCanAssist("player", unit) and true or false
     end
     if filter == "HARMFUL" then
@@ -663,6 +673,45 @@ local function ApplyUnitAuraReactionFilters(container, unit)
     end
 end
 
+local function KickAuraContainer(container, unit)
+    if not container then
+        return
+    end
+    if unit then
+        container.fuyutsuiUnit = unit
+        container:SetUnit(unit)
+    end
+end
+
+--- 重绑全部光环槽的 spellId 候选过滤，并强制容器重新分配光环
+--- 顺序：SetUnit → SetAuraSlotCandidateFilters → UpdateAllAuras（避免 SetUnit 冲掉过滤）
+local function RebindContainerSpellFilters(container, unit)
+    if not container then
+        return
+    end
+    local bindUnit = unit or container.fuyutsuiUnit
+    KickAuraContainer(container, bindUnit)
+
+    if container.fuyutsuiAuraSlots then
+        ApplyUnitAuraReactionFilters(container, bindUnit or "player")
+    end
+    if container.fuyutsuiBarSlots then
+        for _, slot in ipairs(container.fuyutsuiBarSlots) do
+            container:SetAuraSlotCandidateFilters(slot.key, AuraSlotFilters(slot.includeSpellIDs))
+        end
+    end
+    if container.fuyutsuiDispelSlot then
+        local dispel = container.fuyutsuiDispelSlot
+        container:SetAuraSlotCandidateFilters(dispel.key, {
+            includeDispelTypes = dispel.includeDispelTypes,
+        })
+    end
+
+    if container.UpdateAllAuras then
+        container:UpdateAllAuras()
+    end
+end
+
 -- 防御驱散类型 -> 蓝通道编码（与 main.lua DEFENSIVE_DISPEL_TYPE_NAMES / dispelCapabilities 一致）
 local DISPEL_TYPE_COLOR_IDS = {
     Magic = 1,
@@ -787,6 +836,7 @@ local function CreateUnitAuraDurationSlots(unit, spellSlots)
     end
 
     Fuyutsui[key] = durationSlots
+    durationSlots.fuyutsuiUnit = unit
     ApplyUnitAuraReactionFilters(durationSlots, unit)
 end
 
@@ -807,15 +857,7 @@ function Fuyutsui:UpdateUnitAuraContainer(unit)
     if not key then
         return
     end
-    local container = Fuyutsui[key]
-    if not container then
-        return
-    end
-    if container.fuyutsuiAuraSlots then
-        ApplyUnitAuraReactionFilters(container, unit)
-    elseif container.UpdateAllAuras then
-        container:UpdateAllAuras()
-    end
+    RebindContainerSpellFilters(Fuyutsui[key], unit)
 end
 
 -- 兼容旧名
@@ -860,13 +902,20 @@ function Fuyutsui:LayoutAuraApplicationBars()
                     break
                 end
                 CreateHorizontalBarBackgrounds(startIndex, info.maxApps)
-                barSlots:AddAuraSlot("bar_index_" .. info.index, info.filter or "HELPFUL", {
+                local slotKey = "bar_index_" .. info.index
+                barSlots:AddAuraSlot(slotKey, info.filter or "HELPFUL", {
                     candidateFilters = AuraSlotFilters(info.includeSpellIDs),
                     sortMethod = AuraContainerSortMethod.Expiration,
                     sortDirection = AuraContainerSortDirection.Normal,
                     initializeFrame = MakeBarSlotInitializer(info.maxApps, startIndex),
                 })
+                barSlots.fuyutsuiBarSlots = barSlots.fuyutsuiBarSlots or {}
+                tinsert(barSlots.fuyutsuiBarSlots, {
+                    key = slotKey,
+                    includeSpellIDs = info.includeSpellIDs,
+                })
             end
+            barSlots.fuyutsuiUnit = "player"
         end
     end
 
@@ -965,8 +1014,9 @@ local function CreateGroupMemberAuraContainer(memberIndex, groups, auraDefs, inc
     if groups.dispel and includeDispelTypes then
         local pixelIndex = GroupAuraPixelIndex(groups, memberIndex, groups.dispel)
         if pixelIndex > 0 and pixelIndex <= BLOCK_FIX_COUNT then
+            local dispelKey = "group_" .. memberIndex .. "_dispel"
             container:AddAuraSlot(
-                "group_" .. memberIndex .. "_dispel",
+                dispelKey,
                 "HARMFUL",
                 {
                     candidateFilters = {
@@ -977,6 +1027,10 @@ local function CreateGroupMemberAuraContainer(memberIndex, groups, auraDefs, inc
                     initializeFrame = MakeDispelSlotInitializer(pixelIndex),
                 }
             )
+            container.fuyutsuiDispelSlot = {
+                key = dispelKey,
+                includeDispelTypes = includeDispelTypes,
+            }
         end
     end
 
@@ -1012,6 +1066,7 @@ function Fuyutsui:RefreshGroupAuraContainers()
                 container = CreateGroupMemberAuraContainer(memberIndex, groups, auraDefs, includeDispelTypes)
                 groupAuraContainers[memberIndex] = container
             end
+            container.fuyutsuiUnit = unit
             container:SetUnit(unit)
             container:SetEnabled(true)
             container:Show()
@@ -1023,5 +1078,16 @@ function Fuyutsui:RefreshGroupAuraContainers()
             container:SetEnabled(false)
             container:Hide()
         end
+    end
+end
+
+--- 过场后重绑全部光环槽的 spellId / 驱散过滤，避免槽位落到“第一个光环”
+function Fuyutsui:RebindAuraSpellFilters()
+    for unit, key in pairs(UNIT_AURA_CONTAINER_KEYS) do
+        RebindContainerSpellFilters(Fuyutsui[key], unit)
+    end
+    RebindContainerSpellFilters(Fuyutsui.PlayerAuraBarContainer, "player")
+    for _, container in pairs(groupAuraContainers) do
+        RebindContainerSpellFilters(container, container.fuyutsuiUnit)
     end
 end

@@ -310,6 +310,19 @@ function Fuyutsui:PLAYER_FOCUS_CHANGED()
     self:UpdateUnitAuraContainer("focus")
 end
 
+--- 过场/影片结束后重绑 spellId 过滤（槽位否则会落到排序第一的光环）
+function Fuyutsui:CINEMATIC_STOP()
+    C_Timer.After(1, function()
+        self:RebindAuraSpellFilters()
+    end)
+end
+
+function Fuyutsui:STOP_MOVIE()
+    C_Timer.After(1, function()
+        self:RebindAuraSpellFilters()
+    end)
+end
+
 function Fuyutsui:NAME_PLATE_UNIT_ADDED(_, unit)
     self:AddNameplate(unit)
     self:UpdateTargetCanAttack()
