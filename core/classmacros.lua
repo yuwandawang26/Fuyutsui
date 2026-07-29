@@ -296,6 +296,7 @@ Fuyutsui.ClassMacros = {
             "鲁莽药水",
             "银月城生命药水",
             "天灾打击",
+            "冰霜灾祸",
         },
         specialSpells = {
             "/castsequence reset=1 死亡之握,x",

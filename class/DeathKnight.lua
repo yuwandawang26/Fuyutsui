@@ -117,6 +117,15 @@ Fuyutsui.ClassBlocks = {
                 "引导可打断",
             },
         },
+        auras = {
+            player = {
+                { name = "白霜", spellId = 59057, },
+                { name = "冰霜之柱", spellId = 51271, },
+                { name = "杀戮机器", spellId = 51128, },
+                { name = "冰龙吐息", spellId = 12449658, },
+                { name = "黑暗援助", spellId = 101568, },
+            },
+        },
         spells = {
             { spellId = 49576, name = "死亡之握" },
             { spellId = 51052, name = "反魔法领域" },
