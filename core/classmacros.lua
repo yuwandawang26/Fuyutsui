@@ -655,6 +655,7 @@ Fuyutsui.ClassMacros = {
             "先知先觉",
             "黑檀之力",
             "亘古吐息",
+            "碧蓝横扫",
         },
         specialSpells = {},
     },

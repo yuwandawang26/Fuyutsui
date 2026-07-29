@@ -365,7 +365,6 @@ Fuyutsui.timeElapsed1 = 0
 
 function Fuyutsui:OnUpdate(elapsed)
     self:UpdatePlayerCastBlocks()
-
     self:UpdateUnitCastingOrChannelingInfo("target")
     self:UpdateUnitCastingOrChannelingInfo("focus")
     self:UpdateGroupInRangeAndHealth()
@@ -381,6 +380,7 @@ function Fuyutsui:OnUpdate(elapsed)
         self:UpdateItemCooldown()
         self.timeElapsed = 0
     end
+
     self.timeElapsed1 = self.timeElapsed1 + elapsed
     if self.timeElapsed1 > 1 then
         self:UpdatePlayerCombatTime()

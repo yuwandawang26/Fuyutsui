@@ -128,8 +128,47 @@ function Fuyutsui:UpdatePlayerPowerType()
     end
 end
 
+local empowerSpellId = {
+    [382266] = true,
+    [382411] = true,
+    [1263824] = true,
+}
+local assistantWasEmpower = false
+local assistantSuppressUntil = 0
+
 function Fuyutsui:UpdatePlayerAssistant()
     local spellId = C_AssistedCombat.GetNextCastSpell()
+    local now = GetTime()
+
+    -- 离开蓄力推荐后，强制显示 0 持续 0.5 秒
+    if assistantSuppressUntil > 0 and now < assistantSuppressUntil then
+        if empowerSpellId[spellId] then
+            assistantSuppressUntil = 0
+        else
+            state.assistantSpell = 0
+            self:UpdateStateBlock("状态", "一键辅助")
+            return
+        end
+    else
+        assistantSuppressUntil = 0
+    end
+
+    if empowerSpellId[spellId] then
+        assistantWasEmpower = true
+        local spellIndex = spellsList[spellId] and spellsList[spellId].index or 0
+        state.assistantSpell = spellIndex / 255 or 0
+        self:UpdateStateBlock("状态", "一键辅助")
+        return
+    end
+
+    if assistantWasEmpower then
+        assistantWasEmpower = false
+        assistantSuppressUntil = now + 0.7
+        state.assistantSpell = 0
+        self:UpdateStateBlock("状态", "一键辅助")
+        return
+    end
+
     local spellIndex = spellsList[spellId] and spellsList[spellId].index or 0
     state.assistantSpell = spellIndex / 255 or 0
     self:UpdateStateBlock("状态", "一键辅助")
