@@ -274,6 +274,9 @@ function Fuyutsui:ClearAllFuyutsuiBars()
     if Fuyutsui.ReleaseGroupAuraContainers then
         Fuyutsui:ReleaseGroupAuraContainers()
     end
+    if Fuyutsui.ReleaseOtherPriestAuraContainers then
+        Fuyutsui:ReleaseOtherPriestAuraContainers()
+    end
     if Fuyutsui.ClearGroupHealAbsorbBars then
         Fuyutsui:ClearGroupHealAbsorbBars()
     end
@@ -700,6 +703,11 @@ local function RebindContainerSpellFilters(container, unit)
             container:SetAuraSlotCandidateFilters(slot.key, AuraSlotFilters(slot.includeSpellIDs))
         end
     end
+    if container.fuyutsuiSpellIdSlots then
+        for _, slot in ipairs(container.fuyutsuiSpellIdSlots) do
+            container:SetAuraSlotCandidateFilters(slot.key, AuraSlotFilters(slot.includeSpellIDs))
+        end
+    end
     if container.fuyutsuiDispelSlot then
         local dispel = container.fuyutsuiDispelSlot
         container:SetAuraSlotCandidateFilters(dispel.key, {
@@ -1081,6 +1089,102 @@ function Fuyutsui:RefreshGroupAuraContainers()
     end
 end
 
+--[[============================================================================
+    其他牧师光环槽（救赎之魂1/2）
+    团队中除玩家外的前 2 名牧师；有 spell 194384 时色块 b=raid编号/255，否则隐藏（底层 0）
+============================================================================]]
+
+local OTHER_PRIEST_AURA_SPELL_ID = 194384
+local OTHER_PRIEST_SLOT_NAMES = { "救赎之魂1", "救赎之魂2" }
+local otherPriestAuraContainers = {} -- [slot] = AuraContainer
+
+local function SetupRaidIndexAuraPixel(button, pixelIndex, raidIndex)
+    AnchorAuraPixelButton(button, pixelIndex)
+    local bg = button:CreateTexture(nil, "BACKGROUND")
+    bg:SetAllPoints(button)
+    local r, g = EncodeBlockChannels(pixelIndex)
+    bg:SetColorTexture(r, g, raidIndex / 255, 1)
+end
+
+local function MakeRaidIndexSlotInitializer(pixelIndex, raidIndex)
+    return function(button)
+        SetupRaidIndexAuraPixel(button, pixelIndex, raidIndex)
+    end
+end
+
+function Fuyutsui:ReleaseOtherPriestAuraContainers()
+    for slot, container in pairs(otherPriestAuraContainers) do
+        ReleaseFrame(container)
+        otherPriestAuraContainers[slot] = nil
+    end
+end
+
+function Fuyutsui:RefreshOtherPriestAuraContainers()
+    self:ReleaseOtherPriestAuraContainers()
+
+    local blocks = self.blocks
+    local stateBlocks = blocks and blocks.state
+    if not stateBlocks then
+        return
+    end
+
+    local pixelIndices = {}
+    for slot, name in ipairs(OTHER_PRIEST_SLOT_NAMES) do
+        pixelIndices[slot] = stateBlocks[name]
+    end
+    if not pixelIndices[1] and not pixelIndices[2] then
+        return
+    end
+    if not IsInRaid() then
+        return
+    end
+
+    EnsureAuraContainerLoaded()
+
+    local found = 0
+    local num = GetNumGroupMembers()
+    for raidIndex = 1, num do
+        local unit = "raid" .. raidIndex
+        if UnitExists(unit) and not UnitIsUnit(unit, "player") and UnitClassBase(unit) == "PRIEST" then
+            found = found + 1
+            local pixelIndex = pixelIndices[found]
+            if pixelIndex then
+                local includeSpellIDs = { [OTHER_PRIEST_AURA_SPELL_ID] = true }
+                local container = CreateFrame(
+                    "AuraContainer",
+                    "FuyutsuiOtherPriestAura_" .. found,
+                    UIParent,
+                    "CustomAuraContainerTemplate"
+                )
+                container:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 0, 0)
+                container:SetEnabled(true)
+                container:SetFrameStrata(AURA_DURATION_STRATA)
+                container:SetFrameLevel(AURA_DURATION_LEVEL)
+
+                local slotKey = "other_priest_" .. found
+                container:AddAuraSlot(slotKey, "HELPFUL", {
+                    candidateFilters = AuraSlotFilters(includeSpellIDs),
+                    sortMethod = AuraContainerSortMethod.Expiration,
+                    sortDirection = AuraContainerSortDirection.Normal,
+                    initializeFrame = MakeRaidIndexSlotInitializer(pixelIndex, raidIndex),
+                })
+                container.fuyutsuiSpellIdSlots = {
+                    {
+                        key = slotKey,
+                        includeSpellIDs = includeSpellIDs,
+                    },
+                }
+                container.fuyutsuiUnit = unit
+                container:SetUnit(unit)
+                otherPriestAuraContainers[found] = container
+            end
+            if found >= #OTHER_PRIEST_SLOT_NAMES then
+                break
+            end
+        end
+    end
+end
+
 --- 过场后重绑全部光环槽的 spellId / 驱散过滤，避免槽位落到“第一个光环”
 function Fuyutsui:RebindAuraSpellFilters()
     for unit, key in pairs(UNIT_AURA_CONTAINER_KEYS) do
@@ -1088,6 +1192,9 @@ function Fuyutsui:RebindAuraSpellFilters()
     end
     RebindContainerSpellFilters(Fuyutsui.PlayerAuraBarContainer, "player")
     for _, container in pairs(groupAuraContainers) do
+        RebindContainerSpellFilters(container, container.fuyutsuiUnit)
+    end
+    for _, container in pairs(otherPriestAuraContainers) do
         RebindContainerSpellFilters(container, container.fuyutsuiUnit)
     end
 end

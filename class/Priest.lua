@@ -128,6 +128,8 @@ Fuyutsui.ClassBlocks = {
                 "难度",
                 "施法技能",
                 "施法目标",
+                "救赎之魂1",
+                "救赎之魂2",
             },
             ["能量"] = {
                 "法力值",
@@ -136,6 +138,35 @@ Fuyutsui.ClassBlocks = {
                 "类型",
                 "施法",
                 "施法可打断",
+            },
+        },
+        auras = {
+            player = {
+                { name = "神圣化身", spellId = 200183, },
+                { name = "神圣镜像", spellId = 405216, },
+                { name = "圣光涌动", spellId = 114255, maxApps = 2, },
+                { name = "祈福", spellId = 1262766, },
+                { name = "救赎之魂", spellId = 194384, },
+            },
+            target = {
+                harmful = {
+                    { name = "暗言术：痛", spellId = 589, },
+                    { name = "神圣之火", spellId = 14914, },
+                },
+                helpful = {
+                    { name = "愈合祷言", spellId = 41635, },
+                    { name = "恢复", spellIds = 139, },
+                },
+            },
+            focus = {
+                harmful = {
+                    { name = "暗言术：痛", spellId = 589, },
+                    { name = "神圣之火", spellId = 14914, },
+                },
+                helpful = {
+                    { name = "愈合祷言", spellId = 41635, },
+                    { name = "恢复", spellIds = 139, },
+                },
             },
         },
         spells = {
@@ -156,6 +187,11 @@ Fuyutsui.ClassBlocks = {
             num = 5,
             healthPercent = 1,
             role = 2,
+            dispel = 3,
+            aura = {
+                [4] = { name = "恢复", spellId = 139, },
+                [5] = { name = "愈合祷言", spellId = 41635, },
+            },
         },
     },
     [3] = {
@@ -181,8 +217,10 @@ Fuyutsui.ClassBlocks = {
                 "难度",
                 "敌人人数",
                 "施法技能",
+                "姿态",
             },
             ["能量"] = {
+                "狂乱值",
                 "法力值",
             },
             ["配置开关"] = {
@@ -204,6 +242,37 @@ Fuyutsui.ClassBlocks = {
                 "施法可打断",
                 "引导",
                 "引导可打断",
+            },
+        },
+        auras = {
+            player = {
+                { name = "命运多舛", spellId = 390978 },
+                { name = "熵能裂隙", spellId = 450193, },
+                { name = "暗影洞察", spellId = 375981, },
+                { name = "尤格-萨隆的神像", spellId = 373276, maxApps = 20, },
+            },
+            target = {
+                harmful = {
+                    { name = "暗言术：痛", spellId = 589, },
+                    { name = "吸血鬼之触", spellId = 34914, },
+                    { name = "暗言术：癫", spellId = 335467, },
+                    { name = "精神鞭笞", spellId = 15407, },
+                    { name = "惊魂幻象", spellId = 1243069, maxApps = 100, },
+                },
+                helpful = {
+                    { name = "愈合祷言", spellId = 41635, },
+                    { name = "恢复", spellIds = 139, },
+                },
+            },
+            focus = {
+                harmful = {
+                    { name = "暗言术：痛", spellId = 589, },
+                    { name = "神圣之火", spellId = 14914, },
+                },
+                helpful = {
+                    { name = "愈合祷言", spellId = 41635, },
+                    { name = "恢复", spellIds = 139, },
+                },
             },
         },
         spells = {

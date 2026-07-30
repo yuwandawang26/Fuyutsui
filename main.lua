@@ -189,6 +189,9 @@ function Fuyutsui:LoadPlayerBlocks(specIndex)
     if self.ReleaseGroupAuraContainers then
         self:ReleaseGroupAuraContainers()
     end
+    if self.ReleaseOtherPriestAuraContainers then
+        self:ReleaseOtherPriestAuraContainers()
+    end
 end
 
 -- 载入玩家宏（按当前职业从 ClassMacros 选取）
