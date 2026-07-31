@@ -350,6 +350,19 @@ function Fuyutsui:NAME_PLATE_UNIT_REMOVED(_, unit)
     self:UpdateTargetCanAttack()
 end
 
+function Fuyutsui:UNIT_THREAT_SITUATION_UPDATE(_, unitTarget)
+    if nameplate[unitTarget] then
+        self:UpdateNameplateThreat(unitTarget)
+        self:UpdateThreatEnemyCounts()
+        return
+    end
+    if unitTarget ~= "player" then return end
+    for unit in pairs(nameplate) do
+        self:UpdateNameplateThreat(unit)
+    end
+    self:UpdateThreatEnemyCounts()
+end
+
 function Fuyutsui:RefreshShapeshiftAndMount()
     self:UpdateShapeshiftForm()
     self:UpdatePlayerMounted()

@@ -173,7 +173,14 @@ function Fuyutsui:AddNameplate(unit)
         minRange = minRange,
         maxRange = maxRange,
         affectingCombat = UnitAffectingCombat(unit),
+        threatStatus = UnitThreatSituation("player", unit),
     }
+end
+
+function Fuyutsui:UpdateNameplateThreat(unit)
+    local data = nameplate[unit]
+    if not data then return end
+    data.threatStatus = UnitThreatSituation("player", unit)
 end
 
 local testMap = {
@@ -182,6 +189,31 @@ local testMap = {
 local testEncounter = {
     [2563] = true,
 }
+
+local function IsCountedEnemy(self, data, inTestMap, inTestEncounter)
+    return data.canAttack and data.maxRange and data.maxRange <= self.state.specRange
+        and (data.affectingCombat or inTestMap or inTestEncounter)
+end
+
+function Fuyutsui:UpdateThreatEnemyCounts()
+    local noThreatCount = 0
+    local threatCount = 0
+    local inTestMap = state.mapID and testMap[state.mapID]
+    local inTestEncounter = state.encounterID and testEncounter[state.encounterID]
+    for _, data in pairs(nameplate) do
+        if IsCountedEnemy(self, data, inTestMap, inTestEncounter) then
+            if data.threatStatus and data.threatStatus >= 2 then
+                threatCount = threatCount + 1
+            else
+                noThreatCount = noThreatCount + 1
+            end
+        end
+    end
+    state.noThreatEnemyCount = noThreatCount / 255 or 0
+    state.threatEnemyCount = threatCount / 255 or 0
+    self:UpdateStateBlock("状态", "敌人数-无仇恨")
+    self:UpdateStateBlock("状态", "敌人数-有仇恨")
+end
 
 function Fuyutsui:UpdateEnemyCount()
     local count = 0
@@ -192,11 +224,11 @@ function Fuyutsui:UpdateEnemyCount()
         data.minRange = minRange
         data.maxRange = maxRange
         data.affectingCombat = UnitAffectingCombat(unit)
-        if data.canAttack and data.maxRange and data.maxRange <= self.state.specRange
-            and (data.affectingCombat or inTestMap or inTestEncounter) then
+        if IsCountedEnemy(self, data, inTestMap, inTestEncounter) then
             count = count + 1
         end
     end
     state.enemyCount = count / 255 or 0
-    self:UpdateStateBlock("状态", "敌人人数")
+    self:UpdateStateBlock("状态", "敌人数量")
+    self:UpdateThreatEnemyCounts()
 end

@@ -117,7 +117,9 @@ local stateBlockGetters = {
         ["英雄天赋"] = function(self) return (self.state.heroTalent or 0) / 255 end,
         ["施法目标"] = function() return state.castTargetIndex or 0 end,
         ["施法技能"] = function() return state.castingSpell or 0 end,
-        ["敌人人数"] = function() return state.enemyCount or 0 end,
+        ["敌人数量"] = function() return state.enemyCount or 0 end,
+        ["敌人数-无仇恨"] = function() return state.noThreatEnemyCount or 0 end,
+        ["敌人数-有仇恨"] = function() return state.threatEnemyCount or 0 end,
         ["酒池"] = function() return state.staggerPercent or 0 end,
         -- 兼容：旧职业表仍把能量/配置/物品写在 ["状态"] 下
         ["符文"] = function() return GetRunePixel() end,
