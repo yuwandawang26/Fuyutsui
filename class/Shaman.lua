@@ -82,7 +82,6 @@ Fuyutsui.ClassBlocks = {
                 "首领战",
                 "难度",
                 "敌人数量",
-                "漩涡武器层数",
             },
             ["能量"] = {
                 "法力值",
@@ -154,6 +153,9 @@ Fuyutsui.ClassBlocks = {
                 "难度",
                 "施法技能",
                 "施法目标",
+                "敌人数量",
+                "敌人数-无仇恨",
+                "敌人数-有仇恨",
             },
             ["能量"] = {
                 "法力值",
@@ -188,7 +190,7 @@ Fuyutsui.ClassBlocks = {
                 { name = "聚合水流", spellId = 470077, },
                 { name = "升腾", spellId = 114052, },
                 { name = "生命释放", spellId = 73685, },
-                { name = "风暴涌流图腾", spellId = 1267068, maxApps = 2, },
+                { name = "风暴涌流图腾", spellId = 1267089, maxApps = 2, },
                 { name = "倾盆大雨", spellId = 462603, },
                 { name = "自然迅捷", spellId = 378081, },
             },

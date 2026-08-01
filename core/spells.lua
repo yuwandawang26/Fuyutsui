@@ -236,11 +236,13 @@ function Fuyutsui:UpdateSpellCooldown()
 end
 
 function Fuyutsui:GetItemCount()
-    self.state.HealthPotionCount = C_Item.GetItemCount(241304) + C_Item.GetItemCount(241305)
+    self.state.HealthPotionCount = C_Item.GetItemCount(241304) + C_Item.GetItemCount(241305) +
+    C_Item.GetItemCount(271884) + C_Item.GetItemCount(271885)
     self.state.ManaPotionCount = C_Item.GetItemCount(241301) + C_Item.GetItemCount(241300)
     self.state.HealthstoneCount = C_Item.GetItemCount(5512) + C_Item.GetItemCount(224464)
     self.state.RecklessnessCount = C_Item.GetItemCount(241288) + C_Item.GetItemCount(241289)
     self.state.LightsPotentialCount = C_Item.GetItemCount(241308) + C_Item.GetItemCount(241309)
+    self.state.DraughtOfRampantAbandonCount = C_Item.GetItemCount(241292) + C_Item.GetItemCount(241293)
 end
 
 function Fuyutsui:GetItemRemainingTime(itemID)
