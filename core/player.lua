@@ -54,7 +54,8 @@ function Fuyutsui:UpdatePlayerSpecInfo()
 end
 
 function Fuyutsui:UpdatePlayerValid()
-    local valid = not state.isDead and not state.mounted and not state.isChatOpen and not state.drinkStatus and not state.mountCasting
+    local valid = not state.isDead and not state.mounted and not state.isChatOpen and not state.drinkStatus and
+    not state.mountCasting
     state.valid = valid and 1 / 255 or 0
     self:UpdateStateBlock("状态", "有效性")
 end
@@ -130,9 +131,12 @@ function Fuyutsui:UpdatePlayerPowerType()
 end
 
 local empowerSpellId = {
-    [382266] = true,
-    [382411] = true,
-    [1263824] = true,
+    [355936] = true,  -- 梦境吐息
+    [357208] = true,  -- 火焰吐息
+    [382266] = true,  -- 火焰吐息
+    [382411] = true,  -- 永恒之涌
+    [396286] = true,  -- 地壳激变
+    [1263824] = true, -- 吞噬
 }
 local assistantWasEmpower = false
 local assistantSuppressUntil = 0

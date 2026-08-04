@@ -50,6 +50,9 @@ Fuyutsui.ClassBlocks = {
         auras = {
             player = {
                 { name = "白骨之盾", spellId = 195181, maxApps = 12, },
+                { name = "符文刃舞", spellId = 81256, },
+                { name = "吸血鬼之血", spellId = 55233, },
+                { name = "冰封之韧", spellId = 48792, },
             },
         },
         spells = {
@@ -163,7 +166,6 @@ Fuyutsui.ClassBlocks = {
                 "首领战",
                 "难度",
                 "敌人数量",
-
                 "天启骑士数量",
             },
             ["能量"] = {

@@ -40,6 +40,18 @@ Fuyutsui.ClassBlocks = {
                 "引导可打断",
             },
         },
+        auras = {
+            player = {
+                { name = "奥数齐射", spellId = 1242974, maxApps = 20, },
+                { name = "溢流能量", spellId = 394195, maxApps = 5, },
+                { name = "节能施法", spellId = 263725, maxApps = 3, },
+                { name = "过载飞弹", spellId = 1277009, },
+                { name = "敏锐直觉", spellId = 1223797, },
+                { name = "奥术之魂", spellId = 451038, },
+                { name = "奥术涌动", spellId = 365362, },
+                { name = "棱光护体", spellId = 235450, },
+            },
+        },
     },
     [2] = {
         states = {
@@ -122,12 +134,6 @@ Fuyutsui.ClassBlocks = {
                 "引导可打断",
             },
         },
-        -- TODO spellId: 热能真空
-        -- TODO spellId: 冰川尖刺！
-        -- TODO spellId: 冰冷智慧
-        -- TODO spellId: 冰冻之雨
-        -- TODO spellId: 寒冰指
-        -- TODO spellId: 寒冰指层数
     },
 }
 
