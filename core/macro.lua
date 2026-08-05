@@ -2,6 +2,7 @@ local addon, ns = ...
 local format = string.format
 local macroList = {}
 local macroKind = {}
+local bindingOwner = CreateFrame("Frame")
 local modifiers = {
     "CTRL", "ALT", "SHIFT",
     "ALT-CTRL", "ALT-SHIFT", "CTRL-SHIFT",
@@ -39,8 +40,8 @@ local function createMacro(name, key, macro)
         btn:SetAttribute("type", "macro")
         btn:RegisterForClicks("AnyUp", "AnyDown")
         macroList[name] = btn
-        SetOverrideBindingClick(UIParent, false, key, name, "LeftButton")
     end
+    SetOverrideBindingClick(bindingOwner, false, key, name, "LeftButton")
     btn:SetAttribute("macrotext", macro)
     -- print(name, key, macro)
 end
@@ -64,10 +65,22 @@ local function resolveMacroBody(spell)
     return "/cast " .. spell
 end
 
+function Fuyutsui:ClearMacros()
+    if InCombatLockdown() then
+        return
+    end
+    ClearOverrideBindings(bindingOwner)
+    for _, btn in pairs(macroList) do
+        btn:SetAttribute("macrotext", nil)
+    end
+end
+
 function Fuyutsui:CreateMacro(dynamicData, staticData, specialData)
     dynamicData = dynamicData or {}
     staticData = staticData or {}
     specialData = specialData or {}
+
+    self:ClearMacros()
 
     local i = 1
     local function nextSlot(macroBody)

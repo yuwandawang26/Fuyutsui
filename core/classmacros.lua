@@ -3,9 +3,11 @@ local addon, ns = ...
 Fuyutsui.MacroBodies = {
     ["鲁莽药水"] = "item:241288\n/cast item:241289",
     ["银月城生命药水"] = "item:241304\n/cast item:241305",
+    ["浓缩银月城生命药水"] = "item:271884\n/cast item:271885",
 }
 -- 全职业宏表：按 UnitClassBase 键索引
--- 由 LoadPlayerMacros 按当前职业选取
+-- 由 LoadPlayerMacros 按当前职业与专精选取
+-- dynamicSpells 支持：纯数组（旧），或 { common = {...}, [specIndex] = {...} }
 -- 创建顺序：dynamicSpells（每组 30 键）→ staticSpells → specialSpells
 Fuyutsui.ClassMacros = {
     WARRIOR = {
@@ -55,7 +57,10 @@ Fuyutsui.ClassMacros = {
     },
 
     PALADIN = {
-        dynamicSpells = { "神圣震击", "圣光闪现", "圣光术", "荣耀圣令", "清毒术", "圣疗术" },
+        dynamicSpells = {
+            common = { "清毒术", "荣耀圣令", },
+            [1] = { "神圣震击", "圣光闪现", "圣光术", "圣疗术" }
+        },
         staticSpells = {
             "牺牲祝福",
             "代祷",
@@ -68,7 +73,7 @@ Fuyutsui.ClassMacros = {
             "圣洁鸣钟",
             "正义盾击",
             "黎明之光",
-            "[target=mouseover,help][@player]自由祝福",
+            "[@player]自由祝福",
             "神圣棱镜",
             "神圣震击",
             "公正之剑",
@@ -76,7 +81,8 @@ Fuyutsui.ClassMacros = {
             "处决宣判",
             "最终审判",
             "复仇之怒",
-            "[spec:2]圣洁鸣钟;[spec:3]灰烬觉醒",
+            "圣洁鸣钟",
+            "灰烬觉醒",
             "复仇者之盾",
             "责难",
             "远古列王守卫",
@@ -207,7 +213,11 @@ Fuyutsui.ClassMacros = {
     },
 
     PRIEST = {
-        dynamicSpells = { "纯净术", "快速治疗", "真言术：盾", "愈合祷言", "苦修", "圣言术：静" },
+        dynamicSpells = {
+            common = { "纯净术", "快速治疗" },
+            [1] = { "真言术：盾", "苦修" },
+            [2] = { "愈合祷言", "圣言术：静" },
+        },
         staticSpells = {
             "心灵震爆",
             "惩击",
@@ -297,10 +307,11 @@ Fuyutsui.ClassMacros = {
             "银月城生命药水",
             "天灾打击",
             "冰霜灾祸",
+            "[channeling]吞噬",
+            "[nochanneling]吞噬",
         },
         specialSpells = {
             "/castsequence reset=1 死亡之握,x",
-            "/castsequence reset=0.3 吞噬,x",
         },
     },
 
@@ -622,10 +633,21 @@ Fuyutsui.ClassMacros = {
     },
 
     EVOKER = {
-        dynamicSpells = { "活化烈焰", "青翠之拥", "回响", "逆转", "净除", "翡翠之花", "先知先觉" },
+        dynamicSpells = {
+            common = { "净除" },
+            [2] = { "活化烈焰", "青翠之拥", "回响", "逆转", "翡翠之花", },
+            [3] = { "先知先觉" },
+        },
         staticSpells = {
+            "[channeling]火焰吐息",
+            "[nochanneling]火焰吐息",
+            "[channeling]梦境吐息",
+            "[nochanneling]梦境吐息",
+            "[channeling]永恒之涌",
+            "[nochanneling]永恒之涌",
+            "[channeling]地壳激变",
+            "[nochanneling]地壳激变",
             "净除",
-            "火焰吐息",
             "青铜龙的祝福",
             "灼烧之焰",
             "黑曜鳞片",
@@ -639,7 +661,6 @@ Fuyutsui.ClassMacros = {
             "裂解",
             "深呼吸",
             "青翠之拥",
-            "永恒之涌",
             "葬火",
             "狂龙之怒",
             "镇压",
@@ -649,7 +670,6 @@ Fuyutsui.ClassMacros = {
             "空间悖论",
             "营救",
             "喷发",
-            "地壳激变",
             "先知先觉",
             "黑檀之力",
             "亘古吐息",

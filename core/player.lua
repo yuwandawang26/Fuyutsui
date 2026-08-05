@@ -49,13 +49,14 @@ function Fuyutsui:UpdatePlayerSpecInfo()
     self:LoadPlayerBlocks(self.state.specIndex)
     self:UpdateSpellKnown()
     self:UpdatePlayerBlocks()
+    self:LoadPlayerMacros()
     self:UpdateStateBlock("状态", "职业")
     self:UpdateStateBlock("状态", "专精")
 end
 
 function Fuyutsui:UpdatePlayerValid()
     local valid = not state.isDead and not state.mounted and not state.isChatOpen and not state.drinkStatus and
-    not state.mountCasting
+        not state.mountCasting
     state.valid = valid and 1 / 255 or 0
     self:UpdateStateBlock("状态", "有效性")
 end
