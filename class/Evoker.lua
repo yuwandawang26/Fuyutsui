@@ -122,8 +122,8 @@ Fuyutsui.ClassBlocks = {
                 },
                 helpful = {
                     { name = "时间膨胀", spellId = 357170 },
-                    { name = "逆转", spellId = { 366155, 366155 } },
-                    { name = "回响", spellIds = 364343 },
+                    { name = "逆转", spellIds = { 366155, 366155 } },
+                    { name = "回响", spellId = 364343 },
                     { name = "梦境吐息", spellId = 355941 },
                 },
             },
@@ -133,8 +133,8 @@ Fuyutsui.ClassBlocks = {
                 },
                 helpful = {
                     { name = "时间膨胀", spellId = 357170 },
-                    { name = "逆转", spellId = { 366155, 366155 } },
-                    { name = "回响", spellIds = 364343 },
+                    { name = "逆转", spellIds = { 366155, 366155 } },
+                    { name = "回响", spellId = 364343 },
                     { name = "梦境吐息", spellId = 355941 },
                 },
             },
@@ -169,8 +169,8 @@ Fuyutsui.ClassBlocks = {
             role = 2,
             dispel = 3,
             aura = {
-                [4] = { name = "逆转", spellId = { 366155, 366155 } },
-                [5] = { name = "回响", spellIds = 364343 },
+                [4] = { name = "逆转", spellIds = { 366155, 366155 } },
+                [5] = { name = "回响", spellId = 364343 },
                 [6] = { name = "梦境吐息", spellId = 355941 },
             },
         },
