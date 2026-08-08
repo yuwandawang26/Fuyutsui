@@ -47,10 +47,10 @@ Fuyutsui.ClassBlocks = {
         },
         auras = {
             player = {
-                { name = "黑暗主宰", spellId = 1253591, },
                 { name = "熵能裂隙", spellId = 450193, },
                 { name = "天使长", spellId = 81700, },
                 { name = "阴暗面之力", spellId = 198069 },
+                { name = "黑暗主宰", spellId = 1253591, maxApps = 2, },
                 { name = "圣光涌动", spellId = 114255, maxApps = 2, },
                 { name = "福音", spellId = 472433, maxApps = 2, },
                 { name = "强效惩击", spellId = 1253725, maxApps = 2 },

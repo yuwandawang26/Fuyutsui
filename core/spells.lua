@@ -42,6 +42,20 @@ end
 Fuyutsui.DebugPrintNewSpellEntry = DebugPrintNewSpellEntry
 Fuyutsui.DebugPrintSpellBlockLine = DebugPrintSpellBlockLine
 
+local overrideSpells = {
+    [432459] = 1289728, -- 神圣壁垒
+    [432472] = 1289728, -- 圣洁武器
+    [444995] = 455630,  -- 涌动图腾
+}
+
+function Fuyutsui:IsSpellKnown(spellID)
+    local overrideSpellID = overrideSpells[spellID]
+    if overrideSpellID then
+        return IsSpellKnown(overrideSpellID)
+    end
+    return IsSpellKnown(spellID)
+end
+
 function Fuyutsui:ClearInsertSpell()
     if insertSpellTimer then
         insertSpellTimer:Cancel()
@@ -103,6 +117,8 @@ local function HasLearnedAnySpell(spellIDs)
     return false
 end
 
+
+
 local function UpdateCooldownSpellKnown()
     spells = {}
     if not Fuyutsui.blocks or not Fuyutsui.blocks.spells then return end
@@ -110,7 +126,7 @@ local function UpdateCooldownSpellKnown()
         local blocks = Fuyutsui.blocks
         if not blocks or not blocks.spells then return end
         for spellID, info in pairs(blocks.spells) do
-            local isKnown = IsSpellKnown(spellID)
+            local isKnown = Fuyutsui:IsSpellKnown(spellID)
             if info.inSpellBook then
                 isKnown = IsSpellInSpellBook(spellID)
             end
@@ -237,7 +253,7 @@ end
 
 function Fuyutsui:GetItemCount()
     self.state.HealthPotionCount = C_Item.GetItemCount(241304) + C_Item.GetItemCount(241305) +
-    C_Item.GetItemCount(271884) + C_Item.GetItemCount(271885)
+        C_Item.GetItemCount(271884) + C_Item.GetItemCount(271885)
     self.state.ManaPotionCount = C_Item.GetItemCount(241301) + C_Item.GetItemCount(241300)
     self.state.HealthstoneCount = C_Item.GetItemCount(5512) + C_Item.GetItemCount(224464)
     self.state.RecklessnessCount = C_Item.GetItemCount(241288) + C_Item.GetItemCount(241289)

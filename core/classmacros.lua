@@ -35,8 +35,8 @@ Fuyutsui.ClassMacros = {
             "雷霆一击",
             "复仇",
             "胜利在望",
-            "勇士之矛",
-            "英勇飞跃",
+            "[@cursor]勇士之矛",
+            "[@cursor]英勇飞跃",
             "集结呐喊",
             "震荡波",
             "风暴之锤",
@@ -58,8 +58,8 @@ Fuyutsui.ClassMacros = {
 
     PALADIN = {
         dynamicSpells = {
-            common = { "清毒术", "荣耀圣令", },
-            [1] = { "神圣震击", "圣光闪现", "圣光术", "圣疗术" }
+            common = { "清毒术", "荣耀圣令" },
+            [1] = { "神圣震击", "圣光闪现", "圣光术", "圣疗术" },
         },
         staticSpells = {
             "牺牲祝福",
@@ -97,7 +97,12 @@ Fuyutsui.ClassMacros = {
             "银月城生命药水",
             "清毒术",
         },
-        specialSpells = {},
+        specialSpells = {
+            "/cast [@party1,known:神圣壁垒]神圣壁垒\n/cast [@party1,known:圣洁武器]圣洁武器",
+            "/cast [@party2,known:神圣壁垒]神圣壁垒\n/cast [@party2,known:圣洁武器]圣洁武器",
+            "/cast [@party3,known:神圣壁垒]神圣壁垒\n/cast [@party3,known:圣洁武器]圣洁武器",
+            "/cast [@party4,known:神圣壁垒]神圣壁垒\n/cast [@party4,known:圣洁武器]圣洁武器",
+        },
     },
 
     HUNTER = {
@@ -635,7 +640,7 @@ Fuyutsui.ClassMacros = {
     EVOKER = {
         dynamicSpells = {
             common = { "净除" },
-            [2] = { "活化烈焰", "青翠之拥", "回响", "逆转", "翡翠之花", },
+            [2] = { "活化烈焰", "青翠之拥", "回响", "逆转", "翡翠之花" },
             [3] = { "先知先觉" },
         },
         staticSpells = {
@@ -678,7 +683,6 @@ Fuyutsui.ClassMacros = {
             "时空畸体",
             "回溯",
             "时间膨胀",
-
         },
         specialSpells = {},
     },

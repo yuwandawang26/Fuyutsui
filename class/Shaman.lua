@@ -214,7 +214,7 @@ Fuyutsui.ClassBlocks = {
             { spellId = 77130, name = "净化灵魂" },
             { spellId = 73685, name = "生命释放" },
             { spellId = 443454, name = "先祖迅捷" },
-            { spellId = 444995, name = "涌动图腾", inSpellBook = true },
+            { spellId = 444995, name = "涌动图腾"  },
             { spellId = 98008, name = "灵魂链接图腾" },
             { spellId = 114052, name = "升腾" },
             { spellId = 108280, name = "治疗之潮图腾" },

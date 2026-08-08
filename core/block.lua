@@ -35,8 +35,8 @@ local AURA_BAR_STRATA = "TOOLTIP"
 local AURA_BAR_LEVEL = 5004
 
 -- 队伍治疗吸收条（FuyutsuiHealAbsorbBars）
-local HEAL_ABSORB_MAX_SLOTS = 30 -- 最大槽位数
-local HEAL_ABSORB_COLS = 5       -- 每行列数
+local HEAL_ABSORB_MAX_SLOTS = 30  -- 最大槽位数
+local HEAL_ABSORB_COLS = 5        -- 每行列数
 local HEAL_ABSORB_BAR_UNITS = 100 -- 单条条身单元数
 
 --[[============================================================================
@@ -228,8 +228,9 @@ function Fuyutsui:CreateAutoLayoutBar(valueType, minValue, maxValue, spellId)
             val = C_Spell.GetSpellCastCount(spellId) or 0
         elseif valueType == "charge" then
             local charges = C_Spell.GetSpellCharges(spellId)
-            if not charges then return end
-            val = charges.currentCharges or 0
+            if charges and Fuyutsui:IsSpellKnown(spellId) then
+                val = charges.currentCharges or 0
+            end
         end
         bar:SetMinMaxValues(minValue, maxValue)
         bar:SetValue(val)
@@ -301,7 +302,7 @@ healAbsorbBars:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 0, -(BLOCK_HEIGHT + BAR_
 healAbsorbBars:SetFrameStrata(BAR_STRATA)
 healAbsorbBars:SetFrameLevel(BAR_LEVEL)
 
-local healAbsorbSlots = {} -- [slot] = { frame, bar, anchor, bodyTex, endTex, calculator, row, unit }
+local healAbsorbSlots = {}      -- [slot] = { frame, bar, anchor, bodyTex, endTex, calculator, row, unit }
 local healAbsorbUnitToSlot = {} -- [unit] = slot
 
 --- player=1, party1..4=2..5, raidN=N
