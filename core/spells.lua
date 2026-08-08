@@ -46,6 +46,7 @@ local overrideSpells = {
     [432459] = 1289728, -- 神圣壁垒
     [432472] = 1289728, -- 圣洁武器
     [444995] = 455630,  -- 涌动图腾
+    [1242173] = 228260,  -- 虚空齐射
 }
 
 function Fuyutsui:IsSpellKnown(spellID)

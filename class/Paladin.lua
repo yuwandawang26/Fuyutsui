@@ -8,7 +8,6 @@ end
 
 Fuyutsui.ClassBlocks = {
     [1] = {
-
         states = {
             ["状态"] = {
                 "锚点",
@@ -31,6 +30,7 @@ Fuyutsui.ClassBlocks = {
                 "难度",
                 "施法技能",
                 "施法目标",
+                "神圣军备"
             },
             ["能量"] = {
                 "法力值",

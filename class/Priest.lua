@@ -246,6 +246,7 @@ Fuyutsui.ClassBlocks = {
         },
         auras = {
             player = {
+                { name = "虚空齐射", spellId = 1242171, maxApps = 5, },
                 { name = "命运多舛", spellId = 390978 },
                 { name = "熵能裂隙", spellId = 450193, },
                 { name = "暗影洞察", spellId = 375981, },
@@ -288,7 +289,7 @@ Fuyutsui.ClassBlocks = {
             { spellId = 1227280, name = "触须猛击" },
             { spellId = 15286, name = "吸血鬼的拥抱" },
             { spellId = 120644, name = "光晕" },
-            { spellId = 1242173, name = "虚空齐射", forcedKnown = true },
+            { spellId = 1242173, name = "虚空齐射" },
         },
     },
 }

@@ -25,6 +25,7 @@ end
 
 function Fuyutsui:PLAYER_ENTERING_WORLD()
     state.mapID = C_Map.GetBestMapForUnit("player") or 0
+    self:UpdateHolyArmaments(375576)
     self:UpdateHeroTalent()
     self:GetMountsInfo()
     C_Timer.After(5, function()
@@ -187,7 +188,7 @@ function Fuyutsui:UNIT_SPELLCAST_SUCCEEDED(_, unitTarget, castGUID, spellID, cas
 end
 
 local test = {}
-function Fuyutsui:SPELL_UPDATE_COOLDOWN(_, spellID)
+function Fuyutsui:SPELL_UPDATE_COOLDOWN(_, spellID, baseSpellID)
     if issecretvalue(spellID) then return end
     if spellID and not test[spellID] then
         test[spellID] = true
@@ -271,6 +272,11 @@ function Fuyutsui:UNIT_POWER_UPDATE(_, unit, powerType)
 end
 
 function Fuyutsui:SPELL_UPDATE_USES(_, spellID, baseSpellID)
+end
+
+function Fuyutsui:SPELL_UPDATE_ICON(_, spellID)
+    if issecretvalue(spellID) then return end
+    self:UpdateHolyArmaments(spellID)
 end
 
 local rosterTimer

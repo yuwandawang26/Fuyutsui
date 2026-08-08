@@ -270,6 +270,23 @@ function Fuyutsui:UpdatePlayerStagger()
     self:UpdateStateBlock("状态", "酒池")
 end
 
+local holyArmaments = {
+    [432459] = 1, -- 神圣壁垒
+    [432472] = 2, -- 圣洁武器
+}
+
+function Fuyutsui:UpdateHolyArmaments(spellID) -- 神圣军备
+    if not spellID or spellID ~= 375576 then return end
+    for spellId, index in pairs(holyArmaments) do
+        local overrideSpellID = C_Spell.GetOverrideSpell(375576)
+        if not overrideSpellID then return end
+        if overrideSpellID == spellId then
+            state.holyArmaments = index / 255 or 0
+            self:UpdateStateBlock("状态", "神圣军备")
+        end
+    end
+end
+
 function Fuyutsui:UpdateRune()
     local total = 0
     for i = 1, 6 do
