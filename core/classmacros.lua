@@ -307,6 +307,7 @@ Fuyutsui.ClassMacros = {
             "冰霜灾祸",
             "[channeling]吞噬",
             "[nochanneling]吞噬",
+            "[@cursor]枯萎凋零",
         },
         specialSpells = {
             "/castsequence reset=1 死亡之握,x",

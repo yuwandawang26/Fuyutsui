@@ -68,19 +68,14 @@ Fuyutsui.ClassBlocks = {
                     { name = "失格者", spellId = 414022, },
                     { name = "奉献", spellId = 204242, },
                 },
-                helpful = {
-                    { name = "救赎", spellId = 194384, },
-                    { name = "真言术：盾", spellIds = { 17, 1253593 }, },
-                },
+                helpful = {},
             },
             focus = {
                 harmful = {
-                    { name = "暗言术：痛", spellId = 589, },
+                    { name = "失格者", spellId = 414022, },
+                    { name = "奉献", spellId = 204242, },
                 },
-                helpful = {
-                    { name = "救赎", spellId = 194384, },
-                    { name = "真言术：盾", spellIds = { 17, 1253593 }, },
-                },
+                helpful = {},
             },
         },
         spells = {
